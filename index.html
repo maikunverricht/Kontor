@@ -28,6 +28,9 @@ document.documentElement.setAttribute('data-theme',t);})();
   --line-hi:rgba(242,179,61,.38);
   --amber:#F2B33D;--teal:#63D9C4;
   --em-1:#F2B33D;--em-2:#F7CF83;--em-3:#63D9C4;
+  /* Zwei Farben für die neuen Werkzeuge: Blau führt Termine, Kupfer führt Geld.
+     Beide gelten auch für ihre Leitungen im Bus. */
+  --info:#7FA9F5;--geld:#D9A86C;
   --glow-a:rgba(242,179,61,.10);--glow-t:rgba(99,217,196,.08);
   --shadow:0 18px 46px -22px rgba(0,0,0,.75);
   --shadow-lg:0 30px 80px -30px rgba(0,0,0,.85);
@@ -48,6 +51,7 @@ html[data-theme="light"]{
   --line-hi:rgba(224,162,31,.55);
   --amber:#E0A21F;--teal:#2FA894;
   --em-1:#C98A0C;--em-2:#E0A21F;--em-3:#2FA894;
+  --info:#3F6FCB;--geld:#A56B2F;
   --glow-a:rgba(224,162,31,.13);--glow-t:rgba(47,168,148,.10);
   --shadow:0 18px 40px -24px rgba(30,40,60,.30);
   --shadow-lg:0 30px 70px -34px rgba(30,40,60,.42);
@@ -110,6 +114,19 @@ h1 em{font-style:italic;font-weight:600;background:linear-gradient(94deg,var(--e
 /* Kacheln */
 .grid{position:relative;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
   column-gap:18px;row-gap:56px;padding:32px 34px 90px}
+
+/* Bänder: der Arbeitsprozess von links nach rechts, die Werkstatt daneben.
+   Die Überschrift läuft über die ganze Breite, damit das Raster darunter
+   mehrspaltig bleibt und die Leitungen weiter durch die Lücken passen. */
+.gruppe{grid-column:1/-1;position:relative;z-index:1;display:flex;align-items:baseline;gap:14px;
+  flex-wrap:wrap;margin:0 0 -26px;padding-top:6px}
+.gruppe:first-child{padding-top:0}
+.gruppe h2{margin:0;font-size:15px;letter-spacing:-.01em;font-weight:700;font-variation-settings:'wdth' 110;white-space:nowrap}
+.gruppe p{margin:0;flex:1;min-width:140px;font-size:13px;color:var(--text-3);line-height:1.45}
+.gruppe::before{content:"";position:absolute;left:0;right:0;bottom:-11px;height:1px;background:var(--line)}
+/* Die Schrittnummer trägt die Reihenfolge des Prozesses – sie steht kräftiger
+   als der Name der Station dahinter. */
+.t-idx b{font-weight:600;color:var(--text-2)}
 
 /* Datenbus: die Leitung zwischen den Werkzeugen. Liegt hinter den Kacheln,
    läuft in den Lücken und trägt sichtbare Pakete in Flussrichtung. */
@@ -325,6 +342,7 @@ footer a:hover{color:var(--text)}
     <div class="buslegend" aria-hidden="true">
       <span style="color:var(--amber)"><i></i>Stammdaten</span>
       <span style="color:var(--teal)"><i></i>Zeit</span>
+      <span style="color:var(--em-2)"><i></i>Fristen</span>
       <span><i class="name"></i>über den Namen</span>
       <span><i class="opt"></i>nur mit Haken</span>
       <span>oben zurück, unten hin</span>
@@ -385,6 +403,8 @@ footer a:hover{color:var(--text)}
      wb-auftragsbuch-data    Auftraggeber und Aufträge   (Auftragsbuch)
      wb-stempeluhr-summe     Stunden je Auftrag          (Stempeluhr)
      wb-auftragsstatus-data  Prozessschritt und To-dos   (Auftragsstatus)
+     wb-terminbuch-data      Termine und Wiedervorlagen  (Terminbuch)
+     wb-rechnungsbuch-data   Rechnungen und Zahlungen    (Rechnungsbuch)
    ════════════════════════════════════════════════════════════════ */
 const WB = (function(){
   const KANAL = 'werkbank', WECK = 'wb-signal';
@@ -435,6 +455,8 @@ const WB_AB_LS = 'wb-auftragsbuch-data';
 const WB_ZEIT_LS = 'wb-stempeluhr-summe';
 const WB_NOTES_LS = 'wb-noteos-stand';
 const WB_STATUS_LS = 'wb-auftragsstatus-data';
+const WB_TERMIN_LS = 'wb-terminbuch-data';
+const WB_RECH_LS = 'wb-rechnungsbuch-data';
 
 /* Aussehen gilt für die ganze Werkbank. Geschrieben werden beide
    Schlüssel — jedes Werkzeug liest beim Start seinen eigenen, und so
@@ -446,20 +468,43 @@ function wbThemeSichern(t){
 }
 
 const USER = 'maikunverricht';
+
+/* Die Bänder folgen dem Arbeitsprozess. Wer ein Werkzeug ergänzt, trägt es
+   unten in APPS ein und setzt gruppe auf eine dieser Kennungen. */
+const GRUPPEN = [
+  { id:'prozess',   titel:'Der Arbeitsprozess',
+    unter:'Von der Anfrage bis zum Geldeingang. Jedes Werkzeug läuft allein – zusammen wissen sie mehr voneinander.' },
+  { id:'werkstatt', titel:'Werkstatt',
+    unter:'Was neben dem Prozess liegt: Quellcode und alles, was noch dazukommt.' }
+];
+
 const APPS = [
-  { id:'auftragsbuch',   name:'Auftragsbuch',   tag:'Stammdaten',      url:'https://maikunverricht.github.io/Auftragsbuch/',   repo:'Auftragsbuch',
+  { id:'auftragsbuch',   name:'Auftragsbuch',   tag:'Auftraggeber',   gruppe:'prozess', schritt:1,
+    url:'https://maikunverricht.github.io/Auftragsbuch/',   repo:'Auftragsbuch',
     fluss:'führt Stammdaten · zeigt Zeit und Notizen dazu', rc:'var(--amber)',
-    desc:'Auftraggeber, Aufträge und Konditionen an einem Ort – die Stempeluhr bedient sich hier.' },
-  { id:'stempeluhr',     name:'Stempeluhr',     tag:'Zeit & Rechnung', url:'https://maikunverricht.github.io/StopUhr/',        repo:'StopUhr',
+    desc:'Auftraggeber, Aufträge und Konditionen an einem Ort – alle anderen bedienen sich hier.' },
+  { id:'stempeluhr',     name:'Stempeluhr',     tag:'Zeiterfassung',  gruppe:'prozess', schritt:2,
+    url:'https://maikunverricht.github.io/StopUhr/',        repo:'StopUhr',
     fluss:'führt Zeitbuchungen · liest Stammdaten', rc:'var(--teal)',
-    desc:'Arbeitszeiten stempeln, Kunden und Projekten zuordnen, Auswertungen und Rechnungen erzeugen.' },
-  { id:'auftragsstatus', name:'Auftragsstatus', tag:'Fortschritt',     url:'https://maikunverricht.github.io/Auftragsstatus/', repo:'Auftragsstatus',
-    fluss:'führt Prozessschritt und To-dos · liest Stammdaten und Zeit', rc:'var(--em-2)',
+    desc:'Arbeitszeiten stempeln, Kunden und Projekten zuordnen, Auswertungen erzeugen.' },
+  { id:'auftragsstatus', name:'Auftragsstatus', tag:'Fortschritt',    gruppe:'prozess', schritt:3,
+    url:'https://maikunverricht.github.io/Auftragsstatus/', repo:'Auftragsstatus',
+    fluss:'führt Prozessschritt, To-dos und Meilensteine · liest Stammdaten und Zeit', rc:'var(--em-2)',
     desc:'Prozessschritt, verbrauchte Zeit und Budget je Auftrag – mit To-dos, Meilensteinen und Zeitstrahl.' },
-  { id:'noteos',         name:'NoteOS',         tag:'Wissen',          url:'https://maikunverricht.github.io/NoteOS/',         repo:'NoteOS',
+  { id:'terminbuch',     name:'Terminbuch',     tag:'Termine',        gruppe:'prozess', schritt:4,
+    url:'https://maikunverricht.github.io/Terminbuch/',     repo:'Terminbuch',
+    fluss:'führt Termine und Wiedervorlagen · liest Stammdaten und Fristen', rc:'var(--info)',
+    desc:'Zeitstrahl je Auftrag: eigene Termine, Fristen und Meilensteine aus dem Auftragsstatus – mit ICS-Export.' },
+  { id:'rechnungsbuch',  name:'Rechnungsbuch',  tag:'Abrechnung',     gruppe:'prozess', schritt:5,
+    url:'https://maikunverricht.github.io/Rechnungsbuch/',  repo:'Rechnungsbuch',
+    fluss:'führt Rechnungen und Zahlungen · liest Stammdaten und Zeit', rc:'var(--geld)',
+    desc:'Rechnung aus gebuchter Zeit: Entwurf, Festschreibung, offene Posten – Druck und Factur-X.' },
+  { id:'noteos',         name:'NoteOS',         tag:'Wissen',         gruppe:'prozess', schritt:6,
+    url:'https://maikunverricht.github.io/NoteOS/',         repo:'NoteOS',
     fluss:'liest Auftraggeber · meldet Notizen je Auftraggeber', rc:'var(--amber)',
     desc:'Notizen als Bibliothek: Regale, Bücher und Kategorien statt Ordnerlisten.' },
-  { id:'github',         name:'GitHub',         tag:'Quellcode',       url:'https://github.com/'+USER,                         repo:null, type:'github',
+  { id:'github',         name:'GitHub',         tag:'Quellcode',      gruppe:'werkstatt',
+    url:'https://github.com/'+USER,                         repo:null, type:'github',
     fluss:'Quellcode aller Werkzeuge',
     desc:'Profil und alle Repositories – sortiert nach letzter Änderung, mit Links zu Code und Live-Seite.' }
 ];
@@ -506,6 +551,27 @@ $('#st-apps').textContent = APPS.filter(a => a.type !== 'github').length;
    unter derselben Herkunft ablegen. Kein Netzaufruf, keine
    Abhängigkeit — fehlt eine Kopie, bleibt die Zeile leer. */
 const nf1 = new Intl.NumberFormat('de-DE', { maximumFractionDigits:1 });
+const nfE = new Intl.NumberFormat('de-DE', { style:'currency', currency:'EUR', maximumFractionDigits:0 });
+const nfT = new Intl.DateTimeFormat('de-DE', { day:'2-digit', month:'2-digit' });
+const isoTag = d => { const x = new Date(d); return new Date(x.getTime() - x.getTimezoneOffset()*60000).toISOString().slice(0,10); };
+const cent = v => Math.round((Number(v) || 0) * 100) / 100;
+/* Brutto und Rest einer Rechnung – dieselbe Rundung wie im Rechnungsbuch:
+   erst je Position auf Cent, dann die Steuer je Satzgruppe. */
+function rechSumme(r){
+  const pos = Array.isArray(r.positionen) ? r.positionen : [];
+  let netto = 0; const grp = {};
+  pos.forEach(p => {
+    const zeile = cent((+p.menge || 0) * (+p.preis || 0));
+    netto = cent(netto + zeile);
+    const s = r.steuerfall === 'regel' ? (+p.satz || 0) : 0;
+    grp[s] = cent((grp[s] || 0) + zeile);
+  });
+  let steuer = 0;
+  Object.keys(grp).forEach(s => { steuer = cent(steuer + cent(grp[s] * parseFloat(s) / 100)); });
+  const brutto = cent(netto + steuer);
+  const bezahlt = (Array.isArray(r.zahlungen) ? r.zahlungen : []).reduce((s, z) => cent(s + (+z.betrag || 0)), 0);
+  return { netto, brutto, rest:cent(brutto - bezahlt) };
+}
 function standVon(id){
   if (id === 'auftragsbuch') {
     const d = WB.lesen(WB_AB_LS);
@@ -544,6 +610,39 @@ function standVon(id){
     return o + (o === 1 ? ' offener Auftrag' : ' offene Aufträge')
          + (t ? ' · ' + t + ' offene To-dos' : '');
   }
+  if (id === 'terminbuch') {
+    const d = WB.lesen(WB_TERMIN_LS);
+    if (!d || !Array.isArray(d.termine) || !d.termine.length) return null;
+    const heute = isoTag(Date.now());
+    const offen = d.termine.filter(t => t && t.datum && !t.erledigt);
+    const kommend = offen.filter(t => t.datum >= heute).sort((a,b) => a.datum.localeCompare(b.datum));
+    const faellig = offen.filter(t => t.art === 'erinnerung' && t.datum < heute).length;
+    if (!kommend.length && !faellig) return d.termine.length + ' Einträge · nichts offen';
+    return (kommend.length ? kommend.length + (kommend.length === 1 ? ' Termin' : ' Termine')
+              + ' · nächster ' + nfT.format(new Date(kommend[0].datum + 'T12:00:00')) : 'keine Termine')
+         + (faellig ? ' · ' + faellig + ' Wiedervorlage' + (faellig === 1 ? '' : 'n') : '');
+  }
+  if (id === 'rechnungsbuch') {
+    const d = WB.lesen(WB_RECH_LS);
+    if (!d || !Array.isArray(d.rechnungen) || !d.rechnungen.length) return null;
+    const heute = isoTag(Date.now());
+    let offen = 0, spaet = 0, entw = 0;
+    d.rechnungen.forEach(r => {
+      if (!r) return;
+      if (!r.festgeschrieben) { entw++; return; }
+      if (r.storniert || r.stornoVon) return;
+      const s = rechSumme(r);
+      if (s.rest <= 0.005) return;
+      offen = cent(offen + s.rest);
+      const ziel = new Date((r.datum || heute) + 'T12:00:00');
+      ziel.setDate(ziel.getDate() + (parseInt(r.ziel, 10) || 0));
+      if (isoTag(ziel) < heute) spaet++;
+    });
+    if (!offen && !entw) return d.rechnungen.length + ' Rechnungen · alles bezahlt';
+    return (offen ? nfE.format(offen) + ' offen' : 'nichts offen')
+         + (spaet ? ' · ' + spaet + '× überfällig' : '')
+         + (entw ? ' · ' + entw + (entw === 1 ? ' Entwurf' : ' Entwürfe') : '');
+  }
   if (id === 'stempeluhr') {
     const z = WB.lesen(WB_ZEIT_LS);
     if (!z || !z.gesamt) return null;
@@ -571,17 +670,34 @@ const ZEICHEN = {
   auftragsbuch:   SVG('<path d="M5 5.3A2.3 2.3 0 0 1 7.3 3H19v14.4H7.3A2.3 2.3 0 0 0 5 19.7z"/><path d="M5 19.7A2.3 2.3 0 0 1 7.3 17.4H19V21H7.3A2.3 2.3 0 0 1 5 19.7z"/><path d="M8.6 7.4h6.8M8.6 10.8h4.6"/>'),
   stempeluhr:     SVG('<circle cx="12" cy="13.6" r="7"/><path d="M12 10v3.6l2.5 1.7"/><path d="M9.6 3.3h4.8M12 3.3v3.3"/>'),
   auftragsstatus: SVG('<path d="M4.6 6.6h14.8M4.6 12h9.4M4.6 17.4h5.4"/>'),
+  terminbuch:     SVG('<rect x="3.6" y="5.4" width="16.8" height="15" rx="2.2"/><path d="M3.6 10h16.8M8 3.4v3.4M16 3.4v3.4"/><path d="M7.6 13.8h2.2M13.6 13.8h2.8M7.6 17h4.6"/>'),
+  rechnungsbuch:  SVG('<path d="M6 3.4h9.2L19 7.2V20.6H6z"/><path d="M14.6 3.6v3.8H18.8"/><path d="M8.8 11.6h7M8.8 14.8h7M8.8 18h3.6"/>'),
   noteos:         SVG('<path d="M6.6 4.4A1.4 1.4 0 0 1 8 3h8a1.4 1.4 0 0 1 1.4 1.4V21l-5.4-3.1L6.6 21z"/><path d="M9.8 8h4.4"/>'),
   github:         SVG('<path d="M12 .8C5.7.8.6 5.9.6 12.2c0 5.1 3.3 9.4 7.8 10.9.6.1.8-.2.8-.6v-2.1c-3.2.7-3.9-1.5-3.9-1.5-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.1.1 1.7 1.2 1.7 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.8 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.2 1.2.9-.3 1.9-.4 2.9-.4s2 .1 2.9.4c2.2-1.5 3.2-1.2 3.2-1.2.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.5-2.7 5.5-5.3 5.8.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6 4.6-1.5 7.8-5.8 7.8-10.9C23.4 5.9 18.3.8 12 .8z"/>', true)
 };
 const SYMFARBE = { auftragsbuch:'var(--amber)', stempeluhr:'var(--teal)', auftragsstatus:'var(--em-2)',
+                   terminbuch:'var(--info)', rechnungsbuch:'var(--geld)',
                    noteos:'var(--text-3)', github:'var(--text-2)' };
 
 /* ───────── Kacheln aufbauen ───────── */
 const grid = $('#grid');
 const tiles = [];
 const byId = {};
+let letzteGruppe = null;
 APPS.forEach((app, i) => {
+  /* Vor dem ersten Werkzeug eines Bandes läuft die Überschrift über die
+     ganze Breite. Sie ist kein Kachelelement – der Bus misst nur .tile. */
+  const g = app.gruppe || 'werkstatt';
+  if (g !== letzteGruppe) {
+    letzteGruppe = g;
+    const def = GRUPPEN.find(x => x.id === g);
+    if (def) {
+      const h = document.createElement('div');
+      h.className = 'gruppe';
+      h.innerHTML = '<h2>' + esc(def.titel) + '</h2><p>' + esc(def.unter) + '</p>';
+      grid.appendChild(h);
+    }
+  }
   const el = document.createElement('article');
   el.className = 'tile';
   el.style.animationDelay = (i*70)+'ms';
@@ -596,7 +712,7 @@ APPS.forEach((app, i) => {
         <span class="state" data-s="bereit"><span class="dot"></span><span class="s-txt">bereit</span></span>
       </span>
       <span class="t-nm">
-        <span class="t-idx">${pad2(i+1)} · ${esc(app.tag)}</span>
+        <span class="t-idx">${app.schritt ? `<b>${pad2(app.schritt)}</b> · ` : ''}${esc(app.tag)}</span>
         <h2>${esc(app.name)}</h2>
       </span>
       <button class="more" type="button" aria-expanded="false">…mehr</button>
@@ -692,12 +808,16 @@ const FLUSS = [
   { von:'auftragsbuch',   nach:'auftragsstatus', art:'stamm', seite: 1, was:'Stammdaten' },
   { von:'stempeluhr',     nach:'auftragsstatus', art:'zeit',  seite: 1, was:'Zeitbuchungen' },
   { von:'auftragsbuch',   nach:'noteos',         art:'kat',   seite: 1, was:'Auftraggeber als Kategorie' },
+  { von:'auftragsbuch',   nach:'terminbuch',     art:'stamm', seite: 1, was:'Stammdaten' },
+  { von:'auftragsstatus', nach:'terminbuch',     art:'frist', seite: 1, was:'Fristen und Meilensteine' },
+  { von:'auftragsbuch',   nach:'rechnungsbuch',  art:'stamm', seite: 1, was:'Stammdaten' },
+  { von:'stempeluhr',     nach:'rechnungsbuch',  art:'zeit',  seite: 1, was:'Zeitbuchungen' },
   { von:'stempeluhr',     nach:'auftragsbuch',   art:'summe', seite:-1, was:'Stunden je Auftrag' },
   { von:'auftragsstatus', nach:'auftragsbuch',   art:'opt',   seite:-1, was:'Prozessschritt (nur mit Haken)' },
   { von:'noteos',         nach:'auftragsbuch',   art:'notiz', seite:-1, was:'Notizen je Auftraggeber' }
 ];
 const BUSFARBE = { stamm:'var(--amber)', kat:'var(--amber)', zeit:'var(--teal)', summe:'var(--teal)',
-                   opt:'var(--text-3)', notiz:'var(--text-3)' };
+                   frist:'var(--em-2)', opt:'var(--text-3)', notiz:'var(--text-3)' };
 /* Durchgezogen heißt: verknüpft über IDs. Gestrichelt: nur über den Namen
    des Auftraggebers – wird drüben umbenannt, reißt der Faden. Gepunktet:
    wandert nur mit gesetztem Haken zurück. */
@@ -710,6 +830,7 @@ const QUELLE = {
   kat:   { ls:'wb-auftragsbuch-data',   idb:'wb-auftragsbuch',   datei:'auftragsbuch.json',   feld:'auftraggeber' },
   zeit:  { ls:'wb-stempeluhr-summe',    idb:null,                datei:'stempeluhr.json',     feld:null },
   summe: { ls:'wb-stempeluhr-summe',    idb:null,                datei:'stempeluhr.json',     feld:'jeAuftrag' },
+  frist: { ls:'wb-auftragsstatus-data', idb:'wb-auftragsstatus', datei:'auftragsstatus.json', feld:'inhalte' },
   opt:   { ls:'wb-auftragsstatus-data', idb:'wb-auftragsstatus', datei:'auftragsstatus.json', feld:'status' },
   notiz: { ls:'wb-noteos-stand',        idb:null,                datei:'noteos-stand.json',   feld:'jeKategorie' }
 };
@@ -724,6 +845,22 @@ function kennzahlen(art, d){
     z.push(['Kategorien', d.kategorien || 0]);
     if (d.jeKategorie) z.push(['davon mit Auftraggeber', Object.keys(d.jeKategorie).length]);
     if (d.zuletzt) z.push(['zuletzt', String(d.zuletzt)]);
+  } else if (art === 'frist') {
+    const inh = d.inhalte && typeof d.inhalte === 'object' ? d.inhalte : {};
+    const heute = isoTag(Date.now());
+    let fr = 0, spaet = 0, ms = 0;
+    Object.keys(inh).forEach(k => {
+      (Array.isArray(inh[k].todos) ? inh[k].todos : []).forEach(t => {
+        if (!t || !t.faellig) return;
+        fr++;
+        if (!t.erledigt && String(t.faellig).slice(0,10) < heute) spaet++;
+      });
+      ms += (Array.isArray(inh[k].meilensteine) ? inh[k].meilensteine : []).length;
+    });
+    z.push(['Aufträge mit Inhalt', Object.keys(inh).length]);
+    z.push(['Fristen', fr]);
+    z.push(['davon überfällig', spaet]);
+    z.push(['Meilensteine', ms]);
   } else if (art === 'zeit' || art === 'summe') {
     if (d.gesamt) {
       z.push(['Stunden', nf1.format((d.gesamt.sec || 0)/3600)]);
