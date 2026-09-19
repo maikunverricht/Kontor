@@ -343,7 +343,6 @@ footer a:hover{color:var(--text)}
       <span style="color:var(--amber)"><i></i>Stammdaten</span>
       <span style="color:var(--teal)"><i></i>Zeit</span>
       <span style="color:var(--em-2)"><i></i>Fristen</span>
-      <span><i class="name"></i>über den Namen</span>
       <span><i class="opt"></i>nur mit Haken</span>
       <span>oben zurück, unten hin</span>
     </div>
@@ -818,10 +817,12 @@ const FLUSS = [
 ];
 const BUSFARBE = { stamm:'var(--amber)', kat:'var(--amber)', zeit:'var(--teal)', summe:'var(--teal)',
                    frist:'var(--em-2)', opt:'var(--text-3)', notiz:'var(--text-3)' };
-/* Durchgezogen heißt: verknüpft über IDs. Gestrichelt: nur über den Namen
-   des Auftraggebers – wird drüben umbenannt, reißt der Faden. Gepunktet:
-   wandert nur mit gesetztem Haken zurück. */
-const BUSSTRICH = { kat:'name', notiz:'name', opt:'haken' };
+/* Durchgezogen heißt: verknüpft über IDs. Gepunktet: wandert nur mit
+   gesetztem Haken zurück.
+   Seit NoteOS die `agbId` an der Notiz führt, läuft keine Leitung mehr über
+   den Namen – die gestrichelte Art ist leer und bleibt nur stehen, falls
+   wieder einmal etwas nur am Namen hängt. */
+const BUSSTRICH = { opt:'haken' };
 /* Woher der Inhalt einer Leitung stammt. Gelesen wird die Lesekopie im
    localStorage; auf Wunsch die verknüpfte Datei über den Handle, den das
    führende Werkzeug in seiner IndexedDB liegen hat. Geschrieben wird nie. */
@@ -832,7 +833,9 @@ const QUELLE = {
   summe: { ls:'wb-stempeluhr-summe',    idb:null,                datei:'stempeluhr.json',     feld:'jeAuftrag' },
   frist: { ls:'wb-auftragsstatus-data', idb:'wb-auftragsstatus', datei:'auftragsstatus.json', feld:'inhalte' },
   opt:   { ls:'wb-auftragsstatus-data', idb:'wb-auftragsstatus', datei:'auftragsstatus.json', feld:'status' },
-  notiz: { ls:'wb-noteos-stand',        idb:null,                datei:'noteos-stand.json',   feld:'jeKategorie' }
+  /* Ganze Lesekopie: sie trägt beide Zähler – `jeAuftraggeber` über die ID
+     und `jeKategorie` über den Namen. Im Inspektor sind beide zu sehen. */
+  notiz: { ls:'wb-noteos-stand',        idb:null,                datei:'noteos-stand.json',   feld:null }
 };
 function kennzahlen(art, d){
   const z = [];
@@ -843,7 +846,13 @@ function kennzahlen(art, d){
   } else if (art === 'notiz') {
     z.push(['Notizen', d.anzahl || 0]);
     z.push(['Kategorien', d.kategorien || 0]);
-    if (d.jeKategorie) z.push(['davon mit Auftraggeber', Object.keys(d.jeKategorie).length]);
+    if (d.jeAuftraggeber) {
+      const ids = Object.keys(d.jeAuftraggeber);
+      z.push(['verknüpfte Auftraggeber', ids.length]);
+      z.push(['Notizen daran', ids.reduce((s,k) => s + (d.jeAuftraggeber[k] || 0), 0)]);
+    } else if (d.jeKategorie) {
+      z.push(['gezählte Kategorien', Object.keys(d.jeKategorie).length]);
+    }
     if (d.zuletzt) z.push(['zuletzt', String(d.zuletzt)]);
   } else if (art === 'frist') {
     const inh = d.inhalte && typeof d.inhalte === 'object' ? d.inhalte : {};
