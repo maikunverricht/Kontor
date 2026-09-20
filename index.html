@@ -170,6 +170,7 @@ pre.json{margin:14px 0 0;padding:12px 14px;border:1px solid var(--line);border-r
 .buslegend{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:14px;font-family:var(--mono);font-size:11.5px;color:var(--text-3)}
 .buslegend span{display:inline-flex;align-items:center;gap:7px}
 .buslegend i{width:16px;height:2px;border-radius:2px;background:currentColor;flex:none}
+.buslegend .leer{background:none;border-top:2px dotted currentColor;height:0;opacity:.45}
 .buslegend .opt{background:none;border-top:2px dotted currentColor;height:0}
 .buslegend .name{background:none;border-top:2px dashed currentColor;height:0}
 .role{font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;color:var(--text-3);margin:0;
@@ -362,6 +363,13 @@ html[data-theme="light"]{
 /* Im Bündel liegen die Adern dicht – die Höfe würden sich sonst zu einem
    Schleier stapeln. Eine Ader für sich behält ihren vollen Hof. */
 .bus g.gebuendelt .halo{opacity:.028}
+
+/* Eine Leitung, auf der nichts liegt, bewegt sich auch nicht. Sie bleibt
+   sichtbar – der Weg ist da, er ist nur noch nicht benutzt. */
+.bus g.leer .trace{opacity:.2;stroke-dasharray:2 7}
+.bus g.leer .halo{display:none}
+.bus g.leer .pad{opacity:.35}
+.bus g.leer:hover .trace{opacity:.5;stroke-dasharray:2 7}
 </style>
 </head>
 <body>
@@ -402,6 +410,7 @@ html[data-theme="light"]{
       <span style="color:var(--teal)"><i></i>Zeit</span>
       <span style="color:var(--em-2)"><i></i>Fristen</span>
       <span><i class="opt"></i>nur mit Haken</span>
+      <span><i class="leer"></i>noch keine Daten</span>
       <span>oben zurück, unten hin</span>
     </div>
   <footer>
@@ -831,6 +840,22 @@ function ensureLoaded(t){
 }
 
 
+/* ───────── Liegt auf dieser Leitung überhaupt etwas? ─────────
+   Was nicht da ist, kann nicht fließen. Die Leitung wird trotzdem
+   gezeichnet – der Weg besteht, er ist nur noch unbenutzt. Gelesen wird
+   dieselbe Lesekopie, die auch der Inspektor öffnet. */
+function hatInhalt(art){
+  const q = QUELLE[art];
+  if (!q) return true;
+  const d = WB.lesen(q.ls);
+  if (!d) return false;
+  const w = q.feld ? d[q.feld] : d;
+  if (!w) return false;
+  if (Array.isArray(w)) return w.length > 0;
+  if (typeof w === 'object') return Object.keys(w).length > 0;
+  return !!w;
+}
+
 /* ───────── Datenbus ─────────
    Wer führt, wer liest: die Kacheln stehen in Flussrichtung, dazwischen
    liegt die Leitung. Sie wird aus den tatsächlichen Kachelmaßen gezeichnet,
@@ -1020,12 +1045,13 @@ function busZeichnen(){
     const p0 = pts[0], pE = pts[pts.length-1];
     /* Im Bündel würden sich die Höfe zu einem Schleier stapeln. */
     const buendel = gruppen[p.schluessel].length > 1 ? ' gebuendelt' : '';
-    out += '<g class="leitung' + buendel + '" style="--bus:' + farbe + '">'
+    const leer = !hatInhalt(f.art);
+    out += '<g class="leitung' + buendel + (leer ? ' leer' : '') + '" style="--bus:' + farbe + '">'
         +  '<path class="halo" d="' + d + '"/>'
         +  '<path class="trace' + (BUSSTRICH[f.art] ? ' ' + BUSSTRICH[f.art] : '') + '" id="' + id + '" d="' + d + '"></path>'
         +  '<circle class="pad" cx="' + p0[0].toFixed(1) + '" cy="' + p0[1].toFixed(1) + '" r="3"/>'
         +  '<circle class="pad" cx="' + pE[0].toFixed(1) + '" cy="' + pE[1].toFixed(1) + '" r="3"/>';
-    if (!reduce) {
+    if (!reduce && !leer) {
       const laenge = pts.reduce((sum, q, k) => k ? sum + Math.hypot(q[0]-pts[k-1][0], q[1]-pts[k-1][1]) : 0, 0);
       const dauer = Math.max(4.5, laenge / 42);
       const takte = 1;
@@ -1040,7 +1066,7 @@ function busZeichnen(){
     }
     out += '<path class="hit" d="' + d + '" data-f="' + i + '"><title>'
         +  esc(f.was) + ': ' + esc(byId[f.von].app.name) + ' → ' + esc(byId[f.nach].app.name)
-        +  ' · klicken zum Hineinsehen</title></path></g>';
+        +  (leer ? ' · noch keine Daten' : '') + ' · klicken zum Hineinsehen</title></path></g>';
   });
   busEl.innerHTML = out;
   busEl.classList.add('on');
