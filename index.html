@@ -119,7 +119,7 @@ h1 em{font-style:italic;font-weight:600;background:linear-gradient(94deg,var(--e
    mehrspaltig bleibt und die Leitungen weiter durch die Lücken passen. */
 .gruppe{grid-column:1/-1;position:relative;z-index:1;display:flex;align-items:baseline;gap:14px;
   flex-wrap:wrap;margin:0 0 -26px;padding-top:6px}
-.gruppe:first-child{padding-top:0}
+.gruppe:first-child,.offen + .gruppe{padding-top:0}
 .gruppe:empty{min-height:21px}
 .gruppe h2{margin:0;font-size:15px;letter-spacing:-.01em;font-weight:700;font-variation-settings:'wdth' 110;white-space:nowrap}
 .gruppe p{margin:0;flex:1;min-width:140px;font-size:13px;color:var(--text-3);line-height:1.45}
@@ -371,6 +371,21 @@ html[data-theme="light"]{
 .bus g.leer .halo{display:none}
 .bus g.leer .pad{opacity:.35}
 .bus g.leer:hover .trace{opacity:.5;stroke-dasharray:2 7}
+
+/* Die Zeile meldet sich nur, wenn etwas offen ist. Ist nichts offen,
+   steht hier nichts – kein „alles in Ordnung", das man nach zwei Wochen
+   ohnehin überliest. */
+.offen{grid-column:1/-1;position:relative;z-index:2;display:flex;flex-wrap:wrap;gap:8px;
+  margin:0 0 6px;font-family:var(--mono);font-size:12px}
+.offen:empty{display:none}
+.offen button{display:inline-flex;align-items:center;gap:8px;height:30px;padding:0 12px;
+  border-radius:100px;border:1px solid var(--line);background:var(--glass);color:var(--text-2);
+  font:inherit;cursor:pointer;transition:border-color var(--t-s,.25s) var(--kurve,ease),
+  color var(--t-s,.25s) var(--kurve,ease)}
+.offen button:hover{border-color:var(--amber);color:var(--text)}
+.offen button::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--amber);flex:none}
+.offen button.spaet::before{background:var(--em-2,#E2725B)}
+.offen b{font-weight:700;font-variation-settings:'wdth' 110}
 </style>
 </head>
 <body>
@@ -394,7 +409,9 @@ html[data-theme="light"]{
   <section class="hero">
     <h1><span>Der ganze Ablauf</span><br><em>an einem Ort.</em></h1>
   </section>
-  <section class="grid" id="grid" aria-label="Werkzeuge"></section>
+  <section class="grid" id="grid" aria-label="Werkzeuge">
+    <div class="offen" id="offen" aria-live="polite"></div>
+  </section>
 </main>
 
 <footer>
@@ -700,6 +717,63 @@ function standVon(id){
   }
   return null;
 }
+/* ───────── Was offen ist ─────────
+   Drei Fragen, die kein einzelnes Werkzeug beantworten kann, weil sie
+   über zwei Bestände gehen. Gelesen werden dieselben Lesekopien wie
+   überall; fehlt eine, fällt ihr Posten weg. Ist nichts offen, bleibt
+   die Zeile leer und blendet sich per CSS aus. */
+function offeneWelt(){
+  const p = [];
+
+  const z = WB.lesen(WB_ZEIT_LS);
+  if (z && z.offen && z.offen.buchungen) {
+    p.push({ zu:'stempeluhr', spaet:false,
+             text:'<b>' + nf1.format(z.offen.sec/3600) + ' h</b> nicht abgerechnet' });
+  }
+
+  const r = WB.lesen(WB_RECH_LS);
+  if (r && Array.isArray(r.rechnungen)) {
+    const heute = isoTag(Date.now());
+    let spaet = 0, summe = 0;
+    r.rechnungen.forEach(x => {
+      if (!x || !x.festgeschrieben || x.storniert || x.stornoVon) return;
+      const s = rechSumme(x);
+      if (s.rest <= 0.005) return;
+      const ziel = new Date((x.datum || heute) + 'T12:00:00');
+      ziel.setDate(ziel.getDate() + (parseInt(x.ziel, 10) || 0));
+      if (isoTag(ziel) < heute) { spaet++; summe = cent(summe + s.rest); }
+    });
+    if (spaet) p.push({ zu:'rechnungsbuch', spaet:true,
+      text:'<b>' + spaet + '</b> ' + (spaet === 1 ? 'Rechnung' : 'Rechnungen')
+         + ' überfällig · ' + nfE.format(summe) });
+  }
+
+  const t = WB.lesen(WB_TERMIN_LS);
+  if (t && Array.isArray(t.termine)) {
+    const heute = isoTag(Date.now());
+    const grenze = new Date(); grenze.setDate(grenze.getDate() + 7);
+    const bis = isoTag(grenze);
+    let woche = 0, ueber = 0;
+    t.termine.forEach(x => {
+      if (!x || !x.datum || x.erledigt) return;
+      if (x.datum < heute) ueber++;
+      else if (x.datum <= bis) woche++;
+    });
+    if (ueber) p.push({ zu:'terminbuch', spaet:true,
+      text:'<b>' + ueber + '</b> ' + (ueber === 1 ? 'Frist' : 'Fristen') + ' überschritten' });
+    if (woche) p.push({ zu:'terminbuch', spaet:false,
+      text:'<b>' + woche + '</b> ' + (woche === 1 ? 'Frist' : 'Fristen') + ' in sieben Tagen' });
+  }
+
+  const el = document.getElementById('offen');
+  if (!el) return;
+  el.innerHTML = p.map(x =>
+    '<button type="button" class="' + (x.spaet ? 'spaet' : '') + '" data-zu="' + x.zu + '">'
+    + x.text + '</button>').join('');
+  el.querySelectorAll('[data-zu]').forEach(b =>
+    b.addEventListener('click', () => open(b.dataset.zu)));
+}
+
 function staendeZeigen(){
   tiles.forEach(t => {
     const s = standVon(t.app.id);
@@ -795,9 +869,9 @@ APPS.forEach((app, i) => {
 /* Einmal beim Aufbau — und danach immer dann, wenn eines der
    Werkzeuge etwas meldet. Die Kacheln laufen als Rahmen unter
    derselben Herkunft: was dort drin passiert, kommt hier an. */
-staendeZeigen();
-WB.horchen(null, () => staendeZeigen());
-addEventListener('visibilitychange', () => { if (!document.hidden) staendeZeigen(); });
+staendeZeigen(); offeneWelt();
+WB.horchen(null, () => { staendeZeigen(); offeneWelt(); });
+addEventListener('visibilitychange', () => { if (!document.hidden) { staendeZeigen(); offeneWelt(); } });
 setInterval(staendeZeigen, 30000);
 
 function setState(t, s, txt){ t.state.dataset.s = s; $('.s-txt', t.state).textContent = txt; }
