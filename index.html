@@ -120,6 +120,7 @@ h1 em{font-style:italic;font-weight:600;background:linear-gradient(94deg,var(--e
 .gruppe{grid-column:1/-1;position:relative;z-index:1;display:flex;align-items:baseline;gap:14px;
   flex-wrap:wrap;margin:0 0 -26px;padding-top:6px}
 .gruppe:first-child{padding-top:0}
+.gruppe:empty{min-height:21px}
 .gruppe h2{margin:0;font-size:15px;letter-spacing:-.01em;font-weight:700;font-variation-settings:'wdth' 110;white-space:nowrap}
 .gruppe p{margin:0;flex:1;min-width:140px;font-size:13px;color:var(--text-3);line-height:1.45}
 .gruppe::before{content:"";position:absolute;left:0;right:0;bottom:-11px;height:1px;background:var(--line)}
@@ -740,7 +741,6 @@ APPS.forEach((app, i) => {
     if (def) {
       const h = document.createElement('div');
       h.className = 'gruppe';
-      h.innerHTML = '<h2>' + esc(def.titel) + '</h2>';
       grid.appendChild(h);
     }
   }
