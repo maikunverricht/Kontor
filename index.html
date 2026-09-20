@@ -427,6 +427,7 @@ html[data-theme="light"]{
       <span style="color:var(--amber)"><i></i>Stammdaten</span>
       <span style="color:var(--teal)"><i></i>Zeit</span>
       <span style="color:var(--em-2)"><i></i>Fristen</span>
+      <span style="color:var(--geld)"><i></i>Geld</span>
       <span><i class="opt"></i>nur mit Haken</span>
       <span><i class="leer"></i>noch keine Daten</span>
       <span>oben zurück, unten hin</span>
@@ -551,7 +552,7 @@ const GRUPPEN = [
 const APPS = [
   { id:'auftragsbuch',   name:'Auftragsbuch',   tag:'Auftraggeber',   gruppe:'prozess', schritt:1,
     url:'https://maikunverricht.github.io/Auftragsbuch/',   repo:'Auftragsbuch',
-    fluss:'führt Stammdaten · zeigt Zeit und Notizen dazu', rc:'var(--amber)',
+    fluss:'führt Stammdaten · zeigt Zeit, Geld und Notizen dazu', rc:'var(--amber)',
     desc:'Auftraggeber, Aufträge und Konditionen an einem Ort – alle anderen bedienen sich hier.' },
   { id:'stempeluhr',     name:'Stempeluhr',     tag:'Zeiterfassung',  gruppe:'prozess', schritt:2,
     url:'https://maikunverricht.github.io/StopUhr/',        repo:'StopUhr',
@@ -567,7 +568,7 @@ const APPS = [
     desc:'Zeitstrahl je Auftrag: eigene Termine, Fristen und Meilensteine aus dem Auftragsstatus – mit ICS-Export.' },
   { id:'rechnungsbuch',  name:'Rechnungsbuch',  tag:'Abrechnung',     gruppe:'prozess', schritt:5,
     url:'https://maikunverricht.github.io/Rechnungsbuch/',  repo:'Rechnungsbuch',
-    fluss:'führt Rechnungen und Zahlungen · liest Stammdaten und Zeit', rc:'var(--geld)',
+    fluss:'führt Rechnungen und Zahlungen · liest Stammdaten und Zeit · meldet Abgerechnetes zurück', rc:'var(--geld)',
     desc:'Rechnung aus gebuchter Zeit: Entwurf, Festschreibung, offene Posten – Druck und Factur-X.' },
   { id:'noteos',         name:'NoteOS',         tag:'Wissen',         gruppe:'prozess', schritt:6,
     url:'https://maikunverricht.github.io/NoteOS/',         repo:'NoteOS',
@@ -947,10 +948,11 @@ const FLUSS = [
   { von:'stempeluhr',     nach:'rechnungsbuch',  art:'zeit',  seite: 1, was:'Zeitbuchungen' },
   { von:'stempeluhr',     nach:'auftragsbuch',   art:'summe', seite:-1, was:'Stunden je Auftrag' },
   { von:'auftragsstatus', nach:'auftragsbuch',   art:'opt',   seite:-1, was:'Prozessschritt (nur mit Haken)' },
-  { von:'noteos',         nach:'auftragsbuch',   art:'notiz', seite:-1, was:'Notizen je Auftraggeber' }
+  { von:'noteos',         nach:'auftragsbuch',   art:'notiz', seite:-1, was:'Notizen je Auftraggeber' },
+  { von:'rechnungsbuch',  nach:'auftragsbuch',   art:'geld',  seite:-1, was:'Abgerechnet je Auftrag' }
 ];
 const BUSFARBE = { stamm:'var(--amber)', kat:'var(--amber)', zeit:'var(--teal)', summe:'var(--teal)',
-                   frist:'var(--em-2)', opt:'var(--text-3)', notiz:'var(--text-3)' };
+                   frist:'var(--em-2)', geld:'var(--geld)', opt:'var(--text-3)', notiz:'var(--text-3)' };
 /* Durchgezogen heißt: verknüpft über IDs. Gepunktet: wandert nur mit
    gesetztem Haken zurück.
    Seit NoteOS die `agbId` an der Notiz führt, läuft keine Leitung mehr über
@@ -969,7 +971,10 @@ const QUELLE = {
   opt:   { ls:'wb-auftragsstatus-data', idb:'wb-auftragsstatus', datei:'auftragsstatus.json', feld:'status' },
   /* Ganze Lesekopie: sie trägt beide Zähler – `jeAuftraggeber` über die ID
      und `jeKategorie` über den Namen. Im Inspektor sind beide zu sehen. */
-  notiz: { ls:'wb-noteos-stand',        idb:null,                datei:'noteos-stand.json',   feld:null }
+  notiz: { ls:'wb-noteos-stand',        idb:null,                datei:'noteos-stand.json',   feld:null },
+  /* Was je Auftrag gestellt wurde – das Auftragsbuch rechnet daraus
+     den tatsächlichen Stundensatz. Gelesen wird die ganze Kopie. */
+  geld:  { ls:'wb-rechnungsbuch-data', idb:'wb-rechnungsbuch', datei:'rechnungsbuch.json', feld:'rechnungen' }
 };
 function kennzahlen(art, d){
   const z = [];
