@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Werkbank Cockpit</title>
+<title>Kontor · Werkbank Unverricht</title>
 <meta name="description" content="Alle Werkzeuge von Maik Unverricht auf einen Blick – live als Kacheln.">
 <meta name="theme-color" content="#06090E">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='8'%20fill='%2306090E'/%3E%3Cg%20transform='translate%2816%2016%29%20scale%280.19%29%20translate%28-60%20-56%29'%3E%3Cpath%20d='M26%2C16%20V62%20A34%2C34%200%200%200%2094%2C62%20V16'%20fill='none'%20stroke='%23EDF0F3'%20stroke-width='22'%20stroke-linecap='round'%20stroke-linejoin='round'/%3E%3Ccircle%20cx='60'%20cy='64'%20r='18.5'%20fill='%23F2B33D'/%3E%3C/g%3E%3C/svg%3E">
@@ -98,7 +98,7 @@ html[data-theme="light"] .moon{display:none}
 
 /* Hero */
 main{position:relative;max-width:var(--max);margin:0 auto;padding:0 var(--pad)}
-.hero{padding:clamp(120px,17vw,170px) 0 clamp(36px,6vw,56px)}
+.hero{padding:clamp(104px,14vw,140px) 0 clamp(28px,4vw,40px)}
 .eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--text-3);
   display:flex;align-items:center;gap:12px}
 .eyebrow::before{content:"";width:28px;height:1px;background:var(--amber)}
@@ -132,13 +132,13 @@ h1 em{font-style:italic;font-weight:600;background:linear-gradient(94deg,var(--e
 .bus{position:absolute;inset:0;overflow:visible;pointer-events:none;z-index:0;opacity:0;transition:opacity .8s ease}
 .bus.on{opacity:1}
 body.zoomed .bus{opacity:0}
-.bus .trace{fill:none;stroke:var(--bus);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;opacity:.55}
+.bus .trace{fill:none;stroke:var(--bus);stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round;opacity:.38}
 .bus .trace.haken{stroke-dasharray:2 7;opacity:.36}
 .bus .trace.name{stroke-dasharray:9 6;opacity:.46}
-.bus .halo{fill:none;stroke:var(--bus);stroke-width:7;opacity:.09}
+.bus .halo{fill:none;stroke:var(--bus);stroke-width:7;opacity:.05}
 .bus .pad{fill:var(--void);stroke:var(--bus);stroke-width:1.4;opacity:.8}
 .bus .pkt{fill:var(--bus)}
-.bus .aura{fill:var(--bus);opacity:.18}
+.bus .aura{fill:var(--bus);opacity:.12}
 .bus .hit{fill:none;stroke:transparent;stroke-width:10;pointer-events:stroke;cursor:pointer}
 .bus g:hover .trace{opacity:.95;stroke-width:2.2}
 .bus g:hover .halo{opacity:.2}
@@ -384,7 +384,7 @@ html[data-theme="light"]{
 
 /* Im Bündel liegen die Adern dicht – die Höfe würden sich sonst zu einem
    Schleier stapeln. Eine Ader für sich behält ihren vollen Hof. */
-.bus g.gebuendelt .halo{opacity:.045}
+.bus g.gebuendelt .halo{opacity:.028}
 </style>
 </head>
 <body>
@@ -392,13 +392,10 @@ html[data-theme="light"]{
 
 <header class="nav">
   <div class="nav-in">
-    <a class="brand" href="#" id="home"><span class="mark" aria-hidden="true"><svg viewBox="15 5 90 102"><path d="M26,16 V62 A34,34 0 0 0 94,62 V16" fill="none" stroke="currentColor" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/><circle cx="60" cy="64" r="18.5" fill="var(--amber,#F2B33D)"/></svg></span>Werkbank <b>Cockpit</b></a>
+    <a class="brand" href="#" id="home"><span class="mark" aria-hidden="true"><svg viewBox="15 5 90 102"><path d="M26,16 V62 A34,34 0 0 0 94,62 V16" fill="none" stroke="currentColor" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/><circle cx="60" cy="64" r="18.5" fill="var(--amber,#F2B33D)"/></svg></span><b>Kontor</b></a>
     <div class="nav-r">
       <span class="clock" id="clock"></span>
       <a class="pill hide-sm" href="https://maikunverricht.github.io/WerkbankUnverricht/">Werkbank ↗</a>
-      <a class="pill icon-btn" href="https://github.com/maikunverricht" target="_blank" rel="noopener" aria-label="GitHub-Profil">
-        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
-      </a>
       <button class="pill icon-btn" id="themeBtn" type="button" aria-label="Hell/Dunkel umschalten">
         <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
         <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
@@ -409,30 +406,27 @@ html[data-theme="light"]{
 
 <main>
   <section class="hero">
-    <div class="eyebrow">Cockpit · Werkbank Unverricht</div>
     <h1><span>Alle Werkzeuge</span><br><em>auf einen Blick.</em></h1>
-    <p class="lead">Die Kacheln stehen in Flussrichtung: wer die Daten führt, steht vor dem, der sie liest. Antippen öffnet das Werkzeug im Vollbild – zurück geht’s mit <span class="mono">Esc</span>, der Zurück-Geste oder „Übersicht“.</p>
-    <div class="stats" id="stats"><span><b id="st-apps">4</b> Werkzeuge</span><span><b>1</b> GitHub-Profil</span><span id="st-last">Letzter Push: <b>…</b></span></div>
-    <div class="buslegend" aria-hidden="true">
-      <span style="color:var(--amber)"><i></i>Stammdaten</span>
-      <span style="color:var(--teal)"><i></i>Zeit</span>
-      <span style="color:var(--em-2)"><i></i>Fristen</span>
-      <span><i class="opt"></i>nur mit Haken</span>
-      <span>oben zurück, unten hin</span>
-    </div>
   </section>
   <section class="grid" id="grid" aria-label="Werkzeuge"></section>
 </main>
 
 <footer>
   <span>© <span id="yr"></span> Maik Unverricht</span>
-  <span><a href="https://maikunverricht.github.io/WerkbankUnverricht/">Werkbank</a> · <a href="https://github.com/maikunverricht" target="_blank" rel="noopener">GitHub ↗</a></span>
+  <span><a href="https://maikunverricht.github.io/WerkbankUnverricht/">Werkbank</a></span>
 </footer>
 
 <dialog class="bus-dlg" id="dlgBus"><div class="sheet">
   <header><h3 id="busTitel">Datenfluss</h3>
     <button class="pill icon-btn" type="button" id="busZu" aria-label="Schließen">✕</button></header>
   <div class="body" id="busBody"></div>
+    <div class="buslegend" aria-hidden="true" style="padding:0 var(--pad) 16px">
+      <span style="color:var(--amber)"><i></i>Stammdaten</span>
+      <span style="color:var(--teal)"><i></i>Zeit</span>
+      <span style="color:var(--em-2)"><i></i>Fristen</span>
+      <span><i class="opt"></i>nur mit Haken</span>
+      <span>oben zurück, unten hin</span>
+    </div>
   <footer>
     <button class="pill" type="button" id="busDatei">Datei lesen</button>
     <button class="pill" type="button" id="busSichern">Als JSON sichern</button>
@@ -575,11 +569,7 @@ const APPS = [
   { id:'noteos',         name:'NoteOS',         tag:'Wissen',         gruppe:'prozess', schritt:6,
     url:'https://maikunverricht.github.io/NoteOS/',         repo:'NoteOS',
     fluss:'liest Auftraggeber · meldet Notizen je Auftraggeber', rc:'var(--amber)',
-    desc:'Notizen als Bibliothek: Regale, Bücher und Kategorien statt Ordnerlisten.' },
-  { id:'github',         name:'GitHub',         tag:'Quellcode',      gruppe:'werkstatt',
-    url:'https://github.com/'+USER,                         repo:null, type:'github',
-    fluss:'Quellcode aller Werkzeuge',
-    desc:'Profil und alle Repositories – sortiert nach letzter Änderung, mit Links zu Code und Live-Seite.' }
+    desc:'Notizen als Bibliothek: Regale, Bücher und Kategorien statt Ordnerlisten.' }
 ];
 
 /* ───────── Hilfen ───────── */
@@ -616,7 +606,6 @@ $('#yr').textContent = new Date().getFullYear();
 const clock = $('#clock');
 const tick = () => { const d = new Date(); clock.textContent = pad2(d.getHours())+':'+pad2(d.getMinutes()); };
 tick(); setInterval(tick, 15000);
-$('#st-apps').textContent = APPS.filter(a => a.type !== 'github').length;
 
 /* ───────── Was steht gerade in den Werkzeugen? ─────────
    Die Kacheln zeigen nicht nur ein Bild, sondern den Bestand: das
@@ -767,7 +756,7 @@ APPS.forEach((app, i) => {
     if (def) {
       const h = document.createElement('div');
       h.className = 'gruppe';
-      h.innerHTML = '<h2>' + esc(def.titel) + '</h2><p>' + esc(def.unter) + '</p>';
+      h.innerHTML = '<h2>' + esc(def.titel) + '</h2>';
       grid.appendChild(h);
     }
   }
@@ -1066,8 +1055,8 @@ function busZeichnen(){
         +  '<circle class="pad" cx="' + pE[0].toFixed(1) + '" cy="' + pE[1].toFixed(1) + '" r="3"/>';
     if (!reduce) {
       const laenge = pts.reduce((sum, q, k) => k ? sum + Math.hypot(q[0]-pts[k-1][0], q[1]-pts[k-1][1]) : 0, 0);
-      const dauer = Math.max(2.4, laenge / 85);
-      const takte = BUSSTRICH[f.art] ? 1 : 2;
+      const dauer = Math.max(4.5, laenge / 42);
+      const takte = 1;
       for (let k = 0; k < takte; k++) {
         const start = (-dauer * k / takte).toFixed(2) + 's';
         const mp = '<mpath href="#' + id + '" xlink:href="#' + id + '"/>';
@@ -1248,7 +1237,7 @@ function setBar(t){
   $('#openBtn').href = t.app.url;
   const rb = $('#repoBtn');
   if (t.app.repo) { rb.href = t.repoUrl; rb.style.display = ''; } else rb.style.display = 'none';
-  document.title = t.app.name + ' · Werkbank Cockpit';
+  document.title = t.app.name + ' · Kontor';
 }
 function focusApp(t, on){
   if (t.iframe) t.iframe.tabIndex = on ? 0 : -1;
@@ -1285,7 +1274,7 @@ function close({ animate = true } = {}){
     t.frame.classList.remove('fixed'); clearRect(t);
     root.classList.remove('locked');
     current = null; busy = false; fit(t);
-    document.title = 'Werkbank Cockpit';
+    document.title = 'Kontor · Werkbank Unverricht';
     t.shot.focus({ preventScroll:true });
   });
 }
@@ -1353,9 +1342,8 @@ ghData.then(([u, r]) => {
     if (m && m.pushed_at) t.push.textContent = 'Push ' + rel(m.pushed_at);
   });
   const mine = repos.filter(x => !x.fork).sort((a,b) => new Date(b.pushed_at) - new Date(a.pushed_at));
-  if (mine[0]) $('#st-last').innerHTML = `Letzter Push: <b>${esc(mine[0].name)}</b> ${esc(rel(mine[0].pushed_at))}`;
-  const ghTile = byId.github;
-  if (ghTile.state) setState(ghTile, 'live', 'api');
+  const stL = $('#st-last');
+  if (mine[0] && stL) stL.innerHTML = `Letzter Push: <b>${esc(mine[0].name)}</b> ${esc(rel(mine[0].pushed_at))}`;
 }).catch(()=>{});
 
 function renderGitHub(t){
