@@ -262,29 +262,6 @@ body.zoomed .bar{transform:none}
 .pill.primary:hover{background:var(--amber);filter:brightness(1.06)}
 .kbd{font-family:var(--mono);font-size:11px;color:var(--text-3);border:1px solid var(--line);border-radius:5px;padding:0 5px;margin-left:2px}
 
-/* GitHub-Panel */
-.gh{position:absolute;inset:0;overflow:hidden;padding:clamp(22px,4vw,56px);background:var(--bg-grad);color:var(--text)}
-.frame.live .gh{overflow:auto;-webkit-overflow-scrolling:touch}
-.gh-in{max-width:1180px;margin:0 auto}
-.gh-head{display:flex;align-items:center;gap:22px;flex-wrap:wrap}
-.gh-head img{width:92px;height:92px;border-radius:50%;border:1px solid var(--glass-edge);background:var(--glass)}
-.gh-head h3{margin:6px 0 0;font-size:clamp(28px,4vw,46px);line-height:1;letter-spacing:-.04em;font-variation-settings:'wdth' 114,'wght' 800}
-.gh-head p{margin:6px 0 0;color:var(--text-2)}
-.gh-head .pill{margin-left:auto}
-.gh-stats{display:flex;flex-wrap:wrap;gap:10px;margin:28px 0 34px}
-.gh-stat{border:1px solid var(--line);background:var(--glass);border-radius:14px;padding:12px 18px;min-width:120px}
-.gh-stat b{display:block;font-size:26px;letter-spacing:-.03em;font-variation-settings:'wdth' 110}
-.gh-stat span{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-3)}
-.gh-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px;margin-top:16px}
-.repo{border:1px solid var(--line);background:var(--glass);border-radius:15px;padding:16px 18px;display:flex;flex-direction:column;gap:8px;box-shadow:var(--shadow)}
-.repo h4{margin:0;font-size:17px;letter-spacing:-.01em;display:flex;align-items:center;gap:8px}
-.repo p{margin:0;color:var(--text-2);font-size:14px;line-height:1.45;flex:1}
-.repo .r-meta{display:flex;flex-wrap:wrap;gap:4px 14px;font-family:var(--mono);font-size:11.5px;color:var(--text-3)}
-.repo .r-links{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
-.repo .pill{height:30px;font-size:13px;padding:0 11px}
-.lang{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--teal);margin-right:5px;vertical-align:0}
-.gh-note{margin-top:18px;font-family:var(--mono);font-size:12px;color:var(--text-3)}
-
 footer{position:relative;max-width:var(--max);margin:0 auto;padding:26px var(--pad) calc(40px + env(safe-area-inset-bottom));
   display:flex;flex-wrap:wrap;gap:10px 22px;justify-content:space-between;border-top:1px solid var(--line);font-family:var(--mono);font-size:12px;color:var(--text-3)}
 footer a{text-decoration:none}
@@ -406,7 +383,7 @@ html[data-theme="light"]{
 
 <main>
   <section class="hero">
-    <h1><span>Alle Werkzeuge</span><br><em>auf einen Blick.</em></h1>
+    <h1><span>Der ganze Ablauf</span><br><em>an einem Ort.</em></h1>
   </section>
   <section class="grid" id="grid" aria-label="Werkzeuge"></section>
 </main>
@@ -441,7 +418,6 @@ html[data-theme="light"]{
   <div class="grp">
     <button class="pill icon-btn" id="prevBtn" type="button" aria-label="Vorheriges Werkzeug">‹</button>
     <button class="pill icon-btn" id="nextBtn" type="button" aria-label="Nächstes Werkzeug">›</button>
-    <a class="pill hide-sm" id="repoBtn" target="_blank" rel="noopener">Repo</a>
     <a class="pill primary" id="openBtn" target="_blank" rel="noopener"><span class="hide-sm">Neuer Tab</span> ↗</a>
   </div>
 </div>
@@ -735,11 +711,10 @@ const ZEICHEN = {
   terminbuch:     SVG('<rect x="3.6" y="5.4" width="16.8" height="15" rx="2.2"/><path d="M3.6 10h16.8M8 3.4v3.4M16 3.4v3.4"/><path d="M7.6 13.8h2.2M13.6 13.8h2.8M7.6 17h4.6"/>'),
   rechnungsbuch:  SVG('<path d="M6 3.4h9.2L19 7.2V20.6H6z"/><path d="M14.6 3.6v3.8H18.8"/><path d="M8.8 11.6h7M8.8 14.8h7M8.8 18h3.6"/>'),
   noteos:         SVG('<path d="M6.6 4.4A1.4 1.4 0 0 1 8 3h8a1.4 1.4 0 0 1 1.4 1.4V21l-5.4-3.1L6.6 21z"/><path d="M9.8 8h4.4"/>'),
-  github:         SVG('<path d="M12 .8C5.7.8.6 5.9.6 12.2c0 5.1 3.3 9.4 7.8 10.9.6.1.8-.2.8-.6v-2.1c-3.2.7-3.9-1.5-3.9-1.5-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.1.1 1.7 1.2 1.7 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.8 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.2 1.2.9-.3 1.9-.4 2.9-.4s2 .1 2.9.4c2.2-1.5 3.2-1.2 3.2-1.2.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.5-2.7 5.5-5.3 5.8.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6 4.6-1.5 7.8-5.8 7.8-10.9C23.4 5.9 18.3.8 12 .8z"/>', true)
 };
 const SYMFARBE = { auftragsbuch:'var(--amber)', stempeluhr:'var(--teal)', auftragsstatus:'var(--em-2)',
                    terminbuch:'var(--info)', rechnungsbuch:'var(--geld)',
-                   noteos:'var(--text-3)', github:'var(--text-2)' };
+                   noteos:'var(--text-3)' };
 
 /* ───────── Kacheln aufbauen ───────── */
 const grid = $('#grid');
@@ -765,7 +740,6 @@ APPS.forEach((app, i) => {
   el.style.animationDelay = (i*70)+'ms';
   // Animation danach entfernen: sonst entsteht ein Stapelkontext und der Zoom läge unter dem Abdunkler
   el.addEventListener('animationend', e => { if (e.target === el) { el.style.animation = 'none'; el.style.opacity = '1'; } });
-  const repoUrl = app.repo ? `https://github.com/${USER}/${app.repo}` : app.url;
   el.innerHTML = `
     <div class="tile-bg"></div>
     <div class="t-head">
@@ -779,11 +753,10 @@ APPS.forEach((app, i) => {
       </span>
       <button class="more" type="button" aria-expanded="false">…mehr</button>
     </div>
-    <span class="push">${app.type==='github' ? 'github.com/'+USER : ''}</span>
+    <span class="push"></span>
     <div class="t-more"><div>
       ${app.fluss ? `<div class="role" style="--rc:${app.rc || 'var(--text-3)'}">${esc(app.fluss)}</div>` : ''}
       <p class="desc">${esc(app.desc)}</p>
-      <div class="meta"><a href="${esc(repoUrl)}" target="_blank" rel="noopener">${app.repo ? 'Repo ↗' : 'Profil ↗'}</a></div>
     </div></div>`;
   grid.appendChild(el);
   const rahmen = document.createElement('div');
@@ -791,7 +764,7 @@ APPS.forEach((app, i) => {
   rahmen.innerHTML = '<div class="vp"></div><div class="veil"><span>' + esc(app.name) + ' wird geladen …</span></div>';
   document.body.appendChild(rahmen);
   const t = { app, i, el, shot:$('.shot',el), frame:rahmen, vp:$('.vp',rahmen), veil:$('.veil',rahmen),
-              state:$('.state',el), push:$('.push',el), loaded:false, repoUrl };
+              state:$('.state',el), push:$('.push',el), loaded:false };
   tiles.push(t); byId[app.id] = t;
 
   /* Der Knopf klappt den Text aus – und öffnet nicht das Werkzeug. */
@@ -824,7 +797,6 @@ function ensureLoaded(t){
   if (t.loaded) return;
   t.loaded = true;
   setState(t, 'loading', 'lädt');
-  if (t.app.type === 'github') { renderGitHub(t); return; }
   const f = document.createElement('iframe');
   f.title = t.app.name;
   f.tabIndex = -1;
@@ -1235,8 +1207,6 @@ function setBar(t){
   $('#barName').textContent = t.app.name;
   $('#barTag').textContent = t.app.tag;
   $('#openBtn').href = t.app.url;
-  const rb = $('#repoBtn');
-  if (t.app.repo) { rb.href = t.repoUrl; rb.style.display = ''; } else rb.style.display = 'none';
   document.title = t.app.name + ' · Kontor';
 }
 function focusApp(t, on){
@@ -1314,93 +1284,6 @@ addEventListener('popstate', () => {
   const id = location.hash.slice(1);
   if (byId[id]) open(id, { push:false }); else close();
 });
-
-/* ───────── GitHub ───────── */
-async function gh(path){
-  const key = 'wb-cockpit-gh:' + path;
-  try { const c = JSON.parse(store.get(key)); if (c && Date.now() - c.t < 10*60*1000) return c.d; } catch(e){}
-  const r = await fetch('https://api.github.com' + path, { headers:{ Accept:'application/vnd.github+json' } });
-  if (!r.ok) throw new Error('GitHub ' + r.status);
-  let d = await r.json();
-  if (Array.isArray(d)) d = d.map(x => ({ name:x.name, description:x.description, html_url:x.html_url, homepage:x.homepage,
-    has_pages:x.has_pages, language:x.language, stargazers_count:x.stargazers_count, pushed_at:x.pushed_at, fork:x.fork, archived:x.archived }));
-  else d = { login:d.login, name:d.name, bio:d.bio, avatar_url:d.avatar_url, html_url:d.html_url, public_repos:d.public_repos, followers:d.followers, created_at:d.created_at };
-  store.set(key, JSON.stringify({ t:Date.now(), d }));
-  return d;
-}
-const ghData = Promise.allSettled([gh('/users/'+USER), gh('/users/'+USER+'/repos?per_page=100&sort=pushed')]);
-
-ghData.then(([u, r]) => {
-  if (r.status !== 'fulfilled') return;
-  const repos = r.value;
-  tiles.forEach(t => {
-    if (!t.app.repo) return;
-    /* Werkzeuge, die ihren eigenen Stand melden, behalten ihn –
-       das Datum des letzten Pushes sagt dort weniger. */
-    if (standVon(t.app.id)) return;
-    const m = repos.find(x => x.name.toLowerCase() === t.app.repo.toLowerCase());
-    if (m && m.pushed_at) t.push.textContent = 'Push ' + rel(m.pushed_at);
-  });
-  const mine = repos.filter(x => !x.fork).sort((a,b) => new Date(b.pushed_at) - new Date(a.pushed_at));
-  const stL = $('#st-last');
-  if (mine[0] && stL) stL.innerHTML = `Letzter Push: <b>${esc(mine[0].name)}</b> ${esc(rel(mine[0].pushed_at))}`;
-}).catch(()=>{});
-
-function renderGitHub(t){
-  t.vp.innerHTML = `<div class="gh"><div class="gh-in"><div class="gh-note">Lade GitHub …</div></div></div>`;
-  ghData.then(([u, r]) => {
-    const user = u.status === 'fulfilled' ? u.value : { login:USER, name:'Maik Unverricht', avatar_url:`https://github.com/${USER}.png`, html_url:`https://github.com/${USER}` };
-    const repos = r.status === 'fulfilled'
-      ? r.value.filter(x => !x.fork).sort((a,b) => new Date(b.pushed_at) - new Date(a.pushed_at))
-      : APPS.filter(a => a.repo).map(a => ({ name:a.repo, description:a.desc, html_url:`https://github.com/${USER}/${a.repo}`, has_pages:true }));
-    const failed = u.status !== 'fulfilled' || r.status !== 'fulfilled';
-    const since = user.created_at ? new Date(user.created_at).getFullYear() : null;
-    const inCockpit = name => APPS.find(a => a.repo && a.repo.toLowerCase() === name.toLowerCase());
-    t.vp.innerHTML = `
-      <div class="gh"><div class="gh-in">
-        <div class="gh-head">
-          <img src="${esc(user.avatar_url)}" alt="" loading="lazy">
-          <div>
-            <div class="eyebrow">GitHub</div>
-            <h3>${esc(user.name || user.login)}</h3>
-            <p>@${esc(user.login)}${user.bio ? ' · ' + esc(user.bio) : ''}</p>
-          </div>
-          <a class="pill primary" href="${esc(user.html_url)}" target="_blank" rel="noopener">Profil öffnen ↗</a>
-        </div>
-        <div class="gh-stats">
-          <div class="gh-stat"><b>${user.public_repos ?? repos.length}</b><span>Repos</span></div>
-          ${user.followers != null ? `<div class="gh-stat"><b>${user.followers}</b><span>Follower</span></div>` : ''}
-          ${since ? `<div class="gh-stat"><b>${since}</b><span>Dabei seit</span></div>` : ''}
-          <div class="gh-stat"><b>${APPS.filter(a => a.repo).length}</b><span>Im Cockpit</span></div>
-        </div>
-        <div class="eyebrow">Repositories · zuletzt geändert zuerst</div>
-        <div class="gh-grid">
-          ${repos.map(x => {
-            const c = inCockpit(x.name);
-            const live = x.has_pages ? `https://${USER}.github.io/${x.name}/` : (x.homepage || '');
-            return `<div class="repo">
-              <h4>${esc(x.name)}${x.archived ? ' <span class="tag">archiviert</span>' : ''}</h4>
-              <p>${esc(x.description || 'Keine Beschreibung.')}</p>
-              <div class="r-meta">
-                ${x.language ? `<span><span class="lang"></span>${esc(x.language)}</span>` : ''}
-                ${x.stargazers_count ? `<span>★ ${x.stargazers_count}</span>` : ''}
-                ${x.pushed_at ? `<span>${esc(rel(x.pushed_at))}</span>` : ''}
-              </div>
-              <div class="r-links">
-                ${c ? `<button class="pill primary" type="button" data-goto="${c.id}">Im Cockpit</button>` : ''}
-                <a class="pill" href="${esc(x.html_url)}" target="_blank" rel="noopener">Code ↗</a>
-                ${live ? `<a class="pill" href="${esc(live)}" target="_blank" rel="noopener">Live ↗</a>` : ''}
-              </div>
-            </div>`;
-          }).join('')}
-        </div>
-        ${failed ? `<div class="gh-note">GitHub-API gerade nicht erreichbar (Limit: 60 Abrufe/Stunde) – zeige gespeicherte Übersicht.</div>` : ''}
-      </div></div>`;
-    t.vp.querySelectorAll('[data-goto]').forEach(b => b.addEventListener('click', () => { if (current) swap(byId[b.dataset.goto], true); }));
-    t.veil.classList.add('gone');
-    setState(t, failed ? 'slow' : 'live', failed ? 'offline' : 'api');
-  });
-}
 
 /* ───────── Start ───────── */
 measure();
