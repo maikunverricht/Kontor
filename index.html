@@ -387,6 +387,32 @@ html[data-theme="light"]{
 .offen button.spaet::before{background:var(--em-2,#E2725B)}
 .offen button.rot::before{background:var(--red-ink,#E8646E)}
 .offen b{font-weight:700;font-variation-settings:'wdth' 110}
+
+/* ═══ Eine Seite, kein Scrollen ═══
+   Seit 01.10.2026: die Überschrift wird zur Zeile, die Kacheln stehen am
+   Rechner 3 × 2 und am Telefon 2 × 3. Die Leitungen bleiben, wie sie sind. */
+.hero{padding:calc(80px + env(safe-area-inset-top)) 0 4px}
+h1{font-size:clamp(20px,2.6vw,28px);line-height:1.15;letter-spacing:-.03em;margin:0}
+.grid{padding-top:22px;padding-bottom:28px}
+@media (min-width:721px){ .grid{grid-template-columns:repeat(3,minmax(0,1fr))} }
+@media (max-width:720px){
+  .hero{padding-top:calc(74px + env(safe-area-inset-top))}
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:14px;row-gap:38px;padding:20px 22px 24px}
+  .tile{padding:10px 10px 9px}
+  .t-head{gap:8px}
+  .shot{width:34px;height:34px;border-radius:11px}
+  .shot svg{width:18px;height:18px}
+  .t-head h2{font-size:13.5px;letter-spacing:-.02em;white-space:normal;line-height:1.15;overflow:visible}
+  .t-idx{font-size:0}
+  .t-idx b{font-size:9.5px;letter-spacing:.1em}
+  .more{position:absolute;top:-10px;right:-8px;background:var(--glass-2);width:24px;height:24px;padding:0;font-size:0;display:grid;place-items:center}
+  .more::after{content:'⋯';font-size:14px;line-height:1}
+  .offen button{display:block;height:auto;min-height:30px;padding:6px 12px;text-align:left;line-height:1.45}
+  .offen button::before{display:inline-block;margin:0 8px 1px 0;vertical-align:middle}
+  .tile .push{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-size:10.5px;margin-top:6px}
+  .tile.offen .t-more{grid-column:1/-1}
+  footer{padding-top:14px}
+}
 </style>
 </head>
 <body>
@@ -408,7 +434,7 @@ html[data-theme="light"]{
 
 <main>
   <section class="hero">
-    <h1><span>Der ganze Ablauf</span><br><em>an einem Ort.</em></h1>
+    <h1><span>Der ganze Ablauf</span> <em>an einem Ort.</em></h1>
   </section>
   <section class="grid" id="grid" aria-label="Werkzeuge">
     <div class="offen" id="offen" aria-live="polite"></div>
@@ -850,7 +876,7 @@ APPS.forEach((app, i) => {
       </span>
       <span class="t-nm">
         <span class="t-idx">${app.schritt ? `<b>${pad2(app.schritt)}</b> · ` : ''}${esc(app.tag)}</span>
-        <h2>${esc(app.name)}</h2>
+        <h2>${esc(app.name).replace(/^(Auftrags|Rechnungs|Termin|Stempel)/,'$1&shy;')}</h2>
       </span>
       <button class="more" type="button" aria-expanded="false">…mehr</button>
     </div>
