@@ -583,7 +583,7 @@ const APPS = [
     desc:'Auftraggeber, Aufträge und Konditionen an einem Ort – alle anderen bedienen sich hier.' },
   { id:'stempeluhr',     name:'Stempeluhr',     tag:'Zeiterfassung',  gruppe:'prozess', schritt:2,
     url:'https://maikunverricht.github.io/Stempeluhr/',     repo:'Stempeluhr',
-    fluss:'führt Zeitbuchungen · liest Stammdaten', rc:'var(--teal)',
+    fluss:'führt Zeitbuchungen · liest Stammdaten und Abgerechnetes · meldet Stunden und Stundenkonto', rc:'var(--teal)',
     desc:'Arbeitszeiten stempeln, Kunden und Projekten zuordnen, Auswertungen erzeugen.' },
   { id:'auftragsstatus', name:'Auftragsstatus', tag:'Fortschritt',    gruppe:'prozess', schritt:3,
     url:'https://maikunverricht.github.io/Auftragsstatus/', repo:'Auftragsstatus',
@@ -967,6 +967,8 @@ function hatInhalt(art){
   if (!q) return true;
   const d = WB.lesen(q.ls);
   if (!d) return false;
+  /* Der Prozessschritt wandert nur mit gesetztem Haken zurück. */
+  if (art === 'opt' && d.spiegelStatus !== true) return false;
   const w = q.feld ? d[q.feld] : d;
   if (!w) return false;
   if (Array.isArray(w)) return w.length > 0;
@@ -989,12 +991,15 @@ const FLUSS = [
   { von:'auftragsstatus', nach:'terminbuch',     art:'frist', seite: 1, was:'Fristen und Meilensteine' },
   { von:'auftragsbuch',   nach:'rechnungsbuch',  art:'stamm', seite: 1, was:'Stammdaten' },
   { von:'stempeluhr',     nach:'rechnungsbuch',  art:'zeit',  seite: 1, was:'Zeitbuchungen' },
-  { von:'stempeluhr',     nach:'auftragsbuch',   art:'summe', seite:-1, was:'Stunden je Auftrag' },
+  { von:'stempeluhr',     nach:'auftragsbuch',   art:'summe', seite:-1, was:'Stunden je Auftrag · Stundenkonto' },
   { von:'auftragsstatus', nach:'auftragsbuch',   art:'opt',   seite:-1, was:'Prozessschritt (nur mit Haken)' },
   { von:'noteos',         nach:'auftragsbuch',   art:'notiz', seite:-1, was:'Notizen je Auftraggeber' },
-  { von:'rechnungsbuch',  nach:'auftragsbuch',   art:'geld',  seite:-1, was:'Abgerechnet je Auftrag' }
+  { von:'rechnungsbuch',  nach:'auftragsbuch',   art:'geld',  seite:-1, was:'Abgerechnet je Auftrag' },
+  /* Seit 20.09.2026 im Datenfluss beschrieben, im Bild bis 01.10.2026 vergessen:
+     die Stempeluhr liest, welche Buchung schon auf einer Rechnung steht. */
+  { von:'rechnungsbuch',  nach:'stempeluhr',     art:'abger', seite:-1, was:'Abgerechnete Buchungen' }
 ];
-const BUSFARBE = { stamm:'var(--amber)', kat:'var(--amber)', zeit:'var(--teal)', summe:'var(--teal)',
+const BUSFARBE = { abger:'var(--geld)', stamm:'var(--amber)', kat:'var(--amber)', zeit:'var(--teal)', summe:'var(--teal)',
                    frist:'var(--em-2)', geld:'var(--geld)', opt:'var(--text-3)', notiz:'var(--text-3)' };
 /* Durchgezogen heißt: verknüpft über IDs. Gepunktet: wandert nur mit
    gesetztem Haken zurück.
@@ -1008,8 +1013,9 @@ const BUSSTRICH = { opt:'haken' };
 const QUELLE = {
   stamm: { ls:'wb-auftragsbuch-data',   idb:'wb-auftragsbuch',   datei:'auftragsbuch.json',   feld:null },
   kat:   { ls:'wb-auftragsbuch-data',   idb:'wb-auftragsbuch',   datei:'auftragsbuch.json',   feld:'auftraggeber' },
-  zeit:  { ls:'wb-stempeluhr-summe',    idb:null,                datei:'stempeluhr.json',     feld:null },
-  summe: { ls:'wb-stempeluhr-summe',    idb:null,                datei:'stempeluhr.json',     feld:'jeAuftrag' },
+  /* Auftragsstatus und Rechnungsbuch lesen die Buchungen selbst, nicht die Summe. */
+  zeit:  { ls:'stempeluhr_entries_v2',  idb:null,                datei:'stempeluhr-buchungen.json', feld:null },
+  summe: { ls:'wb-stempeluhr-summe',    idb:null,                datei:'stempeluhr.json',     feld:null },
   frist: { ls:'wb-auftragsstatus-data', idb:'wb-auftragsstatus', datei:'auftragsstatus.json', feld:'inhalte' },
   opt:   { ls:'wb-auftragsstatus-data', idb:'wb-auftragsstatus', datei:'auftragsstatus.json', feld:'status' },
   /* Ganze Lesekopie: sie trägt beide Zähler – `jeAuftraggeber` über die ID
@@ -1017,7 +1023,8 @@ const QUELLE = {
   notiz: { ls:'wb-noteos-stand',        idb:null,                datei:'noteos-stand.json',   feld:null },
   /* Was je Auftrag gestellt wurde – das Auftragsbuch rechnet daraus
      den tatsächlichen Stundensatz. Gelesen wird die ganze Kopie. */
-  geld:  { ls:'wb-rechnungsbuch-data', idb:'wb-rechnungsbuch', datei:'rechnungsbuch.json', feld:'rechnungen' }
+  geld:  { ls:'wb-rechnungsbuch-data', idb:'wb-rechnungsbuch', datei:'rechnungsbuch.json', feld:'rechnungen' },
+  abger: { ls:'wb-rechnungsbuch-data', idb:'wb-rechnungsbuch', datei:'rechnungsbuch.json', feld:'abgerechnet' }
 };
 function kennzahlen(art, d){
   const z = [];
@@ -1052,12 +1059,26 @@ function kennzahlen(art, d){
     z.push(['Fristen', fr]);
     z.push(['davon überfällig', spaet]);
     z.push(['Meilensteine', ms]);
+  } else if (art === 'geld') {
+    const r = Array.isArray(d.rechnungen) ? d.rechnungen : [];
+    z.push(['Rechnungen', r.length]);
+    z.push(['festgeschrieben', r.filter(x => x && x.festgeschrieben).length]);
+    z.push(['mit Auftrag', r.filter(x => x && x.aufId).length]);
+  } else if (art === 'abger') {
+    const k = d.abgerechnet && typeof d.abgerechnet === 'object' ? d.abgerechnet : {};
+    z.push(['abgerechnete Buchungen', Object.keys(k).length]);
+    z.push(['auf Rechnungen', new Set(Object.values(k)).size]);
+  } else if (art === 'zeit' && Array.isArray(d)) {
+    z.push(['Buchungen', d.length]);
+    z.push(['Stunden', nf1.format(d.reduce((s, e) => s + (+e.dur || 0), 0) / 3600)]);
+    z.push(['mit Auftrag', d.filter(e => e && e.aufId).length]);
   } else if (art === 'zeit' || art === 'summe') {
     if (d.gesamt) {
       z.push(['Stunden', nf1.format((d.gesamt.sec || 0)/3600)]);
       z.push(['Buchungen', d.gesamt.buchungen || 0]);
     }
     if (art === 'summe' && d.jeAuftrag) z.push(['Aufträge mit Zeit', Object.keys(d.jeAuftrag).length]);
+    if (art === 'summe' && d.konto) z.push(['Stundenkonten', Object.keys(d.konto).length]);
     if (d.laufend && d.laufend.aktiv) z.push(['Uhr', d.laufend.pausiert ? 'pausiert' : 'läuft']);
   } else {
     z.push(['Prozessschritte', Object.keys(d.status || {}).length]);
