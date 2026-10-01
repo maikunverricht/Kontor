@@ -385,6 +385,7 @@ html[data-theme="light"]{
 .offen button:hover{border-color:var(--amber);color:var(--text)}
 .offen button::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--amber);flex:none}
 .offen button.spaet::before{background:var(--em-2,#E2725B)}
+.offen button.rot::before{background:var(--red-ink,#E8646E)}
 .offen b{font-weight:700;font-variation-settings:'wdth' 110}
 </style>
 </head>
@@ -732,6 +733,22 @@ function offeneWelt(){
              text:'<b>' + nf1.format(z.offen.sec/3600) + ' h</b> nicht abgerechnet' });
   }
 
+  /* Stundenkonto bei Auszahlungsgrenze: je Auftraggeber mit Guthaben ein
+     Posten. Rot, sobald das älteste Guthaben zehn Monate alt ist. */
+  if (z && z.konto && typeof z.konto === 'object') {
+    const ab = WB.lesen(WB_AB_LS);
+    const namen = {};
+    (ab && Array.isArray(ab.auftraggeber) ? ab.auftraggeber : []).forEach(x => { if (x) namen[x.id] = x.name; });
+    Object.keys(z.konto).forEach(id => {
+      const k = z.konto[id];
+      if (!k || !(k.h > 0.005)) return;
+      const bis = k.ausgleichBis ? String(k.ausgleichBis).split('-') : null;
+      p.push({ zu:'stempeluhr', spaet: (k.alter || 0) >= 10, rot: (k.alter || 0) >= 10,
+        text:'Stundenkonto ' + esc(namen[id] || 'Auftraggeber') + ' <b>+' + nf1.format(k.h) + ' h</b> · '
+           + nfE.format(k.eur || 0) + (bis ? ' · bis ' + bis[1] + '/' + bis[0] : '') });
+    });
+  }
+
   const r = WB.lesen(WB_RECH_LS);
   if (r && Array.isArray(r.rechnungen)) {
     const heute = isoTag(Date.now());
@@ -769,7 +786,7 @@ function offeneWelt(){
   const el = document.getElementById('offen');
   if (!el) return;
   el.innerHTML = p.map(x =>
-    '<button type="button" class="' + (x.spaet ? 'spaet' : '') + '" data-zu="' + x.zu + '">'
+    '<button type="button" class="' + (x.spaet ? 'spaet' : '') + (x.rot ? ' rot' : '') + '" data-zu="' + x.zu + '">'
     + x.text + '</button>').join('');
   el.querySelectorAll('[data-zu]').forEach(b =>
     b.addEventListener('click', () => open(b.dataset.zu)));
