@@ -1407,6 +1407,8 @@ function setBar(t){
   $('#barName').textContent = t.app.name;
   $('#barTag').textContent = t.app.tag;
   $('#openBtn').href = t.app.url;
+  const einzeln = (t.liste || tiles).length < 2;
+  ['#prevBtn','#nextBtn'].forEach(q => { $(q).style.display = einzeln ? 'none' : ''; });
   document.title = t.app.name + ' · Kontor';
 }
 function focusApp(t, on){
@@ -1465,7 +1467,9 @@ function requestClose(){
 }
 function step(dir){
   if (!current || busy) return;
-  const n = tiles[(current.i + dir + tiles.length) % tiles.length];
+  const L = current.liste || tiles;
+  if (L.length < 2) return;
+  const n = L[(current.i + dir + L.length) % L.length];
   swap(n, true);
 }
 
@@ -1487,34 +1491,49 @@ addEventListener('popstate', () => {
 
 /* ───────── Produktivansicht ─────────
    Hier kommen die Werkzeuge der eigentlichen Arbeit hinein. Ohne url
-   bleibt die Kachel ein Platzhalter; mit url öffnet sie das Werkzeug
-   in einem neuen Tab. */
+   bleibt die Kachel ein Platzhalter; mit id und url geht das Werkzeug
+   wie im Kontor im Vollbild auf. Die Pfeile blättern nur innerhalb
+   dieser Ansicht. */
 const PRODUKTIV = [
-  { name:'Werkzeug 1', tag:'folgt' },
-  { name:'Werkzeug 2', tag:'folgt' },
-  { name:'Werkzeug 3', tag:'folgt' },
-  { name:'Werkzeug 4', tag:'folgt' },
-  { name:'Werkzeug 5', tag:'folgt' },
-  { name:'Werkzeug 6', tag:'folgt' }
+  { id:'schaltplan', name:'Schaltplan', tag:'Schnittstellen', url:'https://maikunverricht.github.io/Schaltplan/',
+    desc:'Imports und Exports aus C- und PaVaSt-Dateien abgleichen, Aufrufketten als Graph.',
+    zeichen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="6" height="6" rx="1.5"/><rect x="15" y="15" width="6" height="6" rx="1.5"/><rect x="15" y="3" width="6" height="6" rx="1.5"/><path d="M9 6h6M18 9v6M6 9v6a3 3 0 0 0 3 3h6"/></svg>' },
+  { name:'Frei', tag:'folgt' },
+  { name:'Frei', tag:'folgt' },
+  { name:'Frei', tag:'folgt' },
+  { name:'Frei', tag:'folgt' },
+  { name:'Frei', tag:'folgt' }
 ];
 const PLUS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>';
 const gridProd = $('#gridProd');
+const prodTiles = [];
 PRODUKTIV.forEach((w, i) => {
-  const el = document.createElement(w.url ? 'a' : 'article');
-  el.className = 'tile' + (w.url ? '' : ' platz');
-  if (w.url) { el.href = w.url; el.target = '_blank'; el.rel = 'noopener'; }
+  const echt = !!(w.id && w.url);
+  const el = document.createElement('article');
+  el.className = 'tile' + (echt ? '' : ' platz');
   el.style.animationDelay = (i*70)+'ms';
+  el.addEventListener('animationend', e => { if (e.target === el) { el.style.animation = 'none'; el.style.opacity = '1'; } });
   el.innerHTML = `
     <div class="tile-bg"></div>
     <div class="t-head">
-      <span class="shot" aria-hidden="true">${PLUS}</span>
+      <span class="shot"${echt ? ` role="button" tabindex="0" aria-label="${esc(w.name)} öffnen" style="color:var(--teal)"` : ' aria-hidden="true"'}>${w.zeichen || PLUS}${echt ? '<span class="state" data-s="bereit"><span class="dot"></span><span class="s-txt">bereit</span></span>' : ''}</span>
       <span class="t-nm">
         <span class="t-idx"><b>${pad2(i+1)}</b> · ${esc(w.tag || '')}</span>
         <h2>${esc(w.name)}</h2>
       </span>
     </div>
-    <span class="push">${w.desc ? esc(w.desc) : (w.url ? '' : 'Platz für ein Werkzeug')}</span>`;
+    <span class="push">${w.desc ? esc(w.desc) : (echt ? '' : 'Platz für ein Werkzeug')}</span>`;
   gridProd.appendChild(el);
+  if (!echt) return;
+  const rahmen = document.createElement('div');
+  rahmen.className = 'frame';
+  rahmen.innerHTML = '<div class="vp"></div><div class="veil"><span>' + esc(w.name) + ' wird geladen …</span></div>';
+  document.body.appendChild(rahmen);
+  const t = { app:w, i:prodTiles.length, el, shot:$('.shot',el), frame:rahmen, vp:$('.vp',rahmen), veil:$('.veil',rahmen),
+              state:$('.state',el), push:$('.push',el), loaded:false, liste:prodTiles };
+  prodTiles.push(t); byId[w.id] = t;
+  el.addEventListener('click', () => { if (!t.frame.classList.contains('live')) open(w.id); });
+  t.shot.addEventListener('keydown', e => { if ((e.key==='Enter'||e.key===' ') && !current) { e.preventDefault(); open(w.id); } });
 });
 
 const slidesEl = $('#slides');
