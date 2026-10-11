@@ -414,17 +414,67 @@ h1{font-size:clamp(20px,2.6vw,28px);line-height:1.15;letter-spacing:-.03em;margi
   footer{padding-top:14px}
 }
 
-/* ═══ Zwei Ansichten zum Wischen ═══
-   Seit 10.10.2026: links der Kontor (alles Verwaltende), rechts die
-   Produktivansicht. Seitlich wischen oder die Punkte antippen. */
+/* ═══ Drei Ansichten zum Wischen ═══
+   Seit 10.10.2026: links der Kontor (alles Verwaltende), dann die
+   Produktivansicht, seit 11.10.2026 rechts daneben das Büro. Seitlich wischen oder die Punkte antippen. */
 .slides{display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;
   overscroll-behavior-x:contain;margin:0 calc(var(--pad) * -1);-webkit-overflow-scrolling:touch}
 .slides::-webkit-scrollbar{display:none}
 .slide{flex:0 0 100%;min-width:0;scroll-snap-align:start;scroll-snap-stop:always;padding:0 var(--pad)}
-.dots{display:flex;justify-content:center;gap:8px;padding:2px 0 6px}
-.dots button{width:8px;height:8px;padding:0;border:0;border-radius:100px;background:var(--text-3);opacity:.45;cursor:pointer;
-  transition:width var(--t-s),opacity var(--t-s),background var(--t-s)}
-.dots button[aria-current="true"]{width:22px;opacity:1;background:var(--amber)}
+
+/* ═══ Meniskus-Dock (aus der Werkbank übernommen) ═══
+   Die Leiste schmilzt um die ziehbare Kugel. Tippen oder Kugel ziehen
+   wechselt die Ansicht; Wischen in den Ansichten zieht die Kugel mit. */
+:root{--dacc:#F2B33D;--plate-1:#1B2633;--plate-2:#0B1016;--plate-rim:#FFFFFF}
+html[data-theme="light"]{--dacc:#E0A21F;--plate-1:#FFFFFF;--plate-2:#E8EDF5;--plate-rim:#FFFFFF}
+footer{padding-bottom:calc(110px + env(safe-area-inset-bottom))!important}
+.dock{position:fixed;z-index:20;left:50%;bottom:calc(16px + env(safe-area-inset-bottom));transform:translateX(-50%);
+  touch-action:none;filter:drop-shadow(var(--shadow-lg));transition:opacity .35s,transform .35s}
+body.zoomed .dock{opacity:0;pointer-events:none;transform:translate(-50%,24px)}
+.dock-wash{position:absolute;width:300px;height:190px;left:0;top:0;pointer-events:none;
+  transform:translate(-50%,-14%);opacity:.3;transition:opacity .4s;
+  background:radial-gradient(circle,var(--dacc) 0%,transparent 66%);filter:blur(14px)}
+.dock-blur{position:absolute;inset:0;-webkit-backdrop-filter:blur(16px) saturate(150%);
+  backdrop-filter:blur(16px) saturate(150%);pointer-events:none}
+.dock-skin{position:absolute;inset:0;overflow:visible;pointer-events:none}
+.dock-plate{fill:url(#plateFill);stroke:url(#plateRim);stroke-width:1}
+#plateFill stop:first-child{stop-color:var(--plate-1)}
+#plateFill stop:last-child{stop-color:var(--plate-2)}
+#plateRim stop{stop-color:var(--plate-rim)}
+.dock-row{position:absolute;display:flex;align-items:center}
+.dock-btn{height:100%;display:grid;place-items:center;background:none;border:0;padding:0;cursor:pointer;
+  color:var(--text-2);transition:color .25s,opacity .3s,transform .3s}
+.dock-btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.dock-btn:hover{color:var(--text)}
+.dock-btn.is-active{opacity:0;transform:scale(.6);pointer-events:none}
+.dock-btn:focus-visible{outline:2px solid var(--dacc);outline-offset:-4px;border-radius:12px}
+.dock-bead{position:absolute;left:0;top:0;border-radius:50%;display:grid;place-items:center;
+  color:#0A0F16;cursor:grab;touch-action:none;
+  background:radial-gradient(circle at 36% 26%,#fff6 0%,#fff0 46%),var(--dacc);
+  box-shadow:0 0 26px -2px var(--dacc),0 6px 14px rgba(0,0,0,.28),inset 0 -6px 14px rgba(0,0,0,.18);
+  transition:background .45s,box-shadow .45s}
+.dock-bead:active{cursor:grabbing}
+.dock-bead:focus-visible{outline:2px solid var(--dacc);outline-offset:3px}
+.dock-bead svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.dock-name{position:absolute;left:0;font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--dacc);white-space:nowrap;transform:translateX(-50%);
+  pointer-events:none;transition:color .45s}
+.dock-hint{position:absolute;left:50%;top:-22px;margin:0;transform:translateX(-50%);white-space:nowrap;
+  transition:opacity .5s;font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--text-3);opacity:.7;pointer-events:none}
+html[data-theme="light"] .dock-name{color:var(--text-2)}
+html[data-theme="light"] .dock-bead{color:#11202B;
+  box-shadow:0 0 22px -4px var(--dacc),0 8px 18px rgba(20,36,60,.22),inset 0 -6px 14px rgba(0,0,0,.10)}
+html[data-theme="light"] .dock-wash{opacity:.22}
+html[data-theme="light"] .dock-blur{-webkit-backdrop-filter:blur(18px) saturate(1.6);backdrop-filter:blur(18px) saturate(1.6)}
+.wipe{position:fixed;left:0;top:0;width:520px;height:520px;border-radius:50%;z-index:18;pointer-events:none;
+  transform:translate(-50%,-50%) scale(.2);opacity:0;
+  background:radial-gradient(circle,var(--dacc) 0%,transparent 62%)}
+.wipe.go{animation:wipe .9s cubic-bezier(.2,.8,.3,1) both}
+html[data-theme="light"] .wipe{mix-blend-mode:multiply}
+@keyframes wipe{0%{opacity:0;transform:translate(-50%,-50%) scale(.15)}
+                35%{opacity:.16}
+                100%{opacity:0;transform:translate(-50%,-50%) scale(3.4)}}
 .tile.platz{cursor:default}
 .tile.platz .tile-bg{border-style:dashed;background:color-mix(in srgb,var(--glass) 55%,transparent);box-shadow:none}
 .tile.platz .shot{border:1px dashed var(--line);background:transparent;color:var(--text-3)}
@@ -465,12 +515,45 @@ a.tile{color:inherit;text-decoration:none}
       </section>
       <section class="grid" id="gridProd" aria-label="Produktive Werkzeuge"></section>
     </div>
+    <div class="slide" id="s-buero" aria-label="Büro">
+      <section class="hero">
+        <h1><span>Alles rund ums</span> <em>Büro.</em></h1>
+      </section>
+      <section class="grid" id="gridBuero" aria-label="Büro-Werkzeuge"></section>
+    </div>
   </div>
-  <nav class="dots" id="dots" aria-label="Ansicht wählen">
-    <button type="button" data-s="0" aria-label="Kontor" aria-current="true"></button>
-    <button type="button" data-s="1" aria-label="Produktiv" aria-current="false"></button>
-  </nav>
 </main>
+
+<nav class="dock" id="dock" aria-label="Ansicht wählen">
+  <div class="dock-wash" id="wash" aria-hidden="true"></div>
+  <div class="dock-blur" id="dblur" aria-hidden="true"></div>
+  <svg class="dock-skin" id="skin" aria-hidden="true">
+    <defs>
+      <linearGradient id="plateFill" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#1B2633" stop-opacity=".88"/>
+        <stop offset="1" stop-color="#0B1016" stop-opacity=".92"/>
+      </linearGradient>
+      <linearGradient id="plateRim" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#FFFFFF" stop-opacity=".26"/>
+        <stop offset=".45" stop-color="#FFFFFF" stop-opacity=".07"/>
+        <stop offset="1" stop-color="#FFFFFF" stop-opacity=".03"/>
+      </linearGradient>
+    </defs>
+    <path class="dock-plate" id="plate" d=""/>
+  </svg>
+  <div class="dock-row" id="drow">
+    <button class="dock-btn is-active" type="button" data-label="Kontor" data-acc="#F2B33D" data-acc-hell="#E0A21F" aria-label="Kontor">
+      <svg viewBox="0 0 24 24"><path d="M4 20V8.5L12 4l8 4.5V20"/><path d="M9 20v-6h6v6M3 20h18"/></svg></button>
+    <button class="dock-btn" type="button" data-label="Produktiv" data-acc="#63D9C4" data-acc-hell="#2FA894" aria-label="Produktiv">
+      <svg viewBox="0 0 24 24"><path d="M14.7 6.3a3.7 3.7 0 0 0 4.9 4.9l-8 8a2.3 2.3 0 0 1-3.3-3.3z"/><path d="M14.7 6.3 17 4"/></svg></button>
+    <button class="dock-btn" type="button" data-label="Büro" data-acc="#8FB8E8" data-acc-hell="#3F6FCB" aria-label="Büro">
+      <svg viewBox="0 0 24 24"><rect x="3.5" y="8.5" width="17" height="11" rx="2"/><path d="M8.5 8.5V6.2a1.7 1.7 0 0 1 1.7-1.7h3.6a1.7 1.7 0 0 1 1.7 1.7v2.3M3.5 13h17"/></svg></button>
+  </div>
+  <div class="dock-name" id="dockName">Kontor</div>
+  <div class="dock-bead" id="bead" role="slider" tabindex="0" aria-label="Ansicht, mit den Pfeiltasten wechseln"
+       aria-valuemin="1" aria-valuemax="3" aria-valuenow="1" aria-valuetext="Kontor"></div>
+  <p class="dock-hint" id="dhint">Tippen – oder die Kugel ziehen</p>
+</nav>
 
 <footer>
   <span>© <span id="yr"></span> Maik Unverricht</span>
@@ -1498,16 +1581,29 @@ const PRODUKTIV = [
   { id:'schaltplan', name:'Schaltplan', tag:'Schnittstellen', url:'https://maikunverricht.github.io/Schaltplan/',
     desc:'Imports und Exports aus C- und PaVaSt-Dateien abgleichen, Aufrufketten als Graph.',
     zeichen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="6" height="6" rx="1.5"/><rect x="15" y="15" width="6" height="6" rx="1.5"/><rect x="15" y="3" width="6" height="6" rx="1.5"/><path d="M9 6h6M18 9v6M6 9v6a3 3 0 0 0 3 3h6"/></svg>' },
-  { name:'Frei', tag:'folgt' },
-  { name:'Frei', tag:'folgt' },
-  { name:'Frei', tag:'folgt' },
+  { id:'codecompare', name:'CodeCompare', tag:'Code-Vergleich', url:'https://maikunverricht.github.io/CodeCompare/',
+    desc:'Prüft, ob Änderungen die Funktion unverändert lassen – Systemkonstanten aufgelöst, Varianten verglichen.',
+    zeichen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="7" height="16" rx="1.5"/><rect x="14" y="4" width="7" height="16" rx="1.5"/><path d="M5.5 8h2M5.5 11h2M16.5 8h2M16.5 11h2M16.5 14h2"/></svg>' },
+  { id:'kapazitaetenplaner', name:'KapazitätenPlaner', tag:'Kapazität', url:'https://maikunverricht.github.io/KapazitaetenPlaner/',
+    desc:'Kapazitäten planen und gegen den Bedarf stellen.',
+    zeichen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>' },
+  { id:'ideahub', name:'IdeaHub', tag:'Ideen', url:'https://maikunverricht.github.io/IdeaHub/',
+    desc:'Ideen sammeln und ordnen – als Karte oder als Baum.',
+    zeichen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1 2V16h5.2v-.2c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/></svg>' },
   { name:'Frei', tag:'folgt' },
   { name:'Frei', tag:'folgt' }
 ];
 const PLUS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>';
-const gridProd = $('#gridProd');
+const BUERO = [
+  { id:'belegungsplan', name:'Belegungsplan', tag:'Arbeitsplätze', url:'https://maikunverricht.github.io/Belegungsplan/',
+    desc:'Belegte und reservierte Arbeitsplätze mit Name und Team – Export als JSON oder CSV.',
+    zeichen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 12h18M12 3v18"/><circle cx="7.5" cy="7.5" r="1.4" fill="currentColor"/><circle cx="16.5" cy="16.5" r="1.4" fill="currentColor"/></svg>' },
+  { name:'Frei', tag:'folgt' },
+  { name:'Frei', tag:'folgt' }
+];
+function ansichtBauen(LISTE, gridEl){
 const prodTiles = [];
-PRODUKTIV.forEach((w, i) => {
+LISTE.forEach((w, i) => {
   const echt = !!(w.id && w.url);
   const el = document.createElement('article');
   el.className = 'tile' + (echt ? '' : ' platz');
@@ -1519,11 +1615,11 @@ PRODUKTIV.forEach((w, i) => {
       <span class="shot"${echt ? ` role="button" tabindex="0" aria-label="${esc(w.name)} öffnen" style="color:var(--teal)"` : ' aria-hidden="true"'}>${w.zeichen || PLUS}${echt ? '<span class="state" data-s="bereit"><span class="dot"></span><span class="s-txt">bereit</span></span>' : ''}</span>
       <span class="t-nm">
         <span class="t-idx"><b>${pad2(i+1)}</b> · ${esc(w.tag || '')}</span>
-        <h2>${esc(w.name)}</h2>
+        <h2>${esc(w.name).replace(/^(Code|Kapazitäten|Belegungs)/,'$1&shy;')}</h2>
       </span>
     </div>
     <span class="push">${w.desc ? esc(w.desc) : (echt ? '' : 'Platz für ein Werkzeug')}</span>`;
-  gridProd.appendChild(el);
+  gridEl.appendChild(el);
   if (!echt) return;
   const rahmen = document.createElement('div');
   rahmen.className = 'frame';
@@ -1535,28 +1631,197 @@ PRODUKTIV.forEach((w, i) => {
   el.addEventListener('click', () => { if (!t.frame.classList.contains('live')) open(w.id); });
   t.shot.addEventListener('keydown', e => { if ((e.key==='Enter'||e.key===' ') && !current) { e.preventDefault(); open(w.id); } });
 });
+}
+ansichtBauen(PRODUKTIV, $('#gridProd'));
+ansichtBauen(BUERO, $('#gridBuero'));
 
 const slidesEl = $('#slides');
-const dotBtns = [...document.querySelectorAll('#dots button')];
 const SLIDE_LS = 'wb-kontor-ansicht';
 function slideIdx(){ return Math.round(slidesEl.scrollLeft / Math.max(1, slidesEl.clientWidth)); }
-function dotsSetzen(){
-  const k = slideIdx();
-  dotBtns.forEach((b, i) => b.setAttribute('aria-current', String(i === k)));
-  try { localStorage.setItem(SLIDE_LS, String(k)); } catch (e) {}
-}
 function zuSlide(k, glatt = true){
   slidesEl.scrollTo({ left: k * slidesEl.clientWidth, behavior: glatt && !reduce ? 'smooth' : 'auto' });
 }
-dotBtns.forEach(b => b.addEventListener('click', () => zuSlide(+b.dataset.s)));
-let slideT;
-slidesEl.addEventListener('scroll', () => { clearTimeout(slideT); slideT = setTimeout(dotsSetzen, 80); }, { passive:true });
-addEventListener('resize', () => zuSlide(+(dotBtns.findIndex(b => b.getAttribute('aria-current') === 'true')), false));
+
+/* ───────── Meniskus-Dock ─────────
+   Übernommen aus der Werkbank. Die Leiste ist ein gerechneter Pfad,
+   der um die Kugel herum schmilzt; die Kugel hängt an einer Feder,
+   ihr Tempo neigt die Schultern der Schmelze nach hinten. */
+const DOCK = {
+  schmalAb:620, feldBreit:52, feldSchmal:44, randBreit:52, randSchmal:30,
+  eckradius:22, eckradiusSchmal:18, hoehe:62, hoeheSchmal:54,
+  kugel:25, kugelSchmal:20, kugelTiefe:12, kugelTiefeSchmal:10, kugelLuft:7, kugelLuftSchmal:6,
+  reichweite:78, reichweiteSchmal:58,
+  federHaerte:210, federDaempfung:28, federRuheWeg:0.15, federRuheTempo:0.60,
+  neigungBei:900, neigungHub:0.95, neigungZug:0.22, neigungSeite:0.38
+};
+const Dock = (function(){
+  const K = DOCK;
+  const dock=$('#dock'), row=$('#drow'), skin=$('#skin'), plate=$('#plate'),
+        blur=$('#dblur'), wash=$('#wash'), bead=$('#bead'), nameEl=$('#dockName'), hint=$('#dhint');
+  const btns=[...row.querySelectorAll('.dock-btn')];
+  const G={}, centers=[];
+  let active=0, x=0, vx=0, ziel=0, zieht=false, raf=null, last=0;
+  const kannSchneiden = window.CSS && CSS.supports && CSS.supports('clip-path','path("M0 0Z")');
+  if (!kannSchneiden) blur.style.display='none';
+
+  function masse(){
+    const schmal = innerWidth < K.schmalAb;
+    G.item=schmal?K.feldSchmal:K.feldBreit; G.pad=schmal?K.randSchmal:K.randBreit;
+    G.R=schmal?K.eckradiusSchmal:K.eckradius;
+    G.rb=schmal?K.kugelSchmal:K.kugel; G.h=schmal?K.kugelTiefeSchmal:K.kugelTiefe;
+    G.rs=G.rb+(schmal?K.kugelLuftSchmal:K.kugelLuft);
+    G.xi=Math.sqrt(G.rs*G.rs-G.h*G.h);
+    G.H=schmal?K.hoeheSchmal:K.hoehe; G.top=G.rb+G.h+9;
+    G.reach=schmal?K.reichweiteSchmal:K.reichweite;
+    G.W=btns.length*G.item+2*G.pad; G.Ht=G.H+G.top;
+  }
+  function aufbauen(){
+    masse();
+    dock.style.width=G.W+'px'; dock.style.height=G.Ht+'px';
+    skin.setAttribute('viewBox','0 0 '+G.W+' '+G.Ht);
+    skin.setAttribute('width',G.W); skin.setAttribute('height',G.Ht);
+    row.style.top=G.top+'px'; row.style.left=G.pad+'px';
+    row.style.height=G.H+'px'; row.style.width=(btns.length*G.item)+'px';
+    btns.forEach((b,i) => { b.style.width=G.item+'px'; centers[i]=G.pad+G.item*i+G.item/2; });
+    bead.style.width=bead.style.height=(G.rb*2)+'px';
+    nameEl.style.top=(G.top+G.H-17)+'px';
+    x=ziel=centers[active]; vx=0;
+    zeichnen();
+  }
+  function pfad(cx, tempo){
+    const t=G.top;
+    const q=Math.max(-1,Math.min(1,tempo/K.neigungBei)), mag=Math.abs(q);
+    const hub=G.rb*K.neigungHub*(1+K.neigungZug*mag);
+    const rL=G.reach*(1+.06*mag+K.neigungSeite*q), rR=G.reach*(1+.06*mag-K.neigungSeite*q);
+    const xl=cx-G.xi, xr=cx+G.xi;
+    const x0=Math.min(Math.max(G.R,cx-rL), xl-2);
+    const x1=Math.max(Math.min(G.W-G.R,cx+rR), xr+2);
+    const weich=lauf => Math.max(.12, Math.min(1, lauf/(G.reach*.55)));
+    const hL=hub*weich(xl-x0), hR=hub*weich(x1-xr);
+    const offL=hL*G.h/G.xi, offR=hR*G.h/G.xi;
+    return 'M '+G.R+' '+t+' L '+x0+' '+t+
+      ' C '+(x0+.55*(xl-x0))+' '+t+' '+(xl-offL)+' '+(t-hL)+' '+xl+' '+t+
+      ' A '+G.rs+' '+G.rs+' 0 0 0 '+xr+' '+t+
+      ' C '+(xr+offR)+' '+(t-hR)+' '+(x1-.55*(x1-xr))+' '+t+' '+x1+' '+t+
+      ' L '+(G.W-G.R)+' '+t+' A '+G.R+' '+G.R+' 0 0 1 '+G.W+' '+(t+G.R)+
+      ' L '+G.W+' '+(t+G.H-G.R)+' A '+G.R+' '+G.R+' 0 0 1 '+(G.W-G.R)+' '+(t+G.H)+
+      ' L '+G.R+' '+(t+G.H)+' A '+G.R+' '+G.R+' 0 0 1 0 '+(t+G.H-G.R)+
+      ' L 0 '+(t+G.R)+' A '+G.R+' '+G.R+' 0 0 1 '+G.R+' '+t+' Z';
+  }
+  function zeichnen(){
+    const p=pfad(x,vx);
+    plate.setAttribute('d',p);
+    if (kannSchneiden) blur.style.clipPath='path("'+p+'")';
+    bead.style.left=x+'px'; bead.style.top=(G.top-G.h)+'px'; bead.style.transform='translate(-50%,-50%)';
+    nameEl.style.left=x+'px';
+    wash.style.left=x+'px'; wash.style.top=(G.top+G.H*.28)+'px';
+  }
+  function schritt(ts){
+    const dt=Math.min(.032,(ts-last)/1000||.016); last=ts;
+    vx += (-K.federHaerte*(x-ziel) - K.federDaempfung*vx)*dt;
+    x += vx*dt; zeichnen();
+    if (zieht || Math.abs(x-ziel)>K.federRuheWeg || Math.abs(vx)>K.federRuheTempo) raf=requestAnimationFrame(schritt);
+    else { x=ziel; vx=0; zeichnen(); raf=null; }
+  }
+  function feder(){
+    if (reduce) { x=ziel; vx=0; zeichnen(); return; }
+    if (raf===null) { last=performance.now(); raf=requestAnimationFrame(schritt); }
+  }
+  function naechste(px){
+    let best=0, bd=Infinity;
+    centers.forEach((c,i) => { const d=Math.abs(c-px); if (d<bd) { bd=d; best=i; } });
+    return best;
+  }
+  function farbe(){
+    const b=btns[active], hell=root.dataset.theme==='light';
+    root.style.setProperty('--dacc', hell ? b.dataset.accHell : b.dataset.acc);
+  }
+  const wipeEl=document.createElement('div');
+  wipeEl.className='wipe'; wipeEl.setAttribute('aria-hidden','true');
+  document.body.appendChild(wipeEl);
+  function welle(){
+    if (reduce) return;
+    const r=bead.getBoundingClientRect();
+    wipeEl.style.left=(r.left+r.width/2)+'px'; wipeEl.style.top=(r.top+r.height/2)+'px';
+    wipeEl.classList.remove('go'); void wipeEl.offsetWidth; wipeEl.classList.add('go');
+  }
+  /* Während die Ansicht selbst hinfährt, darf das Wischen die Kugel
+     nicht zurückholen — die Sperre fällt, wenn das Scrollen ruht. */
+  let gesperrt=false, sperrT=null;
+  function sperren(){ gesperrt=true; clearTimeout(sperrT); sperrT=setTimeout(() => { gesperrt=false; }, 700); }
+  function setzen(i, hinfahren, still){
+    if (i<0 || i>=btns.length) return;
+    const anders = i!==active || !bead.firstChild;
+    active=i;
+    btns.forEach((el,j) => el.classList.toggle('is-active', j===i));
+    farbe();
+    nameEl.textContent=btns[i].dataset.label;
+    bead.setAttribute('aria-valuenow', i+1);
+    bead.setAttribute('aria-valuetext', btns[i].dataset.label);
+    if (anders) { bead.innerHTML=btns[i].querySelector('svg').outerHTML; if (!still) welle(); }
+    if (hinfahren) { sperren(); zuSlide(i); }
+    try { localStorage.setItem(SLIDE_LS, String(i)); } catch (e) {}
+  }
+  let getippt=false;
+  function hinweisWeg(){ if (!getippt) { getippt=true; hint.style.opacity=0; } }
+
+  btns.forEach((b,i) => b.addEventListener('click', () => { hinweisWeg(); ziel=centers[i]; setzen(i,true); feder(); }));
+  bead.addEventListener('pointerdown', e => {
+    zieht=true; hinweisWeg(); e.preventDefault();
+    try { bead.setPointerCapture(e.pointerId); } catch (err) {}
+    feder();
+  });
+  bead.addEventListener('pointermove', e => {
+    if (!zieht) return;
+    const r=dock.getBoundingClientRect();
+    ziel=Math.max(centers[0], Math.min(centers[centers.length-1], e.clientX-r.left));
+    const n=naechste(ziel);
+    if (n!==active) setzen(n,false);
+  });
+  function loslassen(){
+    if (!zieht) return;
+    zieht=false;
+    const n=naechste(ziel);
+    ziel=centers[n]; x=centers[n]; vx=0; zeichnen();
+    setzen(n,true); feder();
+  }
+  bead.addEventListener('pointerup', loslassen);
+  bead.addEventListener('pointercancel', loslassen);
+  bead.addEventListener('keydown', e => {
+    let n=active;
+    if (e.key==='ArrowRight') n=Math.min(btns.length-1, active+1);
+    else if (e.key==='ArrowLeft') n=Math.max(0, active-1);
+    else return;
+    e.preventDefault(); e.stopPropagation(); hinweisWeg(); ziel=centers[n]; setzen(n,true); feder();
+  });
+
+  /* Wischen in den Ansichten: die Kugel läuft live mit. */
+  slidesEl.addEventListener('scroll', () => {
+    if (zieht || gesperrt) { if (gesperrt) sperren(); return; }
+    const w=Math.max(1, slidesEl.clientWidth), f=slidesEl.scrollLeft/w;
+    const i0=Math.max(0, Math.min(btns.length-1, Math.floor(f))), i1=Math.min(btns.length-1, i0+1);
+    ziel=centers[i0]+(centers[i1]-centers[i0])*(f-i0);
+    feder();
+    const n=Math.round(f);
+    if (n!==active) { hinweisWeg(); setzen(n,false); }
+  }, { passive:true });
+
+  addEventListener('resize', () => { aufbauen(); zuSlide(active, false); });
+  new MutationObserver(farbe).observe(root, { attributes:true, attributeFilter:['data-theme'] });
+  return { aufbauen, setzen, get active(){ return active; },
+           gehe(i){ hinweisWeg(); ziel=centers[i]; setzen(i,true); feder(); } };
+})();
+Dock.aufbauen(); Dock.setzen(0,false,true);
+
 addEventListener('keydown', e => {
-  if (current || e.target.closest('input,textarea,select,[contenteditable]')) return;
-  if (e.key === 'ArrowRight') zuSlide(1); else if (e.key === 'ArrowLeft') zuSlide(0);
+  if (current || e.target.closest('input,textarea,select,[contenteditable],#bead')) return;
+  if (e.key === 'ArrowRight' && Dock.active < 2) Dock.gehe(Dock.active + 1);
+  else if (e.key === 'ArrowLeft' && Dock.active > 0) Dock.gehe(Dock.active - 1);
 });
-try { if (localStorage.getItem(SLIDE_LS) === '1') requestAnimationFrame(() => { zuSlide(1, false); dotsSetzen(); }); } catch (e) {}
+try {
+  const k = +localStorage.getItem(SLIDE_LS);
+  if (k > 0 && k < 3) requestAnimationFrame(() => { zuSlide(k, false); Dock.setzen(k, false, true); Dock.aufbauen(); });
+} catch (e) {}
 
 /* ───────── Start ───────── */
 measure();
