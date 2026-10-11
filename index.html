@@ -1598,7 +1598,9 @@ const PRODUKTIV = [
   { id:'ideahub', name:'IdeaHub', tag:'Ideen', url:'https://maikunverricht.github.io/IdeaHub/',
     desc:'Ideen sammeln und ordnen – als Karte oder als Baum.',
     zeichen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1 2V16h5.2v-.2c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/></svg>' },
-  { name:'Frei', tag:'folgt' },
+  { id:'testcasemanager', name:'TestcaseManager', tag:'Testspezifikation', url:'https://maikunverricht.github.io/TestcaseManager/',
+    desc:'Testfälle, Requirements und C-Code verknüpfen – Traceability-Matrix, Abdeckung, Excel-Import und -Export.',
+    zeichen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3.5" width="14" height="17.5" rx="2"/><path d="M9 3.5V2.5h6v1"/><path d="M8.5 10l1.5 1.5L13 8.5M8.5 16l1.5 1.5L13 14.5M15 10.5h1.5M15 16.5h1.5"/></svg>' },
   { name:'Frei', tag:'folgt' }
 ];
 const PLUS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>';
@@ -1623,7 +1625,7 @@ LISTE.forEach((w, i) => {
       <span class="shot"${echt ? ` role="button" tabindex="0" aria-label="${esc(w.name)} öffnen" style="color:var(--teal)"` : ' aria-hidden="true"'}>${w.zeichen || PLUS}${echt ? '<span class="state" data-s="bereit"><span class="dot"></span><span class="s-txt">bereit</span></span>' : ''}</span>
       <span class="t-nm">
         <span class="t-idx"><b>${pad2(i+1)}</b> · ${esc(w.tag || '')}</span>
-        <h2>${esc(w.name).replace(/^(Code|Kapazitäten|Belegungs)/,'$1&shy;')}</h2>
+        <h2>${esc(w.name).replace(/^(Code|Kapazitäten|Belegungs|Testcase)/,'$1&shy;')}</h2>
       </span>
     </div>
     <span class="push">${w.desc ? esc(w.desc) : (echt ? '' : 'Platz für ein Werkzeug')}</span>`;
