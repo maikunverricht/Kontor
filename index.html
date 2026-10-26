@@ -488,6 +488,92 @@ html[data-theme="light"] .wipe{mix-blend-mode:multiply}
 .tile.platz .shot{border:1px dashed var(--line);background:transparent;color:var(--text-3)}
 .tile.platz h2{color:var(--text-2)}
 a.tile{color:inherit;text-decoration:none}
+
+/* ═══ Kontor als Schaltbild (26.10.2026) ═══
+   Oben das Auftragsbuch als Quelle über die ganze Breite, darunter in drei
+   Spalten Stempeluhr · Auftragsstatus · Terminbuch (Arbeiten), darunter
+   Rechnungsbuch (Abrechnen) und NoteOS (Wissen). Jede Kachel ist ein Zeichen
+   mit Namen; der Text kommt als Karte beim Antippen von „⋯“. Am Telefon
+   bleibt dasselbe Bild, nur kleiner – dafür sind es Zeichen. */
+#grid{--kw:136px;grid-template-columns:repeat(3,minmax(0,1fr));justify-items:center;
+  column-gap:12px;row-gap:54px;padding:20px 34px 26px}
+#grid .tile{width:var(--kw);padding:15px 8px 12px;align-items:center;text-align:center}
+/* Nur das Zeichen: kein Kasten, kein Glas. Das Zeichen selbst trägt Farbe und Rand. */
+#grid .tile-bg{display:none}
+#grid .tile{padding:4px 0 2px}
+#grid .shot{box-shadow:var(--shadow)}
+#grid .tile:hover .shot,#grid .tile:focus-within .shot{transform:translateY(-2px)}
+#grid .t-more .push{display:block;margin:0 0 2px;font-size:11px;white-space:normal;-webkit-line-clamp:unset;color:var(--text-2)}
+#grid .t-head{flex-direction:column;gap:9px;width:100%}
+#grid .shot{width:60px;height:60px;border-radius:18px}
+#grid .shot svg{width:28px;height:28px}
+#grid .t-nm{flex:none;width:100%}
+#grid .t-idx{font-size:9px;letter-spacing:.06em;text-align:center}
+#grid .t-head h2{font-size:14.5px;white-space:normal;overflow:visible;line-height:1.15;text-align:center;hyphens:manual}
+#grid .push{margin-top:6px;font-size:10px;max-width:100%;white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.35}
+#grid .more{position:absolute;top:-6px;right:auto;left:calc(50% - 46px);width:22px;height:22px;padding:0;font-size:0;display:grid;place-items:center;background:var(--glass-2)}
+#grid .more::after{content:'⋯';font-size:14px;line-height:1}
+/* Die Karte hängt unter dem Zeichen und schiebt nichts: die Leitungen bleiben stehen. */
+#grid .t-more{position:absolute;top:calc(100% + 8px);left:0;width:min(250px,calc(100vw - 44px));display:block;
+  grid-template-rows:none;opacity:0;visibility:hidden;pointer-events:none;transform:translateY(-4px);
+  transition:opacity var(--t-m),transform var(--t-m),visibility 0s linear var(--t-m);
+  border:1px solid var(--line-hi);border-radius:13px;background:var(--surface,var(--glass-2));
+  box-shadow:var(--shadow-lg);-webkit-backdrop-filter:blur(15px);backdrop-filter:blur(15px);z-index:8;text-align:left}
+#grid .t-more > div{padding:12px 13px}
+#grid .tile.auf{z-index:6}
+#grid .tile.auf .t-more{opacity:1;visibility:visible;pointer-events:auto;transform:none;transition-delay:0s}
+#grid .tile[data-app="terminbuch"] .t-more,#grid .tile[data-app="noteos"] .t-more{left:auto;right:0}
+#grid .tile[data-app="auftragsstatus"] .t-more{left:50%;margin-left:calc(min(250px,calc(100vw - 44px)) / -2)}
+/* Der Hub: breit, über den Rändern des Rasters, damit die Gassen unter ihm beginnen. */
+#grid .tile[data-app="auftragsbuch"]{grid-column:1/-1;width:auto;justify-self:stretch;margin-inline:-22px;
+  padding:2px 18px 16px;align-items:center;text-align:center}
+/* Die Sammelschiene: aus ihr fallen die Stammdaten in die Werkzeuge. */
+#grid .tile[data-app="auftragsbuch"]::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;border-radius:3px;
+  background:color-mix(in srgb,var(--amber) 55%,transparent)}
+#grid .tile[data-app="auftragsbuch"] .shot{width:68px;height:68px;border-radius:20px}
+#grid .tile[data-app="auftragsbuch"] .shot svg{width:32px;height:32px}
+#grid .tile[data-app="auftragsbuch"] .more{left:calc(50% - 50px)}
+#grid .tile[data-app="auftragsbuch"] .t-head h2{font-size:16px}
+#grid .tile[data-app="auftragsbuch"] .push{margin-top:4px;font-size:10.5px}
+#grid .tile[data-app="auftragsbuch"] .t-more{left:50%;margin-left:-125px}
+#grid .tile[data-app="rechnungsbuch"]{grid-column:1}
+/* Ausgang: kein Werkzeug, darum gestrichelt und ohne Glas. */
+#grid .ausgang{grid-column:2;width:var(--kw);position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;
+  justify-content:flex-start;gap:6px;padding:4px 0 2px;border:0;
+  background:transparent;color:var(--text-2);cursor:pointer;font:inherit;text-align:center;
+  transition:border-color var(--t-s),color var(--t-s)}
+#grid .ausgang:hover .a-zeichen{border-color:var(--geld);transform:translateY(-2px)}
+#grid .a-zeichen{width:60px;height:60px;display:grid;place-items:center;border-radius:18px;color:var(--geld);
+  border:1px dashed color-mix(in srgb,var(--geld) 55%,transparent);background:transparent;transition:transform var(--t-s),border-color var(--t-s);margin-bottom:3px}
+#grid .a-zeichen svg{width:28px;height:28px}
+#grid .a-nm{font-size:13.5px;font-weight:700;letter-spacing:-.01em;color:var(--text)}
+#grid .a-wo{font-family:var(--mono);font-size:9px;letter-spacing:.04em;color:var(--text-3);line-height:1.4}
+#grid .tile[data-app="noteos"]{grid-column:3}
+@media (max-width:720px){
+  #grid{--kw:82px;column-gap:6px;row-gap:56px;padding:20px 30px 24px}
+  #grid .tile{padding:4px 0 2px}
+  #grid .shot{width:50px;height:50px;border-radius:15px}
+  #grid .shot svg{width:24px;height:24px}
+  #grid .t-head{gap:7px}
+  #grid .t-head h2{font-size:11.5px;letter-spacing:-.03em}
+  #grid .t-idx{font-size:0}
+  #grid .t-idx b{font-size:9.5px}
+  #grid .push{display:none}
+  #grid .more{top:-6px;left:calc(50% - 40px);width:20px;height:20px}
+  #grid .t-more{width:212px}
+  #grid .tile[data-app="auftragsstatus"] .t-more{margin-left:-106px}
+  #grid .tile[data-app="auftragsbuch"] .push{display:block}
+  #grid .tile[data-app="auftragsbuch"] .t-idx{font-size:10px}
+  #grid .tile[data-app="auftragsbuch"] .t-head h2{font-size:14px}
+  #grid .tile[data-app="auftragsbuch"] .shot{width:56px;height:56px;border-radius:17px}
+  #grid .tile[data-app="auftragsbuch"] .more{left:calc(50% - 44px)}
+  #grid .tile[data-app="auftragsbuch"] .t-more{margin-left:-106px}
+  #grid .ausgang{padding:4px 0 2px}
+  #grid .a-zeichen{width:50px;height:50px;border-radius:15px}
+  #grid .a-zeichen svg{width:24px;height:24px}
+  #grid .a-nm{font-size:11.5px}
+  #grid .a-wo{display:none}
+}
 </style>
 </head>
 <body>
@@ -981,14 +1067,12 @@ APPS.forEach((app, i) => {
   if (g !== letzteGruppe) {
     letzteGruppe = g;
     const def = GRUPPEN.find(x => x.id === g);
-    if (def) {
-      const h = document.createElement('div');
-      h.className = 'gruppe';
-      grid.appendChild(h);
-    }
+    /* Seit 26.10.2026 steht im Kontor keine Bandüberschrift mehr: die Lage
+       im Schaltbild trägt die Ordnung (Stamm oben, Arbeiten, Abrechnen). */
   }
   const el = document.createElement('article');
   el.className = 'tile';
+  el.dataset.app = app.id;
   el.style.animationDelay = (i*70)+'ms';
   // Animation danach entfernen: sonst entsteht ein Stapelkontext und der Zoom läge unter dem Abdunkler
   el.addEventListener('animationend', e => { if (e.target === el) { el.style.animation = 'none'; el.style.opacity = '1'; } });
@@ -1018,12 +1102,14 @@ APPS.forEach((app, i) => {
   const t = { app, i, el, shot:$('.shot',el), frame:rahmen, vp:$('.vp',rahmen), veil:$('.veil',rahmen),
               state:$('.state',el), push:$('.push',el), loaded:false };
   tiles.push(t); byId[app.id] = t;
+  /* Der Stand steht beim Zeichen nicht mehr unter dem Namen, sondern in der Karte. */
+  if (app.id !== 'auftragsbuch') $('.t-more > div', el).prepend(t.push);
 
   /* Der Knopf klappt den Text aus – und öffnet nicht das Werkzeug. */
   t.more = $('.more', el);
   t.more.addEventListener('click', e => {
     e.stopPropagation();
-    const auf = el.classList.toggle('offen');
+    const auf = el.classList.toggle('auf');
     t.more.setAttribute('aria-expanded', String(auf));
     t.more.textContent = auf ? 'weniger' : '…mehr';
     busNeu(); setTimeout(busNeu, 480);
@@ -1034,6 +1120,19 @@ APPS.forEach((app, i) => {
   });
   t.shot.addEventListener('keydown', e => { if ((e.key==='Enter'||e.key===' ') && !current) { e.preventDefault(); open(app.id); } });
 });
+
+/* ───────── Ausgang ─────────
+   Seit 26.10.2026 steht in der Lücke neben dem Rechnungsbuch, was den
+   Kontor verlässt: Druck, Factur-X, die Liste fürs Steuerbüro. Kein
+   Werkzeug, darum gestrichelt – ein Tipp führt ins Rechnungsbuch. */
+const ausgang = document.createElement('button');
+ausgang.type = 'button';
+ausgang.className = 'ausgang';
+ausgang.title = 'Rechnungen verlassen den Kontor: Druck → PDF, Factur-X-XML, CSV für das Steuerbüro';
+ausgang.innerHTML = '<span class="a-zeichen">' + SVG('<path d="M7 8V3.6h10V8"/><rect x="3.6" y="8" width="16.8" height="8.4" rx="2"/><path d="M7 13.4h10v7H7z"/><path d="M16.6 11h.01"/>') + '</span>'
+  + '<span class="a-nm">Ausgang</span><span class="a-wo">Druck · Factur-X · Steuerbüro</span>';
+ausgang.addEventListener('click', () => open('rechnungsbuch'));
+byId.rechnungsbuch.el.after(ausgang);
 
 /* Einmal beim Aufbau — und danach immer dann, wenn eines der
    Werkzeuge etwas meldet. Die Kacheln laufen als Rahmen unter
@@ -1242,77 +1341,82 @@ function busZeichnen(){
   if (!gb.width || !tiles.length) return;
   const R = {};
   let maxR = 0, minL = Infinity;
+  const HUB = 'auftragsbuch';
   tiles.forEach(t => {
     const b = t.el.getBoundingClientRect();
     const r = { l:b.left-gb.left, t:b.top-gb.top, r:b.right-gb.left, b:b.bottom-gb.top };
     r.cx = (r.l+r.r)/2; r.cy = (r.t+r.b)/2;
+    /* Seit 26.10.2026 ist die Kachel nur ein Zeichen mit Namen: Leitungen
+       docken seitlich und oben am Zeichen an, unten unter dem Namen. Der Hub
+       behält sein volles Maß – seine Unterkante ist die Sammelschiene. */
+    if (t.app.id !== HUB) {
+      const z = t.shot.getBoundingClientRect();
+      r.l = z.left-gb.left; r.r = z.right-gb.left; r.t = z.top-gb.top;
+      r.cx = (r.l+r.r)/2; r.cy = (z.top+z.bottom)/2-gb.top;
+    }
     R[t.app.id] = r;
-    maxR = Math.max(maxR, r.r); minL = Math.min(minL, r.l);
+    /* Die Gassen am Rand richten sich nach den Kacheln, nicht nach dem Hub. */
+    if (t.app.id !== HUB) { maxR = Math.max(maxR, r.r); minL = Math.min(minL, r.l); }
   });
   busEl.setAttribute('viewBox', '0 0 ' + Math.round(gb.width) + ' ' + Math.round(gb.height));
   busEl.setAttribute('width', Math.round(gb.width));
   busEl.setAttribute('height', Math.round(gb.height));
 
-  /* ═══ Erst die Bahn bestimmen, dann zeichnen ═══
-     Wer denselben Weg nimmt, fährt auf derselben Bahn. Die Adern liegen
-     mittig um sie herum, damit das Bündel dort bleibt, wo eine einzelne
-     Leitung auch verlaufen wäre. */
-  const ADER = 3;        /* Abstand der Adern im Bündel */
-  const ABSTAND = 26;    /* Abstand der Bahn von der Kachelkante */
-
+  /* ═══ Schaltbild (seit 26.10.2026) ═══
+     Das Auftragsbuch steht oben und führt. Stammdaten laufen von dort in
+     geraden Fallleitungen hinunter, Meldungen laufen als zweite Ader daneben
+     hinauf. Werkzeuge der zweiten Reihe werden durch die Gasse am Rand
+     erreicht. Zwischen den Werkzeugen laufen nur noch die echten Leitungen:
+     Zeit, Fristen, Abgerechnetes. Es gibt keine Kreuzung. */
+  const LUFT = 14;      /* innere Gasse neben den Kacheln */
+  const SEITE = 5;      /* Versatz der beiden Adern eines Paares */
   const plan = [];
   FLUSS.forEach((f, i) => {
     const a = R[f.von], b = R[f.nach];
     if (!a || !b) return;
-    const reihe = Math.abs(a.t - b.t) < 8;
-    const runter = b.t - a.b, hoch = a.t - b.b;
-    const gleicheSpalte = Math.abs(a.cx - b.cx) < 8;
-    let art, grund;
-    if (reihe) {
-      art = f.seite > 0 ? 'unten' : 'oben';
-      grund = f.seite > 0 ? Math.max(a.b, b.b) + ABSTAND : Math.min(a.t, b.t) - ABSTAND;
-    } else if (runter > 0 && runter < 90) {
-      art = 'luecke'; grund = a.b + runter / 2;
-    } else if (hoch > 0 && hoch < 90) {
-      art = 'luecke'; grund = b.b + hoch / 2;
+    let pts;
+    if (f.von === HUB || f.nach === HUB) {
+      const hin = f.von === HUB;                 /* Stammdaten hinunter, Meldungen hinauf */
+      const h = R[HUB], o = hin ? b : a;
+      const s = hin ? -SEITE : SEITE;
+      if (o.t - h.b < 130) {                     /* erste Reihe: gerade Fallleitung */
+        const x = o.cx + s;
+        pts = [[x, h.b], [x, o.t]];
+      } else {                                   /* zweite Reihe: Gasse am Rand */
+        const links = o.cx < (minL + maxR) / 2;
+        const off = LUFT + (hin ? 0 : 2 * SEITE);
+        const x = links ? minL - off : maxR + off;
+        const y = o.cy + s;
+        pts = [[x, h.b], [x, y], [links ? o.l : o.r, y]];
+      }
+      if (!hin) pts.reverse();
+    } else if (Math.abs(a.t - b.t) < 8) {        /* gleiche Reihe: seitlich */
+      const links = a.cx < b.cx;
+      pts = [[links ? a.r : a.l, a.cy], [links ? b.l : b.r, a.cy]];
+    } else if (Math.abs(a.cx - b.cx) < 8) {      /* gleiche Spalte: senkrecht */
+      const x = a.cx + (f.seite > 0 ? SEITE : -SEITE), ab = a.t < b.t;
+      pts = [[x, ab ? a.b : a.t], [x, ab ? b.t : b.b]];
     } else {
-      art = f.seite > 0 ? 'rechts' : 'links';
-      grund = f.seite > 0 ? maxR + ABSTAND : minL - ABSTAND;
+      pts = [[a.cx, a.b], [a.cx, b.cy], [b.l, b.cy]];
     }
-    plan.push({ f:f, i:i, a:a, b:b, art:art, grund:grund, reihe:reihe,
-                gleicheSpalte:gleicheSpalte, runter:runter, hoch:hoch,
-                schluessel: art + '|' + Math.round(grund / 12) });
+    plan.push({ f:f, i:i, pts:pts });
   });
-  const gruppen = {};
-  plan.forEach(p => { (gruppen[p.schluessel] = gruppen[p.schluessel] || []).push(p); });
-  Object.keys(gruppen).forEach(k => {
-    const g = gruppen[k];
-    g.forEach((p, n) => { p.ader = (n - (g.length - 1) / 2) * ADER; });
-  });
+  /* Die Leitung nach draußen: Einbahnstraße, ohne Inspektor. */
+  const ag = ausgang.querySelector('.a-zeichen').getBoundingClientRect(), rb = R.rechnungsbuch;
+  if (rb && ag.width) {
+    const al = ag.left - gb.left, y = (ag.top + ag.bottom) / 2 - gb.top;
+    plan.push({ f:{ von:'rechnungsbuch', nach:'ausgang', art:'geld', was:'Rechnungen nach draußen' },
+                i:'aus', pts:[[rb.r, y], [al, y]], aussen:true });
+  }
 
   let out = '';
   plan.forEach(p => {
-    const f = p.f, a = p.a, b = p.b, i = p.i;
+    const f = p.f, i = p.i, pts = p.pts;
     const farbe = BUSFARBE[f.art];
-    let pts;
-    if (p.art === 'unten' || p.art === 'oben') {
-      const unten = p.art === 'unten', y = p.grund + p.ader;
-      pts = [[a.cx, unten ? a.b : a.t], [a.cx, y], [b.cx, y], [b.cx, unten ? b.b : b.t]];
-    } else if (p.art === 'luecke') {
-      const abwaerts = p.runter > 0 && p.runter < 90;
-      const vonY = abwaerts ? a.b : a.t, nachY = abwaerts ? b.t : b.b;
-      if (p.gleicheSpalte) { const x = a.cx + p.ader; pts = [[x, vonY], [x, nachY]]; }
-      else { const y = p.grund + p.ader;
-             pts = [[a.cx, vonY], [a.cx, y], [b.cx, y], [b.cx, nachY]]; }
-    } else {
-      const rechts = p.art === 'rechts';
-      const x = p.grund + (rechts ? p.ader : -p.ader);
-      pts = [[rechts ? a.r : a.l, a.cy], [x, a.cy], [x, b.cy], [rechts ? b.r : b.l, b.cy]];
-    }
     const d = orth(pts, 13), id = 'busweg' + i;
     const p0 = pts[0], pE = pts[pts.length-1];
     /* Im Bündel würden sich die Höfe zu einem Schleier stapeln. */
-    const buendel = gruppen[p.schluessel].length > 1 ? ' gebuendelt' : '';
+    const buendel = '';
     const leer = !hatInhalt(f.art);
     out += '<g class="leitung' + buendel + (leer ? ' leer' : '') + '" style="--bus:' + farbe + '">'
         +  '<path class="halo" d="' + d + '"/>'
@@ -1332,6 +1436,7 @@ function busZeichnen(){
             +  '<animateMotion dur="' + dauer.toFixed(2) + 's" begin="' + start + '" repeatCount="indefinite" rotate="auto">' + mp + '</animateMotion></circle>';
       }
     }
+    if (p.aussen) { out += '<path class="hit" d="' + d + '"><title>' + esc(f.was) + '</title></path></g>'; return; }
     out += '<path class="hit" d="' + d + '" data-f="' + i + '"><title>'
         +  esc(f.was) + ': ' + esc(byId[f.von].app.name) + ' → ' + esc(byId[f.nach].app.name)
         +  (leer ? ' · noch keine Daten' : '') + ' · klicken zum Hineinsehen</title></path></g>';
