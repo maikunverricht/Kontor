@@ -200,6 +200,10 @@ pre.json{margin:14px 0 0;padding:12px 14px;border:1px solid var(--line);border-r
 .tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-3);
   border:1px solid var(--line);border-radius:100px;padding:2px 8px;white-space:nowrap}
 .state{position:absolute;top:-4px;right:-4px;pointer-events:none}
+/* Zahl an der Ecke: Anzahl Einträge im Werkzeug (z. B. Notizen) */
+.t-zahl{position:absolute;right:-9px;bottom:-7px;min-width:20px;height:20px;padding:0 6px;border-radius:100px;
+  display:grid;place-items:center;font:600 10.5px/1 var(--mono);letter-spacing:0;
+  background:var(--amber);color:var(--on-accent,#12171F);box-shadow:0 0 0 2px var(--void),0 4px 10px -4px rgba(0,0,0,.6);pointer-events:none}
 .s-txt{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .dot{display:block;width:9px;height:9px;border-radius:50%;background:var(--text-3);
   box-shadow:0 0 0 2px var(--glass-2);animation:pulse 1.4s ease-in-out infinite}
@@ -492,7 +496,7 @@ a.tile{color:inherit;text-decoration:none}
 /* ═══ Kontor als Schaltbild (26.10.2026) ═══
    Oben das Auftragsbuch als Quelle über die ganze Breite, darunter in drei
    Spalten Stempeluhr · Auftragsstatus · Terminbuch (Arbeiten), darunter
-   Rechnungsbuch (Abrechnen) und NoteOS (Wissen). Jede Kachel ist ein Zeichen
+   Rechnungsbuch (Abrechnen). Das Notizbuch steht seit 30.10. unter Produktiv. Jede Kachel ist ein Zeichen
    mit Namen; der Text kommt als Karte beim Antippen von „⋯“. Am Telefon
    bleibt dasselbe Bild, nur kleiner – dafür sind es Zeichen. */
 #grid{--kw:136px;grid-template-columns:repeat(3,minmax(0,1fr));justify-items:center;
@@ -522,7 +526,7 @@ a.tile{color:inherit;text-decoration:none}
 #grid .t-more > div{padding:12px 13px}
 #grid .tile.auf{z-index:6}
 #grid .tile.auf .t-more{opacity:1;visibility:visible;pointer-events:auto;transform:none;transition-delay:0s}
-#grid .tile[data-app="terminbuch"] .t-more,#grid .tile[data-app="noteos"] .t-more{left:auto;right:0}
+#grid .tile[data-app="terminbuch"] .t-more{left:auto;right:0}
 #grid .tile[data-app="auftragsstatus"] .t-more{left:50%;margin-left:calc(min(250px,calc(100vw - 44px)) / -2)}
 /* Der Hub: breit, über den Rändern des Rasters, damit die Gassen unter ihm beginnen. */
 #grid .tile[data-app="auftragsbuch"]{grid-column:1/-1;width:auto;justify-self:stretch;margin-inline:-22px;
@@ -548,7 +552,6 @@ a.tile{color:inherit;text-decoration:none}
 #grid .a-zeichen svg{width:28px;height:28px}
 #grid .a-nm{font-size:13.5px;font-weight:700;letter-spacing:-.01em;color:var(--text)}
 #grid .a-wo{font-family:var(--mono);font-size:9px;letter-spacing:.04em;color:var(--text-3);line-height:1.4}
-#grid .tile[data-app="noteos"]{grid-column:3}
 @media (max-width:720px){
   #grid{--kw:82px;column-gap:6px;row-gap:56px;padding:20px 30px 24px}
   #grid .tile{padding:4px 0 2px}
@@ -790,7 +793,7 @@ const GRUPPEN = [
 const APPS = [
   { id:'auftragsbuch',   name:'Auftragsbuch',   tag:'Auftraggeber',   gruppe:'prozess', schritt:1,
     url:'https://maikunverricht.github.io/Auftragsbuch/',   repo:'Auftragsbuch',
-    fluss:'führt Stammdaten · zeigt Zeit, Geld und Notizen dazu', rc:'var(--amber)',
+    fluss:'führt Stammdaten · zeigt Zeit und Geld dazu', rc:'var(--amber)',
     desc:'Auftraggeber, Aufträge und Konditionen an einem Ort – alle anderen bedienen sich hier.' },
   { id:'stempeluhr',     name:'Stempeluhr',     tag:'Zeiterfassung',  gruppe:'prozess', schritt:2,
     url:'https://maikunverricht.github.io/Stempeluhr/',     repo:'Stempeluhr',
@@ -807,11 +810,9 @@ const APPS = [
   { id:'rechnungsbuch',  name:'Rechnungsbuch',  tag:'Abrechnung',     gruppe:'prozess', schritt:5,
     url:'https://maikunverricht.github.io/Rechnungsbuch/',  repo:'Rechnungsbuch',
     fluss:'führt Rechnungen und Zahlungen · liest Stammdaten und Zeit · meldet Abgerechnetes zurück', rc:'var(--geld)',
-    desc:'Rechnung aus gebuchter Zeit: Entwurf, Festschreibung, offene Posten – Druck und Factur-X.' },
-  { id:'noteos',         name:'NoteOS',         tag:'Wissen',         gruppe:'prozess', schritt:6,
-    url:'https://maikunverricht.github.io/NoteOS/',         repo:'NoteOS',
-    fluss:'liest Auftraggeber · meldet Notizen je Auftraggeber', rc:'var(--amber)',
-    desc:'Notizen als Bibliothek: Regale, Bücher und Kategorien statt Ordnerlisten.' }
+    desc:'Rechnung aus gebuchter Zeit: Entwurf, Festschreibung, offene Posten – Druck und Factur-X.' }
+  /* Das Notizbuch (früher NoteOS) steht seit 30.10.2026 unter „Produktiv“:
+     ohne Leitung zum Auftragsbuch. Der Auftragsbezug lebt im Auftragsstatus. */
 ];
 
 /* ───────── Hilfen ───────── */
@@ -1210,14 +1211,12 @@ const FLUSS = [
   { von:'auftragsbuch',   nach:'stempeluhr',     art:'stamm', seite: 1, was:'Stammdaten' },
   { von:'auftragsbuch',   nach:'auftragsstatus', art:'stamm', seite: 1, was:'Stammdaten' },
   { von:'stempeluhr',     nach:'auftragsstatus', art:'zeit',  seite: 1, was:'Zeitbuchungen' },
-  { von:'auftragsbuch',   nach:'noteos',         art:'kat',   seite: 1, was:'Auftraggeber als Kategorie' },
   { von:'auftragsbuch',   nach:'terminbuch',     art:'stamm', seite: 1, was:'Stammdaten' },
   { von:'auftragsstatus', nach:'terminbuch',     art:'frist', seite: 1, was:'Fristen und Meilensteine' },
   { von:'auftragsbuch',   nach:'rechnungsbuch',  art:'stamm', seite: 1, was:'Stammdaten' },
   { von:'stempeluhr',     nach:'rechnungsbuch',  art:'zeit',  seite: 1, was:'Zeitbuchungen' },
   { von:'stempeluhr',     nach:'auftragsbuch',   art:'summe', seite:-1, was:'Stunden je Auftrag · Stundenkonto' },
   { von:'auftragsstatus', nach:'auftragsbuch',   art:'opt',   seite:-1, was:'Prozessschritt (nur mit Haken)' },
-  { von:'noteos',         nach:'auftragsbuch',   art:'notiz', seite:-1, was:'Notizen je Auftraggeber' },
   { von:'rechnungsbuch',  nach:'auftragsbuch',   art:'geld',  seite:-1, was:'Abgerechnet je Auftrag' },
   /* Seit 20.09.2026 im Datenfluss beschrieben, im Bild bis 01.10.2026 vergessen:
      die Stempeluhr liest, welche Buchung schon auf einer Rechnung steht. */
@@ -1760,7 +1759,12 @@ const PRODUKTIV = [
   { id:'testcasemanager', name:'TestcaseManager', tag:'Testspezifikation', url:'https://maikunverricht.github.io/TestcaseManager/',
     desc:'Testfälle, Requirements und C-Code verknüpfen – Traceability-Matrix, Abdeckung, Excel-Import und -Export.',
     zeichen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3.5" width="14" height="17.5" rx="2"/><path d="M9 3.5V2.5h6v1"/><path d="M8.5 10l1.5 1.5L13 8.5M8.5 16l1.5 1.5L13 14.5M15 10.5h1.5M15 16.5h1.5"/></svg>' },
-  { name:'Frei', tag:'folgt' }
+  { id:'notizbuch', name:'Notizbuch', tag:'Wissen', url:'https://maikunverricht.github.io/NoteOS/',
+    desc:'Notizen als Markdown im eigenen Ordner – mit Kanban-Würfel aus Status, Priorität und Person.',
+    /* Zahl an der Ecke des Zeichens: Anzahl Notizen aus der Lesekopie. */
+    zahl:() => { const d = WB.lesen(WB_NOTES_LS); return d && d.anzahl ? { n:d.anzahl, titel:d.anzahl + (d.anzahl === 1 ? ' Notiz' : ' Notizen')
+      + (d.jeStatus ? ' · ' + (d.jeStatus.offen || 0) + ' offen · ' + (d.jeStatus.arbeit || 0) + ' in Bearbeitung' : '') } : null; },
+    zeichen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.6 4.4A1.4 1.4 0 0 1 8 3h8a1.4 1.4 0 0 1 1.4 1.4V21l-5.4-3.1L6.6 21z"/><path d="M9.8 8h4.4"/></svg>' }
 ];
 const PLUS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>';
 const BUERO = [
@@ -1781,7 +1785,7 @@ LISTE.forEach((w, i) => {
   el.innerHTML = `
     <div class="tile-bg"></div>
     <div class="t-head">
-      <span class="shot"${echt ? ` role="button" tabindex="0" aria-label="${esc(w.name)} öffnen" style="color:var(--teal)"` : ' aria-hidden="true"'}>${w.zeichen || PLUS}${echt ? '<span class="state" data-s="bereit"><span class="dot"></span><span class="s-txt">bereit</span></span>' : ''}</span>
+      <span class="shot"${echt ? ` role="button" tabindex="0" aria-label="${esc(w.name)} öffnen" style="color:var(--teal)"` : ' aria-hidden="true"'}>${w.zeichen || PLUS}${echt ? '<span class="state" data-s="bereit"><span class="dot"></span><span class="s-txt">bereit</span></span>' : ''}${w.zahl ? '<span class="t-zahl" hidden></span>' : ''}</span>
       <span class="t-nm">
         <span class="t-idx"><b>${pad2(i+1)}</b> · ${esc(w.tag || '')}</span>
         <h2>${esc(w.name).replace(/^(Code|Kapazitäten|Belegungs|Testcase)/,'$1&shy;')}</h2>
@@ -1803,6 +1807,21 @@ LISTE.forEach((w, i) => {
 }
 ansichtBauen(PRODUKTIV, $('#gridProd'));
 ansichtBauen(BUERO, $('#gridBuero'));
+/* Zahlen an den Ecken der Zeichen – aus den Lesekopien, ohne Netz. */
+function zahlenZeigen(){
+  PRODUKTIV.concat(BUERO).forEach(w => {
+    if (!w.zahl || !byId[w.id]) return;
+    const el = byId[w.id].el.querySelector('.t-zahl');
+    if (!el) return;
+    let z = null; try { z = w.zahl(); } catch(e){}
+    el.hidden = !z;
+    if (z){ el.textContent = z.n > 999 ? '999+' : String(z.n); el.title = z.titel || ''; el.setAttribute('aria-label', z.titel || String(z.n)); }
+  });
+}
+zahlenZeigen();
+WB.horchen(null, zahlenZeigen);
+addEventListener('storage', e => { if (!e.key || e.key === WB_NOTES_LS) zahlenZeigen(); });
+addEventListener('visibilitychange', () => { if (!document.hidden) zahlenZeigen(); });
 
 const slidesEl = $('#slides');
 const SLIDE_LS = 'wb-kontor-ansicht';
