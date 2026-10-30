@@ -1762,8 +1762,11 @@ const PRODUKTIV = [
   { id:'notizbuch', name:'Notizbuch', tag:'Wissen', url:'https://maikunverricht.github.io/NoteOS/',
     desc:'Notizen als Markdown im eigenen Ordner – mit Kanban-Würfel aus Status, Priorität und Person.',
     /* Zahl an der Ecke des Zeichens: Anzahl Notizen aus der Lesekopie. */
-    zahl:() => { const d = WB.lesen(WB_NOTES_LS); return d && d.anzahl ? { n:d.anzahl, titel:d.anzahl + (d.anzahl === 1 ? ' Notiz' : ' Notizen')
-      + (d.jeStatus ? ' · ' + (d.jeStatus.offen || 0) + ' offen · ' + (d.jeStatus.arbeit || 0) + ' in Bearbeitung' : '') } : null; },
+    /* Erledigte zählen nicht: an der Ecke steht nur, was noch offen ist
+       (offen + in Bearbeitung). Ohne Statuszahlen (altes Notizbuch) keine Zahl. */
+    zahl:() => { const d = WB.lesen(WB_NOTES_LS); const s = d && d.jeStatus; if (!s) return null;
+      const o = +s.offen || 0, a = +s.arbeit || 0, n = o + a;
+      return n ? { n, titel:o + ' offen · ' + a + ' in Bearbeitung · ' + (+s.erledigt || 0) + ' erledigt' } : null; },
     zeichen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.6 4.4A1.4 1.4 0 0 1 8 3h8a1.4 1.4 0 0 1 1.4 1.4V21l-5.4-3.1L6.6 21z"/><path d="M9.8 8h4.4"/></svg>' }
 ];
 const PLUS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>';
