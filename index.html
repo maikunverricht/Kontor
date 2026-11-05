@@ -204,6 +204,7 @@ pre.json{margin:14px 0 0;padding:12px 14px;border:1px solid var(--line);border-r
 .t-zahl{position:absolute;right:-9px;bottom:-7px;min-width:20px;height:20px;padding:0 6px;border-radius:100px;
   display:grid;place-items:center;font:600 10.5px/1 var(--mono);letter-spacing:0;
   background:var(--amber);color:var(--on-accent,#12171F);box-shadow:0 0 0 2px var(--void),0 4px 10px -4px rgba(0,0,0,.6);pointer-events:none}
+.t-zahl.rot{background:var(--red-ink,#E8646E);color:#fff}
 .s-txt{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .dot{display:block;width:9px;height:9px;border-radius:50%;background:var(--text-3);
   box-shadow:0 0 0 2px var(--glass-2);animation:pulse 1.4s ease-in-out infinite}
@@ -541,6 +542,9 @@ a.tile{color:inherit;text-decoration:none}
 #grid .tile[data-app="auftragsbuch"] .push{margin-top:4px;font-size:10.5px}
 #grid .tile[data-app="auftragsbuch"] .t-more{left:50%;margin-left:-125px}
 #grid .tile[data-app="rechnungsbuch"]{grid-column:1}
+/* Seit 05.11.2026: das Belegbuch steht als Schritt 6 neben dem Ausgang, unter dem Terminbuch. */
+#grid .tile[data-app="belegbuch"]{grid-column:3}
+#grid .tile[data-app="belegbuch"] .t-more{left:auto;right:0}
 /* Ausgang: kein Werkzeug, darum gestrichelt und ohne Glas. */
 #grid .ausgang{grid-column:2;width:var(--kw);position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;
   justify-content:flex-start;gap:6px;padding:4px 0 2px;border:0;
@@ -621,6 +625,12 @@ a.tile{color:inherit;text-decoration:none}
       </section>
       <section class="grid" id="gridBuero" aria-label="Büro-Werkzeuge"></section>
     </div>
+    <div class="slide" id="s-privat" aria-label="Privat">
+      <section class="hero">
+        <h1><span>Alles</span> <em>Private.</em></h1>
+      </section>
+      <section class="grid" id="gridPrivat" aria-label="Private Werkzeuge"></section>
+    </div>
   </div>
 </main>
 
@@ -648,10 +658,12 @@ a.tile{color:inherit;text-decoration:none}
       <svg viewBox="0 0 24 24"><path d="M14.7 6.3a3.7 3.7 0 0 0 4.9 4.9l-8 8a2.3 2.3 0 0 1-3.3-3.3z"/><path d="M14.7 6.3 17 4"/></svg></button>
     <button class="dock-btn" type="button" data-label="Büro" data-acc="#8FB8E8" data-acc-hell="#3F6FCB" aria-label="Büro">
       <svg viewBox="0 0 24 24"><rect x="3.5" y="8.5" width="17" height="11" rx="2"/><path d="M8.5 8.5V6.2a1.7 1.7 0 0 1 1.7-1.7h3.6a1.7 1.7 0 0 1 1.7 1.7v2.3M3.5 13h17"/></svg></button>
+    <button class="dock-btn" type="button" data-label="Privat" data-acc="#D9A86C" data-acc-hell="#A56B2F" aria-label="Privat">
+      <svg viewBox="0 0 24 24"><path d="M4 11.5 12 5l8 6.5"/><path d="M6.5 9.8V19h11V9.8"/><path d="M10 19v-4.6h4V19"/></svg></button>
   </div>
   <div class="dock-name" id="dockName">Kontor</div>
   <div class="dock-bead" id="bead" role="slider" tabindex="0" aria-label="Ansicht, mit den Pfeiltasten wechseln"
-       aria-valuemin="1" aria-valuemax="3" aria-valuenow="1" aria-valuetext="Kontor"></div>
+       aria-valuemin="1" aria-valuemax="4" aria-valuenow="1" aria-valuetext="Kontor"></div>
   <p class="dock-hint" id="dhint">Tippen – oder die Kugel ziehen</p>
 </nav>
 
@@ -717,6 +729,8 @@ a.tile{color:inherit;text-decoration:none}
      wb-auftragsstatus-data  Prozessschritt und To-dos   (Auftragsstatus)
      wb-terminbuch-data      Termine und Wiedervorlagen  (Terminbuch)
      wb-rechnungsbuch-data   Rechnungen und Zahlungen    (Rechnungsbuch)
+     wb-belegbuch-<bereich>-data     Zähler und Summen   (Belegbuch, kontor | privat)
+     wb-belegbuch-<bereich>-fristen  offene Rechnungen   (Belegbuch → Terminbuch)
    ════════════════════════════════════════════════════════════════ */
 const WB = (function(){
   const KANAL = 'werkbank', WECK = 'wb-signal';
@@ -769,6 +783,27 @@ const WB_NOTES_LS = 'wb-noteos-stand';
 const WB_STATUS_LS = 'wb-auftragsstatus-data';
 const WB_TERMIN_LS = 'wb-terminbuch-data';
 const WB_RECH_LS = 'wb-rechnungsbuch-data';
+/* Belegbuch: je Bereich eine Lesekopie mit Zählern und eine mit Fristen.
+   Keine Beträge einzelner Rechnungen, keine Pfade, kein Volltext. */
+const WB_BELEG_LS = { kontor:'wb-belegbuch-kontor-data', privat:'wb-belegbuch-privat-data' };
+const WB_BELEGFRIST_LS = { kontor:'wb-belegbuch-kontor-fristen', privat:'wb-belegbuch-privat-fristen' };
+function belegStand(bereich){
+  const d = WB.lesen(WB_BELEG_LS[bereich]);
+  if (!d || typeof d !== 'object') return null;
+  const jahr = String(new Date().getFullYear());
+  const abgelegt = d.jahre && d.jahre[jahr] ? (+d.jahre[jahr].anzahl || 0) : 0;
+  return { eingang:+d.eingang || 0, offen:+d.offen || 0, ueber:+d.ueberfaellig || 0, abgelegt, jahr };
+}
+function belegText(b){
+  return b.eingang + ' im Eingang · ' + b.offen + (b.offen === 1 ? ' Rechnung' : ' Rechnungen') + ' offen'
+       + (b.ueber ? ' (' + b.ueber + ' überfällig)' : '') + ' · ' + b.abgelegt + ' abgelegt ' + b.jahr;
+}
+/* Zahl an der Ecke: überfällige Rechnungen haben Vorrang (rot), sonst der Eingang. */
+function belegZahl(bereich){
+  const b = belegStand(bereich); if (!b) return null;
+  if (b.ueber) return { n:b.ueber, rot:true, titel:belegText(b) };
+  return b.eingang ? { n:b.eingang, titel:belegText(b) } : null;
+}
 
 /* Aussehen gilt für die ganze Werkbank. Geschrieben werden beide
    Schlüssel — jedes Werkzeug liest beim Start seinen eigenen, und so
@@ -810,7 +845,12 @@ const APPS = [
   { id:'rechnungsbuch',  name:'Rechnungsbuch',  tag:'Abrechnung',     gruppe:'prozess', schritt:5,
     url:'https://maikunverricht.github.io/Rechnungsbuch/',  repo:'Rechnungsbuch',
     fluss:'führt Rechnungen und Zahlungen · liest Stammdaten und Zeit · meldet Abgerechnetes zurück', rc:'var(--geld)',
-    desc:'Rechnung aus gebuchter Zeit: Entwurf, Festschreibung, offene Posten – Druck und Factur-X.' }
+    desc:'Rechnung aus gebuchter Zeit: Entwurf, Festschreibung, offene Posten – Druck und Factur-X.' },
+  { id:'belegbuch',      name:'Belegbuch',      tag:'Belege',         gruppe:'prozess', schritt:6,
+    url:'https://maikunverricht.github.io/Belegbuch/?bereich=kontor', repo:'Belegbuch',
+    fluss:'führt Belege, Steuerrubriken und Zahlstatus · meldet Rechnungsfristen', rc:'var(--geld)',
+    desc:'Eingangsbelege sammeln, lokal auswerten und nach Rubrik ablegen – mit offenen Rechnungen und Steuerpaket.',
+    zahl:() => belegZahl('kontor') }
   /* Das Notizbuch (früher NoteOS) steht seit 30.10.2026 unter „Produktiv“:
      ohne Leitung zum Auftragsbuch. Der Auftragsbezug lebt im Auftragsstatus. */
 ];
@@ -948,6 +988,10 @@ function standVon(id){
          + (spaet ? ' · ' + spaet + '× überfällig' : '')
          + (entw ? ' · ' + entw + (entw === 1 ? ' Entwurf' : ' Entwürfe') : '');
   }
+  if (id === 'belegbuch') {
+    const b = belegStand('kontor');
+    return b ? belegText(b) : null;
+  }
   if (id === 'stempeluhr') {
     const z = WB.lesen(WB_ZEIT_LS);
     if (!z || !z.gesamt) return null;
@@ -1021,6 +1065,10 @@ function offeneWelt(){
       text:'<b>' + woche + '</b> ' + (woche === 1 ? 'Frist' : 'Fristen') + ' in sieben Tagen' });
   }
 
+  const bk = belegStand('kontor');
+  if (bk && bk.ueber) p.push({ zu:'belegbuch', spaet:true, rot:true,
+    text:'<b>' + bk.ueber + '</b> ' + (bk.ueber === 1 ? 'Eingangsrechnung' : 'Eingangsrechnungen') + ' überfällig' });
+
   const el = document.getElementById('offen');
   if (!el) return;
   el.innerHTML = p.map(x =>
@@ -1032,11 +1080,22 @@ function offeneWelt(){
 
 function staendeZeigen(){
   tiles.forEach(t => {
+    if (t.app.zahl) zahlSetzen(t, t.app.zahl);
     const s = standVon(t.app.id);
     if (!s) return;
     t.push.textContent = s;
     t.push.classList.toggle('run', /läuft/.test(s));
   });
+}
+
+/* Zahl an der Ecke eines Zeichens setzen (Kontor, Produktiv, Büro, Privat). */
+function zahlSetzen(t, fn){
+  let el = t.el.querySelector('.t-zahl');
+  if (!el) { el = document.createElement('span'); el.className = 't-zahl'; el.hidden = true; t.shot.appendChild(el); }
+  let z = null; try { z = fn(); } catch (e) {}
+  el.hidden = !z;
+  el.classList.toggle('rot', !!(z && z.rot));
+  if (z) { el.textContent = z.n > 999 ? '999+' : String(z.n); el.title = z.titel || ''; el.setAttribute('aria-label', z.titel || String(z.n)); }
 }
 
 /* ───────── Zeichen je Werkzeug ─────────
@@ -1050,10 +1109,11 @@ const ZEICHEN = {
   auftragsstatus: SVG('<path d="M4.6 6.6h14.8M4.6 12h9.4M4.6 17.4h5.4"/>'),
   terminbuch:     SVG('<rect x="3.6" y="5.4" width="16.8" height="15" rx="2.2"/><path d="M3.6 10h16.8M8 3.4v3.4M16 3.4v3.4"/><path d="M7.6 13.8h2.2M13.6 13.8h2.8M7.6 17h4.6"/>'),
   rechnungsbuch:  SVG('<path d="M6 3.4h9.2L19 7.2V20.6H6z"/><path d="M14.6 3.6v3.8H18.8"/><path d="M8.8 11.6h7M8.8 14.8h7M8.8 18h3.6"/>'),
+  belegbuch:      SVG('<path d="M6 3.4h12V21l-2.4-1.5L13.2 21l-2.4-1.5L8.4 21 6 19.5z"/><path d="M9 8h6M9 11.4h6M9 14.8h3.6"/>'),
   noteos:         SVG('<path d="M6.6 4.4A1.4 1.4 0 0 1 8 3h8a1.4 1.4 0 0 1 1.4 1.4V21l-5.4-3.1L6.6 21z"/><path d="M9.8 8h4.4"/>'),
 };
 const SYMFARBE = { auftragsbuch:'var(--amber)', stempeluhr:'var(--teal)', auftragsstatus:'var(--em-2)',
-                   terminbuch:'var(--info)', rechnungsbuch:'var(--geld)',
+                   terminbuch:'var(--info)', rechnungsbuch:'var(--geld)', belegbuch:'var(--geld)',
                    noteos:'var(--text-3)' };
 
 /* ───────── Kacheln aufbauen ───────── */
@@ -1086,7 +1146,7 @@ APPS.forEach((app, i) => {
       </span>
       <span class="t-nm">
         <span class="t-idx">${app.schritt ? `<b>${pad2(app.schritt)}</b> · ` : ''}${esc(app.tag)}</span>
-        <h2>${esc(app.name).replace(/^(Auftrags|Rechnungs|Termin|Stempel)/,'$1&shy;')}</h2>
+        <h2>${esc(app.name).replace(/^(Auftrags|Rechnungs|Termin|Stempel|Beleg)/,'$1&shy;')}</h2>
       </span>
       <button class="more" type="button" aria-expanded="false">…mehr</button>
     </div>
@@ -1220,10 +1280,13 @@ const FLUSS = [
   { von:'rechnungsbuch',  nach:'auftragsbuch',   art:'geld',  seite:-1, was:'Abgerechnet je Auftrag' },
   /* Seit 20.09.2026 im Datenfluss beschrieben, im Bild bis 01.10.2026 vergessen:
      die Stempeluhr liest, welche Buchung schon auf einer Rechnung steht. */
-  { von:'rechnungsbuch',  nach:'stempeluhr',     art:'abger', seite:-1, was:'Abgerechnete Buchungen' }
+  { von:'rechnungsbuch',  nach:'stempeluhr',     art:'abger', seite:-1, was:'Abgerechnete Buchungen' },
+  /* Seit 05.11.2026: offene Eingangsrechnungen laufen als Fristen ins Terminbuch.
+     Die Leitung Rechnungsbuch → Belegbuch (WB-17) kommt erst, wenn die Übernahme im Belegbuch eingeschaltet ist. */
+  { von:'belegbuch',      nach:'terminbuch',     art:'belegfrist', seite:-1, was:'Fristen offener Eingangsrechnungen' }
 ];
 const BUSFARBE = { abger:'var(--geld)', stamm:'var(--amber)', kat:'var(--amber)', zeit:'var(--teal)', summe:'var(--teal)',
-                   frist:'var(--em-2)', geld:'var(--geld)', opt:'var(--text-3)', notiz:'var(--text-3)' };
+                   frist:'var(--em-2)', geld:'var(--geld)', belegfrist:'var(--geld)', opt:'var(--text-3)', notiz:'var(--text-3)' };
 /* Durchgezogen heißt: verknüpft über IDs. Gepunktet: wandert nur mit
    gesetztem Haken zurück.
    Seit NoteOS die `agbId` an der Notiz führt, läuft keine Leitung mehr über
@@ -1247,7 +1310,9 @@ const QUELLE = {
   /* Was je Auftrag gestellt wurde – das Auftragsbuch rechnet daraus
      den tatsächlichen Stundensatz. Gelesen wird die ganze Kopie. */
   geld:  { ls:'wb-rechnungsbuch-data', idb:'wb-rechnungsbuch', datei:'rechnungsbuch.json', feld:'rechnungen' },
-  abger: { ls:'wb-rechnungsbuch-data', idb:'wb-rechnungsbuch', datei:'rechnungsbuch.json', feld:'abgerechnet' }
+  abger: { ls:'wb-rechnungsbuch-data', idb:'wb-rechnungsbuch', datei:'rechnungsbuch.json', feld:'abgerechnet' },
+  /* Nur Aussteller und Datum offener Rechnungen – ohne Beträge (WB-10). */
+  belegfrist: { ls:'wb-belegbuch-kontor-fristen', idb:null, datei:'belegbuch-fristen.json', feld:null }
 };
 function kennzahlen(art, d){
   const z = [];
@@ -1287,6 +1352,14 @@ function kennzahlen(art, d){
     z.push(['Rechnungen', r.length]);
     z.push(['festgeschrieben', r.filter(x => x && x.festgeschrieben).length]);
     z.push(['mit Auftrag', r.filter(x => x && x.aufId).length]);
+  } else if (art === 'belegfrist' && Array.isArray(d)) {
+    const heute = isoTag(Date.now());
+    z.push(['offene Rechnungen', d.length]);
+    z.push(['davon überfällig', d.filter(x => x && x.faellig && x.faellig < heute).length]);
+    const n = d.filter(x => x && x.faellig && x.faellig >= heute).sort((a, b) => a.faellig.localeCompare(b.faellig))[0];
+    if (n) z.push(['nächste Fälligkeit', nfT.format(new Date(n.faellig + 'T12:00:00'))]);
+    const b = belegStand('kontor'); if (b) z.push(['im Eingang', b.eingang]);
+    return z;
   } else if (art === 'abger') {
     const k = d.abgerechnet && typeof d.abgerechnet === 'object' ? d.abgerechnet : {};
     z.push(['abgerechnete Buchungen', Object.keys(k).length]);
@@ -1777,6 +1850,16 @@ const BUERO = [
   { name:'Frei', tag:'folgt' },
   { name:'Frei', tag:'folgt' }
 ];
+/* Seit 05.11.2026: die private Seite. Gleiche Kacheln, eigene Ablage dahinter:
+   das Belegbuch läuft hier im Bereich Privat und mischt nichts mit dem Kontor. */
+const PRIVAT = [
+  { id:'belegbuch-privat', name:'Belegbuch', tag:'Steuerbelege', url:'https://maikunverricht.github.io/Belegbuch/?bereich=privat',
+    desc:'Steuerbelege sammeln und je Rubrik ablegen – mit offenen Rechnungen und Steuerpaket fürs Jahr.', farbe:'var(--geld)',
+    zahl:() => belegZahl('privat'),
+    zeichen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3.4h12V21l-2.4-1.5L13.2 21l-2.4-1.5L8.4 21 6 19.5z"/><path d="M9 8h6M9 11.4h6M9 14.8h3.6"/></svg>' },
+  { name:'Frei', tag:'folgt' },
+  { name:'Frei', tag:'folgt' }
+];
 function ansichtBauen(LISTE, gridEl){
 const prodTiles = [];
 LISTE.forEach((w, i) => {
@@ -1788,7 +1871,7 @@ LISTE.forEach((w, i) => {
   el.innerHTML = `
     <div class="tile-bg"></div>
     <div class="t-head">
-      <span class="shot"${echt ? ` role="button" tabindex="0" aria-label="${esc(w.name)} öffnen" style="color:var(--teal)"` : ' aria-hidden="true"'}>${w.zeichen || PLUS}${echt ? '<span class="state" data-s="bereit"><span class="dot"></span><span class="s-txt">bereit</span></span>' : ''}${w.zahl ? '<span class="t-zahl" hidden></span>' : ''}</span>
+      <span class="shot"${echt ? ` role="button" tabindex="0" aria-label="${esc(w.name)} öffnen" style="color:${w.farbe || 'var(--teal)'}"` : ' aria-hidden="true"'}>${w.zeichen || PLUS}${echt ? '<span class="state" data-s="bereit"><span class="dot"></span><span class="s-txt">bereit</span></span>' : ''}${w.zahl ? '<span class="t-zahl" hidden></span>' : ''}</span>
       <span class="t-nm">
         <span class="t-idx"><b>${pad2(i+1)}</b> · ${esc(w.tag || '')}</span>
         <h2>${esc(w.name).replace(/^(Code|Kapazitäten|Belegungs|Testcase)/,'$1&shy;')}</h2>
@@ -1810,20 +1893,22 @@ LISTE.forEach((w, i) => {
 }
 ansichtBauen(PRODUKTIV, $('#gridProd'));
 ansichtBauen(BUERO, $('#gridBuero'));
+ansichtBauen(PRIVAT, $('#gridPrivat'));
 /* Zahlen an den Ecken der Zeichen – aus den Lesekopien, ohne Netz. */
 function zahlenZeigen(){
-  PRODUKTIV.concat(BUERO).forEach(w => {
+  PRODUKTIV.concat(BUERO, PRIVAT).forEach(w => {
     if (!w.zahl || !byId[w.id]) return;
     const el = byId[w.id].el.querySelector('.t-zahl');
     if (!el) return;
     let z = null; try { z = w.zahl(); } catch(e){}
     el.hidden = !z;
+    el.classList.toggle('rot', !!(z && z.rot));
     if (z){ el.textContent = z.n > 999 ? '999+' : String(z.n); el.title = z.titel || ''; el.setAttribute('aria-label', z.titel || String(z.n)); }
   });
 }
 zahlenZeigen();
 WB.horchen(null, zahlenZeigen);
-addEventListener('storage', e => { if (!e.key || e.key === WB_NOTES_LS) zahlenZeigen(); });
+addEventListener('storage', e => { if (!e.key || e.key === WB_NOTES_LS || e.key.startsWith('wb-belegbuch-')) { zahlenZeigen(); staendeZeigen(); offeneWelt(); } });
 addEventListener('visibilitychange', () => { if (!document.hidden) zahlenZeigen(); });
 
 const slidesEl = $('#slides');
@@ -2011,7 +2096,7 @@ addEventListener('keydown', e => {
 });
 try {
   const k = +localStorage.getItem(SLIDE_LS);
-  if (k > 0 && k < 3) requestAnimationFrame(() => { zuSlide(k, false); Dock.setzen(k, false, true); Dock.aufbauen(); });
+  if (k > 0 && k < 4) requestAnimationFrame(() => { zuSlide(k, false); Dock.setzen(k, false, true); Dock.aufbauen(); });
 } catch (e) {}
 
 /* ───────── Start ───────── */
