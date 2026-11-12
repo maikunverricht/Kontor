@@ -21,7 +21,8 @@
 <script>
 (function(){var t=null;try{t=localStorage.getItem('wb-cockpit-theme')}catch(e){}
 if(t!=='light'&&t!=='dark'){t=window.matchMedia&&matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'}
-document.documentElement.setAttribute('data-theme',t);})();
+document.documentElement.setAttribute('data-theme',t);
+document.documentElement.classList.add('wb-vorab');})();
 </script>
 <style>
 :root{
@@ -205,6 +206,7 @@ pre.json{margin:14px 0 0;padding:12px 14px;border:1px solid var(--line);border-r
   display:grid;place-items:center;font:600 10.5px/1 var(--mono);letter-spacing:0;
   background:var(--amber);color:var(--on-accent,#12171F);box-shadow:0 0 0 2px var(--void),0 4px 10px -4px rgba(0,0,0,.6);pointer-events:none}
 .t-zahl.rot{background:var(--red-ink,#E8646E);color:#fff}
+.t-zahl[hidden]{display:none}
 .s-txt{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .dot{display:block;width:9px;height:9px;border-radius:50%;background:var(--text-3);
   box-shadow:0 0 0 2px var(--glass-2);animation:pulse 1.4s ease-in-out infinite}
@@ -493,6 +495,47 @@ html[data-theme="light"] .wipe{mix-blend-mode:multiply}
 .tile.platz .shot{border:1px dashed var(--line);background:transparent;color:var(--text-3)}
 .tile.platz h2{color:var(--text-2)}
 a.tile{color:inherit;text-decoration:none}
+/* Mein Werkzeugkasten (12.11.2026): nur, was die Lizenz auf diesem Gerät freischaltet. */
+.mein-info{margin:8px 0 0;font-family:var(--mono);font-size:11.5px;letter-spacing:.04em;color:var(--text-3);line-height:1.5}
+.mein-info b{color:var(--text-2);font-weight:500}
+.mein-leer{grid-column:1/-1;margin:0;padding:22px 18px;border:1px dashed var(--line);border-radius:15px;
+  text-align:center;color:var(--text-3);font-size:14px;line-height:1.55}
+.tile.nurlesen .shot{opacity:.55}
+/* Ansichten ein- und ausblenden (12.11.2026) */
+html.wb-vorab .slides,html.wb-vorab .dock{visibility:hidden}
+.slide[hidden],.dock-btn[hidden]{display:none!important}
+.ans-menue{position:relative}
+.ans-pfeil{font-size:10px;color:var(--text-3);transition:transform var(--t-s)}
+#ansBtn[aria-expanded="true"]{background:var(--glass);border-color:var(--line-hi)}
+#ansBtn[aria-expanded="true"] .ans-pfeil{transform:rotate(180deg)}
+.ans-panel{position:absolute;right:0;top:calc(100% + 10px);z-index:45;width:250px;padding:12px 14px 10px;
+  border:1px solid var(--glass-edge);border-radius:16px;background:var(--surface,var(--glass-2));box-shadow:var(--shadow-lg);
+  -webkit-backdrop-filter:blur(18px) saturate(1.3);backdrop-filter:blur(18px) saturate(1.3)}
+.ans-panel[hidden]{display:none}
+.ans-kopf{margin:0 0 6px;font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--text-3)}
+.ans-fuss{margin:8px 0 0;padding-top:8px;border-top:1px solid var(--line);font-size:11.5px;line-height:1.45;color:var(--text-3)}
+.ans-zeile{display:flex;align-items:center;gap:10px;padding:7px 0;cursor:pointer;font-size:14px;font-weight:500}
+.ans-zeile span{flex:1;min-width:0}
+.ans-zeile small{display:block;font-family:var(--mono);font-size:10px;font-weight:400;color:var(--text-3);letter-spacing:.04em}
+.ans-zeile.aus{cursor:not-allowed;color:var(--text-3)}
+/* Schieberegler */
+.ans-zeile input{appearance:none;-webkit-appearance:none;margin:0;flex:none;position:relative;width:38px;height:22px;
+  border-radius:100px;background:var(--line-strong,rgba(255,255,255,.17));cursor:inherit;transition:background var(--t-s)}
+.ans-zeile input::after{content:"";position:absolute;left:3px;top:3px;width:16px;height:16px;border-radius:50%;
+  background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.35);transition:transform var(--t-s) var(--kurve,ease)}
+.ans-zeile input:checked{background:var(--teal)}
+.ans-zeile input:checked::after{transform:translateX(16px)}
+.ans-zeile input:disabled{opacity:.4}
+.ans-zeile input:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+@media (max-width:720px){
+  .nav-r{gap:5px}
+  .nav-r .pill{padding:0 11px}
+  .nav-r .pill.icon-btn,#ansBtn{width:36px;padding:0;justify-content:center}
+  .ans-pfeil{display:none}
+  .ans-panel{right:-44px;width:min(250px,calc(100vw - 40px))}
+}
+/* Schmales Telefon: die Marke bleibt als Zeichen, das Wort weicht den Knöpfen. */
+@media (max-width:420px){ .brand b{display:none} }
 
 /* ═══ Kontor als Schaltbild (26.10.2026) ═══
    Oben das Auftragsbuch als Quelle über die ganze Breite, darunter in drei
@@ -595,6 +638,16 @@ a.tile{color:inherit;text-decoration:none}
       <button class="pill" id="alleSichern" type="button" title="Bestände aller Werkzeuge als eine JSON-Datei sichern">Sichern ↓</button>
       <button class="pill" id="alleLaden" type="button" title="Sicherung (JSON) einspielen">Laden ↑</button>
       <input type="file" id="ladeDatei" accept=".json,application/json" hidden>
+      <div class="ans-menue">
+        <button class="pill" id="ansBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="ansPanel" title="Ansichten ein- und ausblenden">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg>
+          <span class="hide-sm">Ansichten</span><span class="ans-pfeil" aria-hidden="true">▾</span></button>
+        <div class="ans-panel" id="ansPanel" role="group" aria-label="Ansichten im Dock" hidden>
+          <p class="ans-kopf">Ansichten im Dock</p>
+          <div id="ansWahl"></div>
+          <p class="ans-fuss">Ohne Lizenz bleibt eine Ansicht aus. Der Werkzeugkasten bleibt immer.</p>
+        </div>
+      </div>
       <button class="pill icon-btn" id="themeBtn" type="button" aria-label="Hell/Dunkel umschalten">
         <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
         <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
@@ -605,9 +658,10 @@ a.tile{color:inherit;text-decoration:none}
 
 <main>
   <div class="slides" id="slides">
-    <div class="slide" id="s-kontor" aria-label="Kontor">
+    <div class="slide" id="s-kontor" aria-label="Meine Firma">
       <section class="hero">
-        <h1><span>Der ganze Ablauf</span> <em>an einem Ort.</em></h1>
+        <h1><span>Meine</span> <em>Firma.</em></h1>
+        <p class="mein-info">Der ganze Ablauf an einem Ort – vom Auftrag bis zum Geldeingang.</p>
       </section>
       <section class="grid" id="grid" aria-label="Werkzeuge">
         <div class="offen" id="offen" aria-live="polite"></div>
@@ -631,6 +685,13 @@ a.tile{color:inherit;text-decoration:none}
       </section>
       <section class="grid" id="gridPrivat" aria-label="Private Werkzeuge"></section>
     </div>
+    <div class="slide" id="s-mein" aria-label="Mein Werkzeugkasten">
+      <section class="hero">
+        <h1><span>Mein</span> <em>Werkzeugkasten.</em></h1>
+        <p class="mein-info" id="meinInfo"></p>
+      </section>
+      <section class="grid" id="gridMein" aria-label="Lizenzierte Werkzeuge"></section>
+    </div>
   </div>
 </main>
 
@@ -652,7 +713,7 @@ a.tile{color:inherit;text-decoration:none}
     <path class="dock-plate" id="plate" d=""/>
   </svg>
   <div class="dock-row" id="drow">
-    <button class="dock-btn is-active" type="button" data-label="Kontor" data-acc="#F2B33D" data-acc-hell="#E0A21F" aria-label="Kontor">
+    <button class="dock-btn is-active" type="button" data-label="Firma" data-acc="#F2B33D" data-acc-hell="#E0A21F" aria-label="Meine Firma">
       <svg viewBox="0 0 24 24"><path d="M4 20V8.5L12 4l8 4.5V20"/><path d="M9 20v-6h6v6M3 20h18"/></svg></button>
     <button class="dock-btn" type="button" data-label="Produktiv" data-acc="#63D9C4" data-acc-hell="#2FA894" aria-label="Produktiv">
       <svg viewBox="0 0 24 24"><path d="M14.7 6.3a3.7 3.7 0 0 0 4.9 4.9l-8 8a2.3 2.3 0 0 1-3.3-3.3z"/><path d="M14.7 6.3 17 4"/></svg></button>
@@ -660,10 +721,12 @@ a.tile{color:inherit;text-decoration:none}
       <svg viewBox="0 0 24 24"><rect x="3.5" y="8.5" width="17" height="11" rx="2"/><path d="M8.5 8.5V6.2a1.7 1.7 0 0 1 1.7-1.7h3.6a1.7 1.7 0 0 1 1.7 1.7v2.3M3.5 13h17"/></svg></button>
     <button class="dock-btn" type="button" data-label="Privat" data-acc="#D9A86C" data-acc-hell="#A56B2F" aria-label="Privat">
       <svg viewBox="0 0 24 24"><path d="M4 11.5 12 5l8 6.5"/><path d="M6.5 9.8V19h11V9.8"/><path d="M10 19v-4.6h4V19"/></svg></button>
+    <button class="dock-btn" type="button" data-label="Werkzeugkasten" data-acc="#B79CF2" data-acc-hell="#7552C9" aria-label="Mein Werkzeugkasten">
+      <svg viewBox="0 0 24 24"><path d="M3.5 10.5h17V19a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 19z"/><path d="M3.5 10.5 6 7h12l2.5 3.5"/><path d="M9.5 7V5h5v2"/><path d="M3.5 14.2h17M11 14.2v1.8h2v-1.8"/></svg></button>
   </div>
-  <div class="dock-name" id="dockName">Kontor</div>
+  <div class="dock-name" id="dockName">Firma</div>
   <div class="dock-bead" id="bead" role="slider" tabindex="0" aria-label="Ansicht, mit den Pfeiltasten wechseln"
-       aria-valuemin="1" aria-valuemax="4" aria-valuenow="1" aria-valuetext="Kontor"></div>
+       aria-valuemin="1" aria-valuemax="5" aria-valuenow="1" aria-valuetext="Firma"></div>
   <p class="dock-hint" id="dhint">Tippen – oder die Kugel ziehen</p>
 </nav>
 
@@ -1768,6 +1831,7 @@ function close({ animate = true } = {}){
     t.frame.classList.remove('fixed'); clearRect(t);
     root.classList.remove('locked');
     current = null; busy = false; fit(t);
+    if (meinNachholen) { meinNachholen = false; meinBauen(); }
     document.title = 'Kontor · Werkbank Unverricht';
     t.shot.focus({ preventScroll:true });
   });
@@ -1874,7 +1938,7 @@ LISTE.forEach((w, i) => {
       <span class="shot"${echt ? ` role="button" tabindex="0" aria-label="${esc(w.name)} öffnen" style="color:${w.farbe || 'var(--teal)'}"` : ' aria-hidden="true"'}>${w.zeichen || PLUS}${echt ? '<span class="state" data-s="bereit"><span class="dot"></span><span class="s-txt">bereit</span></span>' : ''}${w.zahl ? '<span class="t-zahl" hidden></span>' : ''}</span>
       <span class="t-nm">
         <span class="t-idx"><b>${pad2(i+1)}</b> · ${esc(w.tag || '')}</span>
-        <h2>${esc(w.name).replace(/^(Code|Kapazitäten|Belegungs|Testcase)/,'$1&shy;')}</h2>
+        <h2>${esc(w.name).replace(/^(Code|Kapazitäten|Belegungs|Testcase|Auftrags|Rechnungs|Termin|Stempel|Beleg)/,'$1&shy;')}</h2>
       </span>
     </div>
     <span class="push">${w.desc ? esc(w.desc) : (echt ? '' : 'Platz für ein Werkzeug')}</span>`;
@@ -1890,13 +1954,101 @@ LISTE.forEach((w, i) => {
   el.addEventListener('click', () => { if (!t.frame.classList.contains('live')) open(w.id); });
   t.shot.addEventListener('keydown', e => { if ((e.key==='Enter'||e.key===' ') && !current) { e.preventDefault(); open(w.id); } });
 });
+return prodTiles;
 }
 ansichtBauen(PRODUKTIV, $('#gridProd'));
 ansichtBauen(BUERO, $('#gridBuero'));
 ansichtBauen(PRIVAT, $('#gridPrivat'));
+
+/* ───────── Mein Werkzeugkasten ─────────
+   Seit 12.11.2026. Zeigt nur die Werkzeuge, die die Lizenz auf diesem Gerät
+   freischaltet (localStorage `wb-lizenz`, siehe lizenz.md). Geprüft wird wie in
+   jedem Werkzeug: ECDSA P-256 gegen den Prüfschlüssel der Lizenzstelle, offline.
+   Die Ansicht schreibt nichts – freigeschaltet wird weiter im Werkzeug selbst. */
+const LIZ_LS = 'wb-lizenz';
+const LIZ_PUB = 'MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAESwn5vJH6rMd87uKAXdmC4qXnI47PQn7lpnDtpPfzuv4bhSIp2QkxeL2RC7cVaXbnD0lZRdh6g3b+x3MYKm61Pg==';
+/* Kennung in der Lizenz → Kacheln. Das Notizbuch heißt in der Lizenz noch `noteos`;
+   das Belegbuch steht im Kontor und unter Privat. */
+const LIZ_KACHEL = { noteos:['notizbuch'], belegbuch:['belegbuch','belegbuch-privat'] };
+const KATALOG = APPS.map(a => Object.assign({}, a, { zeichen:ZEICHEN[a.id], farbe:SYMFARBE[a.id] }))
+  .concat(PRODUKTIV, BUERO, PRIVAT).filter(w => w.id && w.url);
+
+const b64u = s => { s = String(s).replace(/-/g,'+').replace(/_/g,'/'); while (s.length % 4) s += '=';
+  return Uint8Array.from(atob(s), c => c.charCodeAt(0)); };
+const tagDe = iso => iso ? String(iso).split('-').reverse().join('.') : '';
+async function lizenzLesen(){
+  const roh = store.get(LIZ_LS);
+  if (!roh) return { grund:'keine' };
+  try {
+    const m = String(roh).replace(/\s+/g,'').match(/WB1\.([A-Za-z0-9\-_]+)\.([A-Za-z0-9\-_]+)/);
+    if (!m) return { grund:'format' };
+    const daten = b64u(m[1]), sig = b64u(m[2]);
+    const key = await crypto.subtle.importKey('spki', Uint8Array.from(atob(LIZ_PUB), c => c.charCodeAt(0)),
+      { name:'ECDSA', namedCurve:'P-256' }, false, ['verify']);
+    if (!await crypto.subtle.verify({ name:'ECDSA', hash:'SHA-256' }, key, sig, daten)) return { grund:'signatur' };
+    const p = JSON.parse(new TextDecoder().decode(daten));
+    if (!p || p.v !== 1 || !Array.isArray(p.w)) return { grund:'format' };
+    return { p };
+  } catch (e) { return { grund:'ungueltig' }; }
+}
+
+let MEIN = [], meinTiles = [], meinErst = true, LIZ = null;
+function lizenzIds(p){
+  if (!p) return null;
+  const ids = new Set();
+  p.w.forEach(k => (LIZ_KACHEL[k] || [k]).forEach(x => ids.add(x)));
+  return { alle: p.w.indexOf('*') >= 0, ids };
+}
+async function meinBauen(){
+  LIZ = await lizenzLesen();
+  try { meinKacheln(LIZ); } finally { ansichtenAnwenden(); }
+}
+function meinKacheln({ p, grund }){
+  /* Unter einem offenen Werkzeug wird nicht umgebaut – beim Schließen holt es nach. */
+  if (current && current.app.id.startsWith('mein-')) { meinNachholen = true; return; }
+  meinTiles.forEach(t => { t.frame.remove(); delete byId[t.app.id]; });
+  const g = $('#gridMein'), info = $('#meinInfo');
+  g.innerHTML = '';
+  MEIN = [];
+  if (!p) {
+    info.textContent = '';
+    g.innerHTML = '<p class="mein-leer">' + (grund === 'keine'
+      ? 'Auf diesem Gerät liegt noch keine Lizenz. Öffne ein Werkzeug und tippe auf „Freischalten“ – danach steht es hier.'
+      : 'Die hinterlegte Lizenz lässt sich nicht prüfen. Füge den Schlüssel in einem Werkzeug neu ein.') + '</p>';
+    meinTiles = [];
+    return;
+  }
+  const alle = p.w.indexOf('*') >= 0;
+  const ids = new Set();
+  p.w.forEach(k => (LIZ_KACHEL[k] || [k]).forEach(x => ids.add(x)));
+  const heute = isoTag(Date.now());
+  const abgelaufen = p.m === 'miete' && p.b && heute > p.b;
+  MEIN = KATALOG.filter(w => alle || ids.has(w.id)).map(w => Object.assign({}, w, {
+    id:'mein-' + w.id, tag: abgelaufen ? 'nur lesen' : (w.id === 'belegbuch-privat' ? 'Privat · ' + w.tag : w.tag) }));
+  info.innerHTML = 'Lizenz <b>' + esc(p.id || '–') + '</b>' + (p.n ? ' · ' + esc(p.n) : '')
+    + ' · ' + (p.m === 'miete' ? 'Miete' + (p.b ? (abgelaufen ? ' · abgelaufen am ' : ' · bis ') + tagDe(p.b) : '')
+                              : 'Kauf' + (p.b ? ' · Wartung bis ' + tagDe(p.b) : ''))
+    + ' · ' + (alle ? 'alle Werkzeuge' : MEIN.length + (MEIN.length === 1 ? ' Werkzeug' : ' Werkzeuge'));
+  if (!MEIN.length) {
+    g.innerHTML = '<p class="mein-leer">Die Lizenz nennt kein Werkzeug, das hier steht.</p>';
+    meinTiles = [];
+    return;
+  }
+  meinTiles = ansichtBauen(MEIN, g);
+  if (abgelaufen) meinTiles.forEach(t => t.el.classList.add('nurlesen'));
+  zahlenZeigen();
+  if (meinErst) {
+    meinErst = false;
+    const h = location.hash.slice(1);
+    if (h.startsWith('mein-') && byId[h] && !current) open(h, { animate:false });
+  }
+}
+let meinNachholen = false;
+addEventListener('storage', e => { if (!e.key || e.key === LIZ_LS) meinBauen(); });
+
 /* Zahlen an den Ecken der Zeichen – aus den Lesekopien, ohne Netz. */
 function zahlenZeigen(){
-  PRODUKTIV.concat(BUERO, PRIVAT).forEach(w => {
+  PRODUKTIV.concat(BUERO, PRIVAT, MEIN).forEach(w => {
     if (!w.zahl || !byId[w.id]) return;
     const el = byId[w.id].el.querySelector('.t-zahl');
     if (!el) return;
@@ -1913,6 +2065,8 @@ addEventListener('visibilitychange', () => { if (!document.hidden) zahlenZeigen(
 
 const slidesEl = $('#slides');
 const SLIDE_LS = 'wb-kontor-ansicht';
+/* Vor dem Aufbau des Docks lesen – das Dock schreibt beim Start die erste Ansicht hinein. */
+const ansGemerkt = store.get(SLIDE_LS);
 function slideIdx(){ return Math.round(slidesEl.scrollLeft / Math.max(1, slidesEl.clientWidth)); }
 function zuSlide(k, glatt = true){
   slidesEl.scrollTo({ left: k * slidesEl.clientWidth, behavior: glatt && !reduce ? 'smooth' : 'auto' });
@@ -1934,13 +2088,17 @@ const Dock = (function(){
   const K = DOCK;
   const dock=$('#dock'), row=$('#drow'), skin=$('#skin'), plate=$('#plate'),
         blur=$('#dblur'), wash=$('#wash'), bead=$('#bead'), nameEl=$('#dockName'), hint=$('#dhint');
-  const btns=[...row.querySelectorAll('.dock-btn')];
+  const alleBtns=[...row.querySelectorAll('.dock-btn')];
+  let btns=alleBtns.slice(), aktivBtn=null;
   const G={}, centers=[];
   let active=0, x=0, vx=0, ziel=0, zieht=false, raf=null, last=0;
   const kannSchneiden = window.CSS && CSS.supports && CSS.supports('clip-path','path("M0 0Z")');
   if (!kannSchneiden) blur.style.display='none';
 
   function masse(){
+    btns = alleBtns.filter(b => !b.hidden);
+    centers.length = 0;
+    if (active >= btns.length) active = 0;
     const schmal = innerWidth < K.schmalAb;
     G.item=schmal?K.feldSchmal:K.feldBreit; G.pad=schmal?K.randSchmal:K.randBreit;
     G.R=schmal?K.eckradiusSchmal:K.eckradius;
@@ -1961,6 +2119,7 @@ const Dock = (function(){
     btns.forEach((b,i) => { b.style.width=G.item+'px'; centers[i]=G.pad+G.item*i+G.item/2; });
     bead.style.width=bead.style.height=(G.rb*2)+'px';
     nameEl.style.top=(G.top+G.H-17)+'px';
+    bead.setAttribute('aria-valuemax', btns.length);
     x=ziel=centers[active]; vx=0;
     zeichnen();
   }
@@ -2027,21 +2186,21 @@ const Dock = (function(){
   function sperren(){ gesperrt=true; clearTimeout(sperrT); sperrT=setTimeout(() => { gesperrt=false; }, 700); }
   function setzen(i, hinfahren, still){
     if (i<0 || i>=btns.length) return;
-    const anders = i!==active || !bead.firstChild;
-    active=i;
-    btns.forEach((el,j) => el.classList.toggle('is-active', j===i));
+    const anders = btns[i]!==aktivBtn || !bead.firstChild;
+    active=i; aktivBtn=btns[i];
+    alleBtns.forEach(el => el.classList.toggle('is-active', el===btns[i]));
     farbe();
     nameEl.textContent=btns[i].dataset.label;
     bead.setAttribute('aria-valuenow', i+1);
     bead.setAttribute('aria-valuetext', btns[i].dataset.label);
     if (anders) { bead.innerHTML=btns[i].querySelector('svg').outerHTML; if (!still) welle(); }
     if (hinfahren) { sperren(); zuSlide(i); }
-    try { localStorage.setItem(SLIDE_LS, String(i)); } catch (e) {}
+    try { localStorage.setItem(SLIDE_LS, btns[i].dataset.label); } catch (e) {}
   }
   let getippt=false;
   function hinweisWeg(){ if (!getippt) { getippt=true; hint.style.opacity=0; } }
 
-  btns.forEach((b,i) => b.addEventListener('click', () => { hinweisWeg(); ziel=centers[i]; setzen(i,true); feder(); }));
+  alleBtns.forEach(b => b.addEventListener('click', () => { const i=btns.indexOf(b); if (i<0) return; hinweisWeg(); ziel=centers[i]; setzen(i,true); feder(); }));
   bead.addEventListener('pointerdown', e => {
     zieht=true; hinweisWeg(); e.preventDefault();
     try { bead.setPointerCapture(e.pointerId); } catch (err) {}
@@ -2084,22 +2243,93 @@ const Dock = (function(){
 
   addEventListener('resize', () => { aufbauen(); zuSlide(active, false); });
   new MutationObserver(farbe).observe(root, { attributes:true, attributeFilter:['data-theme'] });
-  return { aufbauen, setzen, get active(){ return active; },
+  return { aufbauen, setzen, get active(){ return active; }, get anzahl(){ return btns.length; },
+           get label(){ return btns[active] ? btns[active].dataset.label : ''; },
+           indexVon(label){ return btns.findIndex(b => b.dataset.label === label); },
            gehe(i){ hinweisWeg(); ziel=centers[i]; setzen(i,true); feder(); } };
 })();
 Dock.aufbauen(); Dock.setzen(0,false,true);
 
 addEventListener('keydown', e => {
   if (current || e.target.closest('input,textarea,select,[contenteditable],#bead')) return;
-  if (e.key === 'ArrowRight' && Dock.active < 2) Dock.gehe(Dock.active + 1);
+  if (e.key === 'ArrowRight' && Dock.active < Dock.anzahl - 1) Dock.gehe(Dock.active + 1);
   else if (e.key === 'ArrowLeft' && Dock.active > 0) Dock.gehe(Dock.active - 1);
 });
-try {
-  const k = +localStorage.getItem(SLIDE_LS);
-  if (k > 0 && k < 4) requestAnimationFrame(() => { zuSlide(k, false); Dock.setzen(k, false, true); Dock.aufbauen(); });
-} catch (e) {}
+/* ───────── Ansichten ein- und ausblenden ─────────
+   Seit 12.11.2026. Eine Ansicht erscheint im Dock nur, wenn die Lizenz
+   mindestens ein Werkzeug darin freischaltet – und sie nicht von Hand
+   ausgeblendet ist. Der Werkzeugkasten bleibt immer: dort steht, was
+   fehlt, und dort sitzen die Schalter. Gemerkt wird je Gerät. */
+const AUS_LS = 'wb-kontor-ausgeblendet';
+const ANSICHTEN = [
+  { slide:'s-kontor',    label:'Firma',          name:'Meine Firma', liste:APPS },
+  { slide:'s-produktiv', label:'Produktiv',      name:'Produktiv',   liste:PRODUKTIV },
+  { slide:'s-buero',     label:'Büro',           name:'Büro',        liste:BUERO },
+  { slide:'s-privat',    label:'Privat',         name:'Privat',      liste:PRIVAT },
+  { slide:'s-mein',      label:'Werkzeugkasten', name:'Werkzeugkasten', fest:true }
+];
+const dockBtns = [...document.querySelectorAll('#drow .dock-btn')];
+function ausgeblendet(){
+  try { const a = JSON.parse(store.get(AUS_LS) || '[]'); return Array.isArray(a) ? a : []; } catch (e) { return []; }
+}
+function lizenziert(a, frei){
+  if (a.fest) return true;
+  if (!frei) return false;
+  return frei.alle || a.liste.some(w => w.id && frei.ids.has(w.id));
+}
+let ansErst = true;
+function ansichtenAnwenden(){
+  const frei = lizenzIds(LIZ && LIZ.p), aus = ausgeblendet();
+  /* Welche Ansicht soll danach vorne stehen? Beim Start die gemerkte,
+     sonst die aktuelle – fällt sie weg, die erste sichtbare. */
+  let wunsch = Dock.label;
+  if (ansErst) {
+    const g = ansGemerkt;
+    wunsch = /^\d+$/.test(g || '') ? (ANSICHTEN[+g] || {}).label : g;   /* alte Fassung merkte die Nummer */
+  }
+  ANSICHTEN.forEach((a, i) => {
+    const zeigen = a.fest || (lizenziert(a, frei) && aus.indexOf(a.slide) < 0);
+    document.getElementById(a.slide).hidden = !zeigen;
+    if (dockBtns[i]) dockBtns[i].hidden = !zeigen;
+  });
+  Dock.aufbauen();
+  let k = Dock.indexVon(wunsch); if (k < 0) k = 0;
+  Dock.setzen(k, false, true); Dock.aufbauen();
+  requestAnimationFrame(() => zuSlide(k, false));
+  ansWahlZeigen(frei, aus);
+  if (ansErst) { ansErst = false; root.classList.remove('wb-vorab'); }
+  busNeu();
+}
+function ansWahlZeigen(frei, aus){
+  const el = document.getElementById('ansWahl');
+  el.innerHTML = ANSICHTEN.filter(a => !a.fest).map(a => {
+    const lz = lizenziert(a, frei), an = lz && aus.indexOf(a.slide) < 0;
+    return '<label class="ans-zeile' + (lz ? '' : ' aus') + '"><span>' + esc(a.name)
+      + (lz ? '' : '<small>keine Lizenz</small>') + '</span>'
+      + '<input type="checkbox" role="switch" data-slide="' + a.slide + '"' + (an ? ' checked' : '') + (lz ? '' : ' disabled') + '></label>';
+  }).join('');
+  el.querySelectorAll('input:not(:disabled)').forEach(b => b.addEventListener('change', () => {
+    const liste = ausgeblendet().filter(x => x !== b.dataset.slide);
+    if (!b.checked) liste.push(b.dataset.slide);
+    store.set(AUS_LS, JSON.stringify(liste));
+    ansichtenAnwenden();
+    const neu = el.querySelector('[data-slide="' + b.dataset.slide + '"]'); if (neu) neu.focus();
+  }));
+}
+addEventListener('storage', e => { if (e.key === AUS_LS) ansichtenAnwenden(); });
+const ansBtn = $('#ansBtn'), ansPanel = $('#ansPanel');
+function ansMenue(auf){
+  ansPanel.hidden = !auf; ansBtn.setAttribute('aria-expanded', String(auf));
+  if (auf) { const f = ansPanel.querySelector('input:not(:disabled)'); if (f) f.focus(); }
+}
+ansBtn.addEventListener('click', e => { e.stopPropagation(); ansMenue(ansPanel.hidden); });
+document.addEventListener('click', e => { if (!ansPanel.hidden && !e.target.closest('.ans-menue')) ansMenue(false); });
+addEventListener('keydown', e => { if (e.key === 'Escape' && !ansPanel.hidden) { ansMenue(false); ansBtn.focus(); } });
+/* Falls die Prüfung hängt: nach anderthalb Sekunden trotzdem zeigen. */
+setTimeout(() => { if (ansErst) ansichtenAnwenden(); }, 1500);
 
 /* ───────── Start ───────── */
+meinBauen();
 measure();
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
 const startId = location.hash.slice(1);
