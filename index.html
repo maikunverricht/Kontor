@@ -512,6 +512,9 @@ html.wb-vorab .slides,html.wb-vorab .dock{visibility:hidden}
   border:1px solid var(--glass-edge);border-radius:16px;background:var(--surface,var(--glass-2));box-shadow:var(--shadow-lg);
   -webkit-backdrop-filter:blur(18px) saturate(1.3);backdrop-filter:blur(18px) saturate(1.3)}
 .ans-panel[hidden]{display:none}
+.ans-panel{max-height:calc(100svh - 110px);overflow-y:auto;overscroll-behavior:contain}
+.ans-kopf2{margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+#kastenWahl .ans-zeile{padding:5px 0;font-size:13.5px}
 .ans-kopf{margin:0 0 6px;font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--text-3)}
 .ans-fuss{margin:8px 0 0;padding-top:8px;border-top:1px solid var(--line);font-size:11.5px;line-height:1.45;color:var(--text-3)}
 .ans-zeile{display:flex;align-items:center;gap:10px;padding:7px 0;cursor:pointer;font-size:14px;font-weight:500}
@@ -645,7 +648,9 @@ html.wb-vorab .slides,html.wb-vorab .dock{visibility:hidden}
         <div class="ans-panel" id="ansPanel" role="group" aria-label="Ansichten im Dock" hidden>
           <p class="ans-kopf">Ansichten im Dock</p>
           <div id="ansWahl"></div>
-          <p class="ans-fuss">Ohne Lizenz bleibt eine Ansicht aus. Der Werkzeugkasten bleibt immer.</p>
+          <p class="ans-kopf ans-kopf2" id="kastenKopf">Im Werkzeugkasten</p>
+          <div id="kastenWahl"></div>
+          <p class="ans-fuss">Ohne Lizenz bleibt eine Ansicht aus. Der Werkzeugkasten selbst bleibt immer.</p>
         </div>
       </div>
       <button class="pill icon-btn" id="themeBtn" type="button" aria-label="Hell/Dunkel umschalten">
@@ -1992,7 +1997,10 @@ async function lizenzLesen(){
   } catch (e) { return { grund:'ungueltig' }; }
 }
 
-let MEIN = [], meinTiles = [], meinErst = true, LIZ = null;
+let MEIN = [], MEIN_ALLE = [], meinTiles = [], meinErst = true, LIZ = null;
+/* Werkzeuge, die im Werkzeugkasten von Hand ausgeblendet sind (Kennungen ohne `mein-`). */
+const KASTEN_AUS_LS = 'wb-kontor-kasten-aus';
+function kastenAus(){ try { const a = JSON.parse(store.get(KASTEN_AUS_LS) || '[]'); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
 function lizenzIds(p){
   if (!p) return null;
   const ids = new Set();
@@ -2009,7 +2017,7 @@ function meinKacheln({ p, grund }){
   meinTiles.forEach(t => { t.frame.remove(); delete byId[t.app.id]; });
   const g = $('#gridMein'), info = $('#meinInfo');
   g.innerHTML = '';
-  MEIN = [];
+  MEIN = []; MEIN_ALLE = [];
   if (!p) {
     info.textContent = '';
     g.innerHTML = '<p class="mein-leer">' + (grund === 'keine'
@@ -2023,14 +2031,19 @@ function meinKacheln({ p, grund }){
   p.w.forEach(k => (LIZ_KACHEL[k] || [k]).forEach(x => ids.add(x)));
   const heute = isoTag(Date.now());
   const abgelaufen = p.m === 'miete' && p.b && heute > p.b;
-  MEIN = KATALOG.filter(w => alle || ids.has(w.id)).map(w => Object.assign({}, w, {
+  MEIN_ALLE = KATALOG.filter(w => alle || ids.has(w.id));
+  const aus = kastenAus();
+  MEIN = MEIN_ALLE.filter(w => aus.indexOf(w.id) < 0).map(w => Object.assign({}, w, {
     id:'mein-' + w.id, tag: abgelaufen ? 'nur lesen' : (w.id === 'belegbuch-privat' ? 'Privat · ' + w.tag : w.tag) }));
   info.innerHTML = 'Lizenz <b>' + esc(p.id || '–') + '</b>' + (p.n ? ' · ' + esc(p.n) : '')
     + ' · ' + (p.m === 'miete' ? 'Miete' + (p.b ? (abgelaufen ? ' · abgelaufen am ' : ' · bis ') + tagDe(p.b) : '')
                               : 'Kauf' + (p.b ? ' · Wartung bis ' + tagDe(p.b) : ''))
-    + ' · ' + (alle ? 'alle Werkzeuge' : MEIN.length + (MEIN.length === 1 ? ' Werkzeug' : ' Werkzeuge'));
+    + ' · ' + (alle ? 'alle Werkzeuge' : MEIN_ALLE.length + (MEIN_ALLE.length === 1 ? ' Werkzeug' : ' Werkzeuge'))
+    + (MEIN.length < MEIN_ALLE.length ? ' · ' + (MEIN_ALLE.length - MEIN.length) + ' ausgeblendet' : '');
   if (!MEIN.length) {
-    g.innerHTML = '<p class="mein-leer">Die Lizenz nennt kein Werkzeug, das hier steht.</p>';
+    g.innerHTML = '<p class="mein-leer">' + (MEIN_ALLE.length
+      ? 'Alle Werkzeuge sind ausgeblendet. Über „Ansichten“ oben rechts holst du sie zurück.'
+      : 'Die Lizenz nennt kein Werkzeug, das hier steht.') + '</p>';
     meinTiles = [];
     return;
   }
@@ -2315,8 +2328,24 @@ function ansWahlZeigen(frei, aus){
     ansichtenAnwenden();
     const neu = el.querySelector('[data-slide="' + b.dataset.slide + '"]'); if (neu) neu.focus();
   }));
+  kastenWahlZeigen();
 }
-addEventListener('storage', e => { if (e.key === AUS_LS) ansichtenAnwenden(); });
+/* Einzelne Werkzeuge im Werkzeugkasten – nur, was die Lizenz freischaltet. */
+function kastenWahlZeigen(){
+  const el = document.getElementById('kastenWahl'), aus = kastenAus();
+  document.getElementById('kastenKopf').hidden = !MEIN_ALLE.length;
+  el.innerHTML = MEIN_ALLE.map(w => '<label class="ans-zeile"><span>' + esc(w.name)
+      + (w.id === 'belegbuch-privat' ? '<small>Privat</small>' : '') + '</span>'
+      + '<input type="checkbox" role="switch" data-wz="' + esc(w.id) + '"' + (aus.indexOf(w.id) < 0 ? ' checked' : '') + '></label>').join('');
+  el.querySelectorAll('input').forEach(b => b.addEventListener('change', () => {
+    const liste = kastenAus().filter(x => x !== b.dataset.wz);
+    if (!b.checked) liste.push(b.dataset.wz);
+    store.set(KASTEN_AUS_LS, JSON.stringify(liste));
+    meinKacheln(LIZ || {});
+  }));
+}
+addEventListener('storage', e => { if (e.key === AUS_LS) ansichtenAnwenden();
+  if (e.key === KASTEN_AUS_LS) { meinKacheln(LIZ || {}); kastenWahlZeigen(); } });
 const ansBtn = $('#ansBtn'), ansPanel = $('#ansPanel');
 function ansMenue(auf){
   ansPanel.hidden = !auf; ansBtn.setAttribute('aria-expanded', String(auf));
