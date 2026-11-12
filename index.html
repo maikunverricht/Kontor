@@ -532,7 +532,7 @@ a.tile{color:inherit;text-decoration:none}
 .lw-g{font-size:25px;font-weight:700;letter-spacing:-.03em;line-height:1.12;font-variation-settings:'wdth' 110;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .lw-g.mono{font-family:var(--mono);font-weight:500;font-size:31px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
-.lw-g.mittel{font-size:19px}
+.lw-g.mittel{font-size:19px;white-space:normal;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .lw-s{font-size:12px;color:var(--text-3);line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .lw-s.rot{color:var(--red-ink,#E8646E)}
 .lw-woche{display:flex;gap:5px;align-items:stretch;height:50px;margin-top:10px}
@@ -561,7 +561,8 @@ a.tile{color:inherit;text-decoration:none}
 @media (max-width:720px){
   .lw-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
   .lw{padding:12px 13px 13px;border-radius:18px}
-  .lw-g{font-size:21px}.lw-g.mono{font-size:27px}.lw-g.mittel{font-size:17px}
+  .lw-g{font-size:21px}.lw-g.mono{font-size:27px}.lw-g.mittel{font-size:16px}
+  .lw-urteil{font-size:10px;padding:2px 7px}
   .lw.klein{padding:11px 12px}
   .lw-grid + .lw-grid{margin-top:9px}
   .lw-grid.kl{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -569,6 +570,47 @@ a.tile{color:inherit;text-decoration:none}
   .lw-kn b{font-size:13px}
 }
 @media (prefers-reduced-motion:reduce){ .lw-p.lauf{animation:none} }
+/* Notizbuch: Titel laufen durch */
+.lw-lauf{position:relative;height:68px;overflow:hidden;margin-top:9px;
+  -webkit-mask-image:linear-gradient(transparent,#000 16%,#000 84%,transparent);mask-image:linear-gradient(transparent,#000 16%,#000 84%,transparent)}
+.lw-lauf ul{list-style:none;margin:0;padding:0}
+.lw-lauf.laeuft ul{animation:lwLauf var(--dauer,20s) linear infinite}
+.lw:hover .lw-lauf ul{animation-play-state:paused}
+.lw-lauf li{height:22px;display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text-2);min-width:0}
+.lw-lauf li span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.lw-lauf li i{width:6px;height:6px;border-radius:50%;flex:none;background:var(--c)}
+.lw-lauf li.arbeit i{background:var(--amber)}
+.lw-lauf li b{color:var(--red-ink,#E8646E);font-weight:700;flex:none}
+@keyframes lwLauf{to{transform:translateY(-50%)}}
+/* KapazitätenPlaner: Team-Auslastung je Woche */
+.lw-kapa{display:flex;gap:6px;align-items:stretch;height:96px;margin-top:10px}
+.lw-kapa i{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:3px;font-style:normal;
+  font-family:var(--mono);font-size:9px;color:var(--text-3)}
+.lw-kapa i em{font-style:normal;font-size:9.5px;color:var(--text-2)}
+.lw-kapa i b{width:100%;border-radius:4px;background:color-mix(in srgb,var(--c) 45%,transparent)}
+.lw-kapa i.heute{color:var(--text)}
+.lw-kapa i.heute b{background:var(--c)}
+.lw-kapa i.warn b{background:var(--amber)}
+.lw-kapa i.ueber b{background:var(--over,#EE8E6A)}
+.lw-kapa i.rot b{background:var(--red-ink,#E8646E)}
+/* CodeCompare: Urteil */
+.lw-urteil{align-self:flex-start;white-space:nowrap;margin-top:8px;font-family:var(--mono);font-size:11px;padding:3px 9px;border-radius:100px;border:1px solid currentColor}
+.lw-urteil.gut{color:var(--teal)}
+.lw-urteil.rot{color:var(--red-ink,#E8646E)}
+/* IdeaHub: Kernideen im Wechsel */
+.lw-dreh{position:relative;height:70px;margin-top:8px}
+.lw-dreh > div{position:absolute;inset:0;display:flex;flex-direction:column;gap:3px;opacity:0;transform:translateY(8px);
+  transition:opacity .6s var(--kurve,ease),transform .6s var(--kurve,ease);pointer-events:none}
+.lw-dreh > div.an{opacity:1;transform:none}
+.lw-dreh strong{font-size:17px;font-weight:700;letter-spacing:-.02em;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lw-dreh span{font-size:12px;color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lw-dreh em{position:relative;height:4px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:4px}
+.lw-dreh em::after{content:"";position:absolute;inset:0 auto 0 0;width:var(--p);background:var(--c);border-radius:3px}
+.lw-dreh small{font-family:var(--mono);font-size:10px;color:var(--text-3)}
+.lw-punkte{display:flex;gap:5px;margin-top:8px}
+.lw-punkte i{width:5px;height:5px;border-radius:50%;background:var(--line-strong,var(--line))}
+.lw-punkte i.an{background:var(--c)}
+@media (prefers-reduced-motion:reduce){ .lw-lauf.laeuft ul{animation:none} .lw-dreh > div{transition:none} }
 /* Info-Knopf am Werkzeugkasten: erscheint erst, wenn die Maus über der Überschrift steht. */
 .mein-i{position:relative;display:inline-block;vertical-align:middle;margin-left:12px;font-size:0;line-height:0}
 .mein-i:has(.mein-i-tip:empty){display:none}
@@ -2264,9 +2306,64 @@ const LIVE = {
     const d = lsJson(WB_NOTES_LS);
     if (!d) return null;
     const s = d.jeStatus;
+    /* Titel der offenen Notizen laufen durch – seit 12.11.2026 schreibt das
+       Notizbuch sie mit in seine Lesekopie. Ältere Fassungen: nur die Zahl. */
+    const tl = Array.isArray(d.titel) ? d.titel.filter(x => x && x.t) : [];
+    const zeile = x => '<li class="' + (x.s === 'arbeit' ? 'arbeit' : '') + '"><i></i><span>' + esc(x.t) + '</span>'
+      + (x.p === 'hoch' ? '<b>!</b>' : '') + '</li>';
+    const lauf = tl.length ? '<div class="lw-lauf' + (tl.length > 3 ? ' laeuft' : '') + '" style="--dauer:' + (tl.length * 2.6) + 's"><ul>'
+      + tl.map(zeile).join('') + (tl.length > 3 ? tl.map(zeile).join('') : '') + '</ul></div>' : '';
     if (s) { const o = +s.offen || 0, a = +s.arbeit || 0;
-      return { gross:String(o + a), sub:'offen · ' + a + ' in Arbeit · ' + mz(+d.anzahl || 0, 'Notiz', 'Notizen') }; }
-    return d.anzahl ? { gross:String(d.anzahl), sub:d.anzahl === 1 ? 'Notiz' : 'Notizen' } : null;
+      return { gross:String(o + a), sub:'offen · ' + a + ' in Arbeit · ' + mz(+d.anzahl || 0, 'Notiz', 'Notizen'), extra:lauf }; }
+    return d.anzahl ? { gross:String(d.anzahl), sub:d.anzahl === 1 ? 'Notiz' : 'Notizen', extra:lauf } : null;
+  }},
+  kapazitaetenplaner: { breit:true, w(){
+    const d = lsJson('wb-kapa-stand');
+    if (!d || !Array.isArray(d.wochen) || !d.wochen.length) return null;
+    const farbe = v => v > 110 ? 'rot' : v > 100 ? 'ueber' : v > 85 ? 'warn' : '';
+    const max = Math.max(110, ...d.wochen.map(w => +w.pct || 0));
+    const w0 = d.wochen[0];
+    const bars = '<div class="lw-kapa">' + d.wochen.map((w, i) =>
+      '<i class="' + farbe(+w.pct || 0) + (i === 0 ? ' heute' : '') + '"><em>' + (+w.pct || 0) + '</em>'
+      + '<b style="height:' + Math.max(4, Math.round((+w.pct || 0) / max * 100)) + '%"></b>KW' + w.kw + '</i>').join('') + '</div>';
+    const ue = +d.ueberlastet || 0;
+    const wer = d.nur ? 'Deine Woche · ' + d.nur : 'Team diese Woche · ' + mz(+d.mitarbeiter || 0, 'Person', 'Personen')
+      + (ue ? ' · ' + ue + ' überlastet' : '');
+    return { gross:(+w0.pct || 0) + ' %', sub:wer, rot:(+w0.pct || 0) > 100, extra:bars };
+  }},
+  codecompare: { w(){
+    const d = lsJson('wb-codecompare-stand');
+    const v = d && d.letzter;
+    if (!v || !v.a || !v.b) return null;
+    const ver = x => x.version ? 'v' + String(x.version).replace(/^v/i, '') : (x.datei || '–');
+    const gleicheFc = v.a.fc === v.b.fc;
+    const titel = gleicheFc ? v.a.fc : v.a.fc + ' ⇄ ' + v.b.fc;
+    const wann = new Date(v.zeit || Date.now());
+    const zeitTxt = isoTag(wann) === isoTag(Date.now()) ? 'heute ' + uhrzeit(wann) : nfT.format(wann) + ' ' + uhrzeit(wann);
+    const frueher = Array.isArray(d.verlauf) ? d.verlauf.length - 1 : 0;
+    return { gross:titel, klein:true,
+      sub:(gleicheFc ? ver(v.a) + ' ⇄ ' + ver(v.b) : ver(v.a) + ' gegen ' + ver(v.b)),
+      extra:'<span class="lw-urteil ' + (v.identisch ? 'gut' : 'rot') + '">' + (v.identisch ? '✓ identisch'
+        : '✕ ' + mz(+v.abweichungen || 0, 'Abweichung', 'Abweichungen')) + '</span>'
+        + '<span class="lw-fuss">' + zeitTxt + (frueher > 0 ? ' · ' + frueher + ' frühere' : '') + '</span>' };
+  }},
+  ideahub: { breit:true, w(){
+    const roh = lsJson('ideahub:cores');
+    const kerne = (Array.isArray(roh) ? roh : []).filter(c => c && c.text && !c.composted);
+    if (!kerne.length) return null;
+    const item = (c, i) => {
+      const dt = Array.isArray(c.details) ? c.details : [];
+      const fertig = dt.filter(x => x && x.status === 'erledigt').length;
+      const p = dt.length ? Math.round(fertig / dt.length * 100) : 0;
+      return '<div class="' + (i === 0 ? 'an' : '') + '"><strong>' + esc(c.text) + '</strong>'
+        + (c.subtitle ? '<span>' + esc(c.subtitle) + '</span>' : '')
+        + (dt.length ? '<em style="--p:' + p + '%"></em><small>' + fertig + ' von ' + dt.length + ' Details erledigt</small>'
+                     : '<small>noch keine Details</small>') + '</div>';
+    };
+    const liste = kerne.slice(0, 12);
+    return { gross:mz(kerne.length, 'Kernidee', 'Kernideen'), klein:true, sub:'',
+      extra:'<div class="lw-dreh" data-n="' + liste.length + '">' + liste.map(item).join('') + '</div>'
+        + (liste.length > 1 ? '<div class="lw-punkte">' + liste.map((_, i) => '<i class="' + (i === 0 ? 'an' : '') + '"></i>').join('') + '</div>' : '') };
   }}
 };
 function belegLive(bereich){
@@ -2282,12 +2379,13 @@ function kachelNeu(t){
   const w = t.app;
   t.el.classList.toggle('klein', !d);
   t.el.classList.toggle('breit', !!(d && L.breit));
-  t.inner.innerHTML = d
+  const html = d
     ? '<div class="lw-k"><span class="lw-ic">' + (w.zeichen || '') + '</span><span class="lw-n">' + esc(w.name) + '</span>'
       + (d.punkt ? '<span class="lw-p ' + d.punkt + '"></span>' : '') + '</div>'
       + '<div class="lw-g' + (d.mono ? ' mono' : '') + (d.klein ? ' mittel' : '') + '">' + esc(d.gross) + '</div>'
-      + '<div class="lw-s' + (d.rot ? ' rot' : '') + '">' + esc(d.sub || '') + '</div>' + (d.extra || '')
+      + (d.sub ? '<div class="lw-s' + (d.rot ? ' rot' : '') + '">' + esc(d.sub) + '</div>' : '') + (d.extra || '')
     : '<span class="lw-ic">' + (w.zeichen || '') + '</span><span class="lw-kn"><b>' + esc(w.name) + '</b><small>' + esc(w.tag || '') + '</small></span>';
+  if (html !== t.html) { t.html = html; t.inner.innerHTML = html; }
   t.el.setAttribute('aria-label', w.name + (d ? ': ' + d.gross + ', ' + (d.sub || '') : '') + ' – öffnen');
 }
 function kastenBauen(liste, g){
@@ -2324,9 +2422,27 @@ function kastenBauen(liste, g){
 /* Nachziehen, sobald ein Werkzeug etwas spiegelt – und die Uhr im Sekundentakt. */
 let kastenT = null;
 function kastenFrisch(){ clearTimeout(kastenT); kastenT = setTimeout(() => meinTiles.forEach(kachelNeu), 120); }
-addEventListener('storage', e => { if (!e.key || /^(wb-|stempeluhr_)/.test(e.key)) kastenFrisch(); });
+addEventListener('storage', e => { if (!e.key || /^(wb-|stempeluhr_|ideahub:)/.test(e.key)) kastenFrisch(); });
 WB.horchen(null, kastenFrisch);
 addEventListener('visibilitychange', () => { if (!document.hidden) kastenFrisch(); });
+/* Kernideen wechseln alle fünf Sekunden – außer die Maus steht darauf
+   oder Bewegung ist abgestellt. */
+const ruhig = matchMedia('(prefers-reduced-motion: reduce)');
+setInterval(() => {
+  if (document.hidden || current || ruhig.matches) return;
+  document.querySelectorAll('#gridMein .lw-dreh').forEach(box => {
+    const karte = box.closest('.lw');
+    if (karte && karte.matches(':hover')) return;
+    const teile = box.children, n = teile.length;
+    if (n < 2) return;
+    let i = [...teile].findIndex(x => x.classList.contains('an'));
+    teile[i].classList.remove('an');
+    i = (i + 1) % n;
+    teile[i].classList.add('an');
+    const pk = karte && karte.querySelectorAll('.lw-punkte i');
+    if (pk) pk.forEach((p, j) => p.classList.toggle('an', j === i));
+  });
+}, 5000);
 setInterval(() => {
   const t = byId['mein-stempeluhr'];
   if (!t || document.hidden || current || document.getElementById('s-mein').hidden) return;
