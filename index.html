@@ -570,6 +570,25 @@ a.tile{color:inherit;text-decoration:none}
   .lw-kn b{font-size:13px}
 }
 @media (prefers-reduced-motion:reduce){ .lw-p.lauf{animation:none} }
+
+/* Werkzeugkasten: selbst anordnen (13.11.2026) */
+.lw-leiste{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin:-4px 0 4px;min-height:32px}
+.lw-hinweis{margin-right:auto;font-size:12px;color:var(--text-3);opacity:0;transition:opacity var(--t-s)}
+.lw-hinweis.sichtbar{opacity:1}
+.lw-hinweis .mit-finger{display:none}
+@media (hover:none){ .lw-hinweis .mit-maus{display:none} .lw-hinweis .mit-finger{display:inline} }
+.lw-knopf{height:30px;padding:0 13px;border-radius:100px;border:1px solid var(--line);background:var(--glass);color:var(--text-2);
+  font:500 12.5px var(--display);cursor:pointer;transition:border-color var(--t-s),color var(--t-s),background var(--t-s)}
+.lw-knopf:hover{border-color:var(--line-hi);color:var(--text)}
+.lw-knopf.an{background:var(--amber);border-color:transparent;color:var(--ink,#12171F);font-weight:600}
+#gridMein.ordnen .lw{cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;
+  outline:1px dashed var(--line-hi);outline-offset:-1px}
+#gridMein.ordnen .lw-p{display:none}
+#gridMein.ordnen .lw::after{content:"⠿";position:absolute;top:9px;right:11px;font-size:15px;line-height:1;color:var(--text-3)}
+#gridMein.ordnen .lw:hover{transform:none}
+#gridMein .lw.zieht{z-index:30;cursor:grabbing;transition:none;opacity:.96;
+  box-shadow:0 24px 50px -18px rgba(0,0,0,.6),0 0 0 2px var(--amber)}
+@media (max-width:720px){ .lw-hinweis{font-size:11px} }
 /* Notizbuch: Titel laufen durch */
 .lw-lauf{position:relative;height:68px;overflow:hidden;margin-top:9px;
   -webkit-mask-image:linear-gradient(transparent,#000 16%,#000 84%,transparent);mask-image:linear-gradient(transparent,#000 16%,#000 84%,transparent)}
@@ -827,6 +846,11 @@ html.wb-vorab .slides,html.wb-vorab .dock{visibility:hidden}
           <button type="button" class="mein-i-btn" aria-label="Lizenz anzeigen" aria-describedby="meinInfo" aria-expanded="false">i</button>
           <span class="mein-i-tip" id="meinInfo" role="tooltip"></span></span></h1>
       </section>
+      <div class="lw-leiste" id="ordnenLeiste" hidden>
+        <span class="lw-hinweis" id="ordnenHinweis"><span class="mit-maus">Kacheln ziehen – oder auswählen und mit den Pfeiltasten schieben.</span><span class="mit-finger">Kachel festhalten und an den neuen Platz schieben.</span></span>
+        <button type="button" class="lw-knopf" id="ordnenReset" hidden>Zurücksetzen</button>
+        <button type="button" class="lw-knopf" id="ordnenBtn" aria-pressed="false">Anordnen</button>
+      </div>
       <section class="grid" id="gridMein" aria-label="Lizenzierte Werkzeuge"></section>
     </div>
   </div>
@@ -2151,6 +2175,7 @@ function meinKacheln({ p, grund }){
   /* Unter einem offenen Werkzeug wird nicht umgebaut – beim Schließen holt es nach. */
   if (current && current.app.id.startsWith('mein-')) { meinNachholen = true; return; }
   meinTiles.forEach(t => { t.frame.remove(); delete byId[t.app.id]; });
+  document.getElementById('ordnenLeiste').hidden = true;
   const g = $('#gridMein'), info = $('#meinInfo');
   g.innerHTML = '';
   MEIN = []; MEIN_ALLE = [];
@@ -2187,6 +2212,7 @@ function meinKacheln({ p, grund }){
     return;
   }
   meinTiles = kastenBauen(MEIN, g);
+  document.getElementById('ordnenLeiste').hidden = MEIN.length < 2;
   if (abgelaufen) meinTiles.forEach(t => t.el.classList.add('nurlesen'));
   zahlenZeigen();
   if (meinErst) {
@@ -2398,7 +2424,9 @@ function kastenBauen(liste, g){
     const boxK = document.createElement('div'); boxK.className = 'lw-grid kl'; g.appendChild(boxK);
     /* Kacheln mit Inhalt zuerst, die kleinen danach – in der Reihenfolge der Ansichten. */
     const hatInhalt = w => { const L = LIVE[w.id.replace(/^mein-/, '')]; try { return !!(L && L.w()); } catch (e) { return false; } };
-    ws.map(w => ({ w, v:hatInhalt(w) })).forEach(({ w, v }) => {
+    const folge = kastenFolge();
+    const rang = w => { const i = folge.indexOf(w.id.replace(/^mein-/, '')); return i < 0 ? 1e4 + ws.indexOf(w) : i; };
+    ws.slice().sort((a, b) => rang(a) - rang(b)).map(w => ({ w, v:hatInhalt(w) })).forEach(({ w, v }) => {
       const el = document.createElement('article');
       el.className = 'lw';
       el.tabIndex = 0; el.setAttribute('role', 'button');
@@ -2413,8 +2441,13 @@ function kastenBauen(liste, g){
                   state:$('.state', el), push:document.createElement('span'), loaded:false, liste:tl };
       tl.push(t); byId[w.id] = t;
       kachelNeu(t);
-      el.addEventListener('click', () => { if (!t.frame.classList.contains('live')) open(w.id); });
-      el.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && !current) { e.preventDefault(); open(w.id); } });
+      el.dataset.wz = w.id.replace(/^mein-/, '');
+      el.addEventListener('click', () => { if (ordnen || schonGezogen) return; if (!t.frame.classList.contains('live')) open(w.id); });
+      el.addEventListener('keydown', e => {
+        if (ordnen) { ordnenTaste(e, el); return; }
+        if ((e.key === 'Enter' || e.key === ' ') && !current) { e.preventDefault(); open(w.id); }
+      });
+      el.addEventListener('pointerdown', e => ziehenStart(e, el));
     });
   });
   return tl;
@@ -2449,6 +2482,100 @@ setInterval(() => {
   const run = lsJson('stempeluhr_run_v1');
   if (run && run.running && !run.paused) kachelNeu(t);
 }, 1000);
+
+/* ───────── Werkzeugkasten: selbst anordnen ─────────
+   Seit 13.11.2026. „Anordnen“ schaltet die Kacheln beweglich: ziehen mit
+   Maus oder Finger, oder auswählen und mit den Pfeiltasten schieben.
+   Verschoben wird innerhalb einer Reihe – große Kacheln unter großen,
+   kleine unter kleinen, je Bereich. Gemerkt wird die Reihenfolge je Gerät. */
+const FOLGE_LS = 'wb-kontor-kasten-folge';
+function kastenFolge(){ try { const a = JSON.parse(store.get(FOLGE_LS) || '[]'); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
+function folgeSichern(){
+  const ids = [...document.querySelectorAll('#gridMein .lw')].map(x => x.dataset.wz).filter(Boolean);
+  /* Ausgeblendete Werkzeuge behalten ihren Platz in der Liste. */
+  const alt = kastenFolge().filter(x => ids.indexOf(x) < 0);
+  store.set(FOLGE_LS, JSON.stringify(ids.concat(alt)));
+  document.getElementById('ordnenReset').hidden = false;
+}
+let ordnen = false, schonGezogen = false;
+function ordnenSetzen(an){
+  ordnen = an;
+  const g = document.getElementById('gridMein'), b = document.getElementById('ordnenBtn');
+  g.classList.toggle('ordnen', an);
+  b.textContent = an ? 'Fertig' : 'Anordnen';
+  b.setAttribute('aria-pressed', String(an));
+  b.classList.toggle('an', an);
+  document.getElementById('ordnenHinweis').classList.toggle('sichtbar', an);
+  document.getElementById('ordnenReset').hidden = !an || !kastenFolge().length;
+}
+document.getElementById('ordnenBtn').addEventListener('click', () => ordnenSetzen(!ordnen));
+document.getElementById('ordnenReset').addEventListener('click', () => {
+  store.set(FOLGE_LS, '[]');
+  meinKacheln(LIZ || {});
+  ordnenSetzen(true);
+  document.getElementById('ordnenReset').hidden = true;
+});
+addEventListener('keydown', e => { if (e.key === 'Escape' && ordnen) ordnenSetzen(false); });
+
+/* Mit der Tastatur: Pfeil links/oben schiebt nach vorn, rechts/unten nach hinten. */
+function ordnenTaste(e, el){
+  const vor = e.key === 'ArrowLeft' || e.key === 'ArrowUp', nach = e.key === 'ArrowRight' || e.key === 'ArrowDown';
+  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); ordnenSetzen(false); return; }
+  if (!vor && !nach) return;
+  e.preventDefault(); e.stopPropagation();
+  if (vor && el.previousElementSibling) el.parentNode.insertBefore(el, el.previousElementSibling);
+  else if (nach && el.nextElementSibling) el.parentNode.insertBefore(el.nextElementSibling, el);
+  else return;
+  el.focus();
+  folgeSichern();
+}
+
+/* Ziehen: die Kachel folgt dem Zeiger, die anderen rücken nach. */
+let zug = null;
+function ziehenStart(e, el){
+  if (!ordnen || e.button > 0) return;
+  e.preventDefault();
+  const r0 = el.getBoundingClientRect();
+  zug = { el, dx:e.clientX - r0.left, dy:e.clientY - r0.top, x0:e.clientX, y0:e.clientY, bewegt:false };
+  el.setPointerCapture(e.pointerId);
+  el.addEventListener('pointermove', ziehen);
+  el.addEventListener('pointerup', ziehenEnde);
+  el.addEventListener('pointercancel', ziehenEnde);
+}
+function ziehen(e){
+  if (!zug) return;
+  const el = zug.el;
+  if (!zug.bewegt) {
+    if (Math.hypot(e.clientX - zug.x0, e.clientY - zug.y0) < 4) return;
+    zug.bewegt = true; el.classList.add('zieht');
+  }
+  /* Ziel: die Kachel derselben Reihe unter dem Zeiger. */
+  const unter = document.elementsFromPoint(e.clientX, e.clientY)
+    .find(x => x !== el && x.classList && x.classList.contains('lw') && x.parentNode === el.parentNode);
+  if (unter) {
+    /* Die Kachel nimmt den Platz der überfahrenen ein: von vorn kommend
+       dahinter, von hinten kommend davor. */
+    const kinder = [...el.parentNode.children];
+    if (kinder.indexOf(el) < kinder.indexOf(unter)) el.parentNode.insertBefore(el, unter.nextElementSibling);
+    else el.parentNode.insertBefore(el, unter);
+  }
+  el.style.transform = 'none';
+  const n = el.getBoundingClientRect();
+  el.style.transform = 'translate(' + (e.clientX - zug.dx - n.left) + 'px,' + (e.clientY - zug.dy - n.top) + 'px) scale(1.03)';
+  /* Am Rand mitscrollen, sonst kommt man am Telefon nicht weit. */
+  if (e.clientY < 70) scrollBy(0, -12); else if (e.clientY > innerHeight - 110) scrollBy(0, 12);
+}
+function ziehenEnde(){
+  if (!zug) return;
+  const el = zug.el, bewegt = zug.bewegt;
+  el.removeEventListener('pointermove', ziehen);
+  el.removeEventListener('pointerup', ziehenEnde);
+  el.removeEventListener('pointercancel', ziehenEnde);
+  el.classList.remove('zieht');
+  el.style.transform = '';
+  zug = null;
+  if (bewegt) { folgeSichern(); schonGezogen = true; setTimeout(() => { schonGezogen = false; }, 50); }
+}
 
 let meinNachholen = false;
 {
