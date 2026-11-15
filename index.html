@@ -21,8 +21,7 @@
 <script>
 (function(){var t=null;try{t=localStorage.getItem('wb-cockpit-theme')}catch(e){}
 if(t!=='light'&&t!=='dark'){t=window.matchMedia&&matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'}
-document.documentElement.setAttribute('data-theme',t);
-document.documentElement.classList.add('wb-vorab');})();
+document.documentElement.setAttribute('data-theme',t);})();
 </script>
 <style>
 :root{
@@ -205,8 +204,6 @@ pre.json{margin:14px 0 0;padding:12px 14px;border:1px solid var(--line);border-r
 .t-zahl{position:absolute;right:-9px;bottom:-7px;min-width:20px;height:20px;padding:0 6px;border-radius:100px;
   display:grid;place-items:center;font:600 10.5px/1 var(--mono);letter-spacing:0;
   background:var(--amber);color:var(--on-accent,#12171F);box-shadow:0 0 0 2px var(--void),0 4px 10px -4px rgba(0,0,0,.6);pointer-events:none}
-.t-zahl.rot{background:var(--red-ink,#E8646E);color:#fff}
-.t-zahl[hidden]{display:none}
 .s-txt{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .dot{display:block;width:9px;height:9px;border-radius:50%;background:var(--text-3);
   box-shadow:0 0 0 2px var(--glass-2);animation:pulse 1.4s ease-in-out infinite}
@@ -495,245 +492,6 @@ html[data-theme="light"] .wipe{mix-blend-mode:multiply}
 .tile.platz .shot{border:1px dashed var(--line);background:transparent;color:var(--text-3)}
 .tile.platz h2{color:var(--text-2)}
 a.tile{color:inherit;text-decoration:none}
-/* Mein Werkzeugkasten (12.11.2026): nur, was die Lizenz auf diesem Gerät freischaltet. */
-.mein-info{margin:8px 0 0;font-family:var(--mono);font-size:11.5px;letter-spacing:.04em;color:var(--text-3);line-height:1.5}
-.mein-info b{color:var(--text-2);font-weight:500}
-.mein-leer{grid-column:1/-1;margin:0;padding:22px 18px;border:1px dashed var(--line);border-radius:15px;
-  text-align:center;color:var(--text-3);font-size:14px;line-height:1.55}
-.tile.nurlesen .shot{opacity:.55}
-
-/* ───── Werkzeugkasten: Live-Kacheln (12.11.2026) ───── */
-#gridMein{display:block;padding-left:0;padding-right:0}
-/* Mauerwerk (15.11.2026): feine Zeilen von 4 px, jede Kachel belegt so viele,
-   wie sie hoch ist. So rückt unter einer kurzen Kachel die nächste nach,
-   statt dass eine hohe die ganze Reihe streckt. */
-#gridMein .lw-grid{grid-auto-rows:4px;row-gap:0;align-items:start}
-#gridMein .lw{align-self:start}
-.lw-gr{margin:22px 0 10px;font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--text-3);
-  display:flex;align-items:center;gap:10px}
-.lw-gr:first-child{margin-top:4px}
-.lw-gr::after{content:"";flex:1;height:1px;background:var(--line)}
-.lw-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;grid-auto-flow:row dense}
-.lw{position:relative;overflow:hidden;min-width:0;border-radius:20px;border:1px solid var(--line);background:var(--glass);
-  -webkit-backdrop-filter:blur(14px) saturate(1.2);backdrop-filter:blur(14px) saturate(1.2);box-shadow:var(--shadow);
-  padding:14px 16px 15px;cursor:pointer;outline:none;
-  transition:transform var(--t-s) var(--kurve,ease),border-color var(--t-s),opacity var(--t-s)}
-.lw::before{content:"";position:absolute;inset:0 0 auto 0;height:2px;background:var(--c);opacity:.85}
-.lw:hover,.lw:focus-visible{transform:translateY(-2px);border-color:var(--line-hi)}
-.lw:focus-visible{box-shadow:0 0 0 2px var(--amber),var(--shadow)}
-.lw.gr-L{grid-column:span 2}
-.lw.gr-XL{grid-column:span 3}
-.lw.gr-S,.lw.klein{align-self:start}
-.lw-grid:empty{display:none}
-#gridMein.frei .lw-grid{margin-top:4px}
-@media (max-width:900px){ .lw.gr-XL{grid-column:span 2} }
-.lw-in{display:flex;flex-direction:column;gap:2px;min-width:0}
-.lw-k{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-2);margin-bottom:6px;min-width:0}
-.lw-n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.lw-ic{display:inline-flex;flex:none;color:var(--c)}
-.lw-ic svg{width:17px;height:17px}
-.lw-p{margin-left:auto;width:8px;height:8px;border-radius:50%;flex:none}
-.lw-p.lauf{background:var(--red-ink,#E8646E);box-shadow:0 0 0 4px color-mix(in srgb,var(--red-ink,#E8646E) 22%,transparent);animation:lwPuls 1.6s ease-in-out infinite}
-.lw-p.pause{background:var(--amber)}
-@keyframes lwPuls{50%{opacity:.35}}
-.lw-g{font-size:25px;font-weight:700;letter-spacing:-.03em;line-height:1.12;font-variation-settings:'wdth' 110;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.lw-g.mono{font-family:var(--mono);font-weight:500;font-size:31px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
-.lw-g.mittel{font-size:19px;white-space:normal;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
-.lw-s{font-size:12px;color:var(--text-3);line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
-.lw-s.rot{color:var(--red-ink,#E8646E)}
-.lw-woche{display:flex;gap:5px;align-items:stretch;height:50px;margin-top:10px}
-.lw-woche i{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:3px;font-style:normal;
-  font-family:var(--mono);font-size:9px;color:var(--text-3)}
-.lw-woche i b{width:100%;border-radius:4px;background:color-mix(in srgb,var(--c) 30%,transparent)}
-.lw-woche i.heute{color:var(--text)}
-.lw-woche i.heute b{background:var(--c)}
-.lw-fuss{font-family:var(--mono);font-size:10.5px;color:var(--text-3);margin-top:7px}
-.lw-pb{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:3px 12px;align-items:center;margin-top:8px;font-size:12.5px}
-.lw-pb span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.lw-pb small{grid-row:span 2;font-family:var(--mono);font-size:10.5px;color:var(--text-2)}
-.lw-pb em{position:relative;height:5px;border-radius:3px;background:var(--line);overflow:hidden;margin-bottom:5px}
-.lw-pb em::after{content:"";position:absolute;inset:0 auto 0 0;width:var(--p);border-radius:3px;background:var(--c)}
-.lw-pb em.warn::after{background:var(--over,#EE8E6A)}
-.lw-pb em.rot::after{background:var(--red-ink,#E8646E)}
-.lw.klein{padding:12px 14px}
-.lw.klein::before{display:none}
-.lw.klein .lw-in{display:grid;grid-template-columns:auto minmax(45%,1fr) minmax(0,auto);align-items:center;gap:0 11px}
-.lw-kz{min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;font-size:17px;font-weight:700;letter-spacing:-.02em;white-space:nowrap;font-variation-settings:'wdth' 108}
-.lw-kz.mono{font-family:var(--mono);font-weight:500;font-size:15px}
-.lw-kz.rot{color:var(--red-ink,#E8646E)}
-.lw.klein .lw-p{position:absolute;top:9px;right:9px;width:6px;height:6px}
-@media (max-width:720px){
-  .lw.klein .lw-in{grid-template-columns:auto minmax(0,1fr);row-gap:7px}
-  .lw.klein .lw-kn{grid-column:1/-1;grid-row:2}
-  .lw.klein .lw-kz{justify-self:end}
-}
-.lw.klein .lw-ic svg{width:19px;height:19px}
-.lw-kn{min-width:0;display:flex;flex-direction:column}
-.lw-kn b{font-size:13.5px;font-weight:650;letter-spacing:-.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.lw-kn small{font-family:var(--mono);font-size:10px;letter-spacing:.04em;color:var(--text-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.lw .state{display:none}
-.lw.nurlesen{opacity:.6}
-@media (max-width:720px){
-  .lw-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
-  .lw{padding:12px 13px 13px;border-radius:18px}
-  .lw-g{font-size:21px}.lw-g.mono{font-size:27px}.lw-g.mittel{font-size:16px}
-  .lw-urteil{font-size:10px;padding:2px 7px}
-  .lw.klein{padding:11px 12px}
-  .lw-kn b{font-size:13px}
-}
-@media (prefers-reduced-motion:reduce){ .lw-p.lauf{animation:none} }
-
-/* Werkzeugkasten: selbst anordnen (13.11.2026) */
-.lw-leiste{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin:-4px 0 4px;min-height:32px}
-.lw-hinweis{margin-right:auto;font-size:12px;color:var(--text-3);opacity:0;transition:opacity var(--t-s)}
-.lw-hinweis.sichtbar{opacity:1}
-.lw-hinweis .mit-finger{display:none}
-@media (hover:none){ .lw-hinweis .mit-maus{display:none} .lw-hinweis .mit-finger{display:inline} }
-.lw-knopf{height:30px;padding:0 13px;border-radius:100px;border:1px solid var(--line);background:var(--glass);color:var(--text-2);
-  font:500 12.5px var(--display);cursor:pointer;transition:border-color var(--t-s),color var(--t-s),background var(--t-s)}
-.lw-knopf:hover{border-color:var(--line-hi);color:var(--text)}
-.lw-knopf.an{background:var(--amber);border-color:transparent;color:var(--ink,#12171F);font-weight:600}
-#gridMein.ordnen .lw{cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;
-  outline:1px dashed var(--line-hi);outline-offset:-1px}
-#gridMein.ordnen .lw-p{display:none}
-/* Größenknopf: nur beim Anordnen, oben rechts in jeder Kachel */
-.lw-gk{display:none;position:absolute;top:8px;right:8px;z-index:3;min-width:30px;height:22px;padding:0 6px;border-radius:7px;
-  border:1px solid var(--line-hi);background:var(--surface,var(--glass));color:var(--text);
-  font:600 10.5px/20px var(--mono);cursor:pointer;touch-action:manipulation}
-.lw-gk:hover{background:var(--amber);color:var(--ink,#12171F);border-color:transparent}
-#gridMein.ordnen .lw-gk{display:block}
-#gridMein.ordnen .lw.klein{padding-right:46px}
-.lw-knopf.an2{border-color:var(--line-hi);color:var(--text)}
-/* Breite Bildschirme (15.11.2026): das Gerüst wird breiter, aber nur der
-   Werkzeugkasten nutzt die Fläche – die übrigen Ansichten bleiben in ihrer
-   gewohnten Breite und mittig. */
-@media (min-width:1400px){
-  main{max-width:min(1880px,100vw)}
-  .slide > *{max-width:calc(var(--max) - 2 * var(--pad));margin-left:auto;margin-right:auto}
-  #s-mein > *{max-width:none}
-}
-#gridMein.ordnen .lw:hover{transform:none}
-#gridMein .lw.zieht{z-index:30;cursor:grabbing;transition:none;opacity:.96;
-  box-shadow:0 24px 50px -18px rgba(0,0,0,.6),0 0 0 2px var(--amber)}
-@media (max-width:720px){ .lw-hinweis{font-size:11px} }
-/* Notizbuch: Titel laufen durch */
-.lw-lauf{position:relative;height:68px;overflow:hidden;margin-top:9px;
-  -webkit-mask-image:linear-gradient(transparent,#000 16%,#000 84%,transparent);mask-image:linear-gradient(transparent,#000 16%,#000 84%,transparent)}
-.lw-lauf ul{list-style:none;margin:0;padding:0}
-.lw-lauf.laeuft ul{animation:lwLauf var(--dauer,20s) linear infinite}
-.lw:hover .lw-lauf ul{animation-play-state:paused}
-.lw-lauf li{height:22px;display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text-2);min-width:0}
-.lw-lauf li span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
-.lw-lauf li i{width:6px;height:6px;border-radius:50%;flex:none;background:var(--c)}
-.lw-lauf li.arbeit i{background:var(--amber)}
-.lw-lauf li b{color:var(--red-ink,#E8646E);font-weight:700;flex:none}
-@keyframes lwLauf{to{transform:translateY(-50%)}}
-/* KapazitätenPlaner: meine Workitems */
-.wi-kopf{display:flex;align-items:center;gap:8px;margin-top:14px;padding-top:11px;border-top:1px solid var(--line);
-  font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-3)}
-.wi-kopf b{margin-left:auto;font-weight:500;color:var(--text-2);letter-spacing:0}
-.lw-lauf.wi{height:162px;margin-top:4px}
-.lw-lauf.wi li{height:40px;display:grid;grid-template-columns:8px minmax(0,1fr) auto;grid-template-rows:20px 16px;
-  column-gap:9px;align-items:center;font-size:12.5px}
-.lw-lauf.wi li i{grid-row:1/3;align-self:center;background:var(--line-strong,var(--line))}
-.lw-lauf.wi li.laeuft i{background:var(--c)}
-.lw-lauf.wi li.heute i{background:var(--amber)}
-.lw-lauf.wi li.ueber i{background:var(--red-ink,#E8646E)}
-.wi-t{color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
-.wi-h{font-family:var(--mono);font-size:10.5px;color:var(--text-2);text-align:right}
-.wi-d{grid-column:2/4;font-family:var(--mono);font-size:10px;color:var(--text-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.wi-d em{font-style:normal;margin-left:8px;color:var(--amber)}
-.wi-d em.rot{color:var(--red-ink,#E8646E)}
-/* KapazitätenPlaner: Team-Auslastung je Woche */
-.lw-kapa{display:flex;gap:6px;align-items:stretch;height:96px;margin-top:10px}
-.lw-kapa i{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:3px;font-style:normal;
-  font-family:var(--mono);font-size:9px;color:var(--text-3)}
-.lw-kapa i em{font-style:normal;font-size:9.5px;color:var(--text-2)}
-.lw-kapa i b{width:100%;border-radius:4px;background:color-mix(in srgb,var(--c) 45%,transparent)}
-.lw-kapa i.heute{color:var(--text)}
-.lw-kapa i.heute b{background:var(--c)}
-.lw-kapa i.warn b{background:var(--amber)}
-.lw-kapa i.ueber b{background:var(--over,#EE8E6A)}
-.lw-kapa i.rot b{background:var(--red-ink,#E8646E)}
-/* CodeCompare: Urteil */
-.lw-urteil{align-self:flex-start;white-space:nowrap;margin-top:8px;font-family:var(--mono);font-size:11px;padding:3px 9px;border-radius:100px;border:1px solid currentColor}
-.lw-urteil.gut{color:var(--teal)}
-.lw-urteil.rot{color:var(--red-ink,#E8646E)}
-/* IdeaHub: Kernideen im Wechsel */
-.lw-dreh{position:relative;height:70px;margin-top:8px}
-.lw-dreh > div{position:absolute;inset:0;display:flex;flex-direction:column;gap:3px;opacity:0;transform:translateY(8px);
-  transition:opacity .6s var(--kurve,ease),transform .6s var(--kurve,ease);pointer-events:none}
-.lw-dreh > div{transition-duration:.3s}
-.lw-dreh > div.an{opacity:1;transform:none;transition-duration:.6s;transition-delay:.3s}
-.lw-dreh strong{font-size:17px;font-weight:700;letter-spacing:-.02em;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.lw-dreh span{font-size:12px;color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.lw-dreh em{position:relative;height:4px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:4px}
-.lw-dreh em::after{content:"";position:absolute;inset:0 auto 0 0;width:var(--p);background:var(--c);border-radius:3px}
-.lw-dreh small{font-family:var(--mono);font-size:10px;color:var(--text-3)}
-.lw-punkte{display:flex;gap:5px;margin-top:8px}
-.lw-punkte i{width:5px;height:5px;border-radius:50%;background:var(--line-strong,var(--line))}
-.lw-punkte i.an{background:var(--c)}
-@media (prefers-reduced-motion:reduce){ .lw-lauf.laeuft ul{animation:none} .lw-dreh > div{transition:none} }
-/* Info-Knopf am Werkzeugkasten: erscheint erst, wenn die Maus über der Überschrift steht. */
-.mein-i{position:relative;display:inline-block;vertical-align:middle;margin-left:12px;font-size:0;line-height:0}
-.mein-i:has(.mein-i-tip:empty){display:none}
-.mein-i-btn{width:22px;height:22px;padding:0;border-radius:50%;border:1px solid var(--line-strong,var(--line));background:var(--glass);
-  color:var(--text-2);font:italic 600 12px/1 var(--display);cursor:help;opacity:0;transform:scale(.85);
-  transition:opacity var(--t-s),transform var(--t-s) var(--kurve,ease),border-color var(--t-s),color var(--t-s)}
-.hero:hover .mein-i-btn,.mein-i-btn:focus-visible,.mein-i.offen .mein-i-btn{opacity:1;transform:none}
-.mein-i-btn:hover,.mein-i.offen .mein-i-btn{border-color:var(--line-hi);color:var(--text)}
-.mein-i-tip{position:absolute;left:-6px;top:calc(100% + 10px);z-index:30;width:max-content;max-width:min(300px,80vw);
-  display:grid;gap:5px;padding:12px 14px;border:1px solid var(--glass-edge);border-radius:13px;
-  background:var(--surface,var(--glass-2));box-shadow:var(--shadow-lg);
-  -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);
-  font:400 12px/1.4 var(--mono);letter-spacing:.02em;color:var(--text-2);text-align:left;
-  opacity:0;visibility:hidden;transform:translateY(-4px);transition:opacity var(--t-s),transform var(--t-s),visibility 0s var(--t-s)}
-.mein-i-tip span{display:flex;gap:12px}
-.mein-i-tip i{font-style:normal;color:var(--text-3);width:58px;flex:none;text-transform:uppercase;font-size:9.5px;letter-spacing:.14em;padding-top:2px}
-.mein-i-tip b{color:var(--text);font-weight:500}
-.mein-i-btn:hover + .mein-i-tip,.mein-i-btn:focus-visible + .mein-i-tip,.mein-i.offen .mein-i-tip{
-  opacity:1;visibility:visible;transform:none;transition:opacity var(--t-s),transform var(--t-s),visibility 0s}
-/* Ohne Maus (Telefon) gibt es kein Darüberfahren – dort steht der Knopf leise da. */
-@media (hover:none){ .mein-i-btn{opacity:.55;transform:none} }
-/* Ansichten ein- und ausblenden (12.11.2026) */
-html.wb-vorab .slides,html.wb-vorab .dock{visibility:hidden}
-.slide[hidden],.dock-btn[hidden]{display:none!important}
-.ans-menue{position:relative}
-.ans-pfeil{font-size:10px;color:var(--text-3);transition:transform var(--t-s)}
-#ansBtn[aria-expanded="true"]{background:var(--glass);border-color:var(--line-hi)}
-#ansBtn[aria-expanded="true"] .ans-pfeil{transform:rotate(180deg)}
-.ans-panel{position:absolute;right:0;top:calc(100% + 10px);z-index:45;width:250px;padding:12px 14px 10px;
-  border:1px solid var(--glass-edge);border-radius:16px;background:var(--surface,var(--glass-2));box-shadow:var(--shadow-lg);
-  -webkit-backdrop-filter:blur(18px) saturate(1.3);backdrop-filter:blur(18px) saturate(1.3)}
-.ans-panel[hidden]{display:none}
-.ans-panel{max-height:calc(100svh - 110px);overflow-y:auto;overscroll-behavior:contain}
-.ans-kopf2{margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
-#kastenWahl .ans-zeile{padding:5px 0;font-size:13.5px}
-.ans-kopf{margin:0 0 6px;font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--text-3)}
-.ans-fuss{margin:8px 0 0;padding-top:8px;border-top:1px solid var(--line);font-size:11.5px;line-height:1.45;color:var(--text-3)}
-.ans-zeile{display:flex;align-items:center;gap:10px;padding:7px 0;cursor:pointer;font-size:14px;font-weight:500}
-.ans-zeile span{flex:1;min-width:0}
-.ans-zeile small{display:block;font-family:var(--mono);font-size:10px;font-weight:400;color:var(--text-3);letter-spacing:.04em}
-.ans-zeile.aus{cursor:not-allowed;color:var(--text-3)}
-/* Schieberegler */
-.ans-zeile input{appearance:none;-webkit-appearance:none;margin:0;flex:none;position:relative;width:38px;height:22px;
-  border-radius:100px;background:var(--line-strong,rgba(255,255,255,.17));cursor:inherit;transition:background var(--t-s)}
-.ans-zeile input::after{content:"";position:absolute;left:3px;top:3px;width:16px;height:16px;border-radius:50%;
-  background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.35);transition:transform var(--t-s) var(--kurve,ease)}
-.ans-zeile input:checked{background:var(--teal)}
-.ans-zeile input:checked::after{transform:translateX(16px)}
-.ans-zeile input:disabled{opacity:.4}
-.ans-zeile input:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
-@media (max-width:720px){
-  .nav-r{gap:5px}
-  .nav-r .pill{padding:0 11px}
-  .nav-r .pill.icon-btn,#ansBtn{width:36px;padding:0;justify-content:center}
-  .ans-pfeil{display:none}
-  .ans-panel{right:-44px;width:min(250px,calc(100vw - 40px))}
-}
-/* Schmales Telefon: die Marke bleibt als Zeichen, das Wort weicht den Knöpfen. */
-@media (max-width:420px){ .brand b{display:none} }
 
 /* ═══ Kontor als Schaltbild (26.10.2026) ═══
    Oben das Auftragsbuch als Quelle über die ganze Breite, darunter in drei
@@ -783,9 +541,6 @@ html.wb-vorab .slides,html.wb-vorab .dock{visibility:hidden}
 #grid .tile[data-app="auftragsbuch"] .push{margin-top:4px;font-size:10.5px}
 #grid .tile[data-app="auftragsbuch"] .t-more{left:50%;margin-left:-125px}
 #grid .tile[data-app="rechnungsbuch"]{grid-column:1}
-/* Seit 05.11.2026: das Belegbuch steht als Schritt 6 neben dem Ausgang, unter dem Terminbuch. */
-#grid .tile[data-app="belegbuch"]{grid-column:3}
-#grid .tile[data-app="belegbuch"] .t-more{left:auto;right:0}
 /* Ausgang: kein Werkzeug, darum gestrichelt und ohne Glas. */
 #grid .ausgang{grid-column:2;width:var(--kw);position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;
   justify-content:flex-start;gap:6px;padding:4px 0 2px;border:0;
@@ -822,6 +577,20 @@ html.wb-vorab .slides,html.wb-vorab .dock{visibility:hidden}
   #grid .a-nm{font-size:11.5px}
   #grid .a-wo{display:none}
 }
+/* ═══ Lizenz im Kontor (seit 15.11.2026) ═══
+   Sichtbar ist nur, was die Lizenz nennt. Bis die Prüfung durch ist,
+   bleiben die Raster unsichtbar – sonst blitzen fremde Kacheln auf. */
+html.lz-warten #grid,html.lz-warten #gridProd,html.lz-warten #gridBuero{visibility:hidden}
+.lz-leer{grid-column:1/-1;justify-self:center;max-width:420px;margin:24px auto;padding:22px 20px;text-align:center;
+  border:1px dashed var(--line-strong,var(--line));border-radius:18px;color:var(--text-2);font-size:15px;line-height:1.55}
+.lz-leer b{display:block;color:var(--text);font-size:17px;margin-bottom:4px}
+.lz-leer .pill{margin-top:14px}
+#lzFeld{width:100%;box-sizing:border-box;min-height:96px;resize:vertical;border-radius:11px;padding:12px;
+  border:1px solid var(--line);background:var(--glass);color:var(--text);font:400 15px/1.45 var(--mono);word-break:break-all}
+#lzFeld:focus{outline:none;border-color:var(--amber)}
+#lzMeld{min-height:20px;margin:10px 0 0;font-size:14px}
+#lzMeld.gut{color:var(--teal)} #lzMeld.schlecht{color:var(--red-ink,#E8646E)}
+#lzStand{margin:0 0 12px;color:var(--text-2);font-size:14.5px}
 </style>
 </head>
 <body>
@@ -836,18 +605,9 @@ html.wb-vorab .slides,html.wb-vorab .dock{visibility:hidden}
       <button class="pill" id="alleSichern" type="button" title="Bestände aller Werkzeuge als eine JSON-Datei sichern">Sichern ↓</button>
       <button class="pill" id="alleLaden" type="button" title="Sicherung (JSON) einspielen">Laden ↑</button>
       <input type="file" id="ladeDatei" accept=".json,application/json" hidden>
-      <div class="ans-menue">
-        <button class="pill" id="ansBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="ansPanel" title="Ansichten ein- und ausblenden">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg>
-          <span class="hide-sm">Ansichten</span><span class="ans-pfeil" aria-hidden="true">▾</span></button>
-        <div class="ans-panel" id="ansPanel" role="group" aria-label="Ansichten im Dock" hidden>
-          <p class="ans-kopf">Ansichten im Dock</p>
-          <div id="ansWahl"></div>
-          <p class="ans-kopf ans-kopf2" id="kastenKopf">Im Werkzeugkasten</p>
-          <div id="kastenWahl"></div>
-          <p class="ans-fuss">Ohne Lizenz bleibt eine Ansicht aus. Der Werkzeugkasten selbst bleibt immer.</p>
-        </div>
-      </div>
+      <button class="pill icon-btn hide-sm" id="lizenzBtn" type="button" aria-label="Lizenz" title="Lizenz">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="M10.8 12.2 20 3M16 7l3 3M14 9l2 2"/></svg>
+      </button>
       <button class="pill icon-btn" id="themeBtn" type="button" aria-label="Hell/Dunkel umschalten">
         <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
         <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
@@ -858,10 +618,9 @@ html.wb-vorab .slides,html.wb-vorab .dock{visibility:hidden}
 
 <main>
   <div class="slides" id="slides">
-    <div class="slide" id="s-kontor" aria-label="Meine Firma">
+    <div class="slide" id="s-kontor" aria-label="Kontor">
       <section class="hero">
-        <h1><span>Meine</span> <em>Firma.</em></h1>
-        <p class="mein-info">Der ganze Ablauf an einem Ort – vom Auftrag bis zum Geldeingang.</p>
+        <h1><span>Der ganze Ablauf</span> <em>an einem Ort.</em></h1>
       </section>
       <section class="grid" id="grid" aria-label="Werkzeuge">
         <div class="offen" id="offen" aria-live="polite"></div>
@@ -878,26 +637,6 @@ html.wb-vorab .slides,html.wb-vorab .dock{visibility:hidden}
         <h1><span>Alles rund ums</span> <em>Büro.</em></h1>
       </section>
       <section class="grid" id="gridBuero" aria-label="Büro-Werkzeuge"></section>
-    </div>
-    <div class="slide" id="s-privat" aria-label="Privat">
-      <section class="hero">
-        <h1><span>Alles</span> <em>Private.</em></h1>
-      </section>
-      <section class="grid" id="gridPrivat" aria-label="Private Werkzeuge"></section>
-    </div>
-    <div class="slide" id="s-mein" aria-label="Mein Werkzeugkasten">
-      <section class="hero">
-        <h1><span>Mein</span> <em>Werkzeugkasten.</em><span class="mein-i">
-          <button type="button" class="mein-i-btn" aria-label="Lizenz anzeigen" aria-describedby="meinInfo" aria-expanded="false">i</button>
-          <span class="mein-i-tip" id="meinInfo" role="tooltip"></span></span></h1>
-      </section>
-      <div class="lw-leiste" id="ordnenLeiste" hidden>
-        <span class="lw-hinweis" id="ordnenHinweis"><span class="mit-maus">Kacheln ziehen · Größe über das Kästchen oben rechts · Tastatur: Pfeile schieben, + / − Größe.</span><span class="mit-finger">Festhalten und schieben · Kästchen oben rechts ändert die Größe.</span></span>
-        <button type="button" class="lw-knopf" id="bereicheBtn" aria-pressed="false" hidden title="Kacheln nach Firma, Produktiv, Büro und Privat gruppieren">Bereiche</button>
-        <button type="button" class="lw-knopf" id="ordnenReset" hidden>Zurücksetzen</button>
-        <button type="button" class="lw-knopf" id="ordnenBtn" aria-pressed="false">Anordnen</button>
-      </div>
-      <section class="grid" id="gridMein" aria-label="Lizenzierte Werkzeuge"></section>
     </div>
   </div>
 </main>
@@ -920,26 +659,22 @@ html.wb-vorab .slides,html.wb-vorab .dock{visibility:hidden}
     <path class="dock-plate" id="plate" d=""/>
   </svg>
   <div class="dock-row" id="drow">
-    <button class="dock-btn is-active" type="button" data-label="Firma" data-acc="#F2B33D" data-acc-hell="#E0A21F" aria-label="Meine Firma">
+    <button class="dock-btn is-active" type="button" data-label="Kontor" data-acc="#F2B33D" data-acc-hell="#E0A21F" aria-label="Kontor">
       <svg viewBox="0 0 24 24"><path d="M4 20V8.5L12 4l8 4.5V20"/><path d="M9 20v-6h6v6M3 20h18"/></svg></button>
     <button class="dock-btn" type="button" data-label="Produktiv" data-acc="#63D9C4" data-acc-hell="#2FA894" aria-label="Produktiv">
       <svg viewBox="0 0 24 24"><path d="M14.7 6.3a3.7 3.7 0 0 0 4.9 4.9l-8 8a2.3 2.3 0 0 1-3.3-3.3z"/><path d="M14.7 6.3 17 4"/></svg></button>
     <button class="dock-btn" type="button" data-label="Büro" data-acc="#8FB8E8" data-acc-hell="#3F6FCB" aria-label="Büro">
       <svg viewBox="0 0 24 24"><rect x="3.5" y="8.5" width="17" height="11" rx="2"/><path d="M8.5 8.5V6.2a1.7 1.7 0 0 1 1.7-1.7h3.6a1.7 1.7 0 0 1 1.7 1.7v2.3M3.5 13h17"/></svg></button>
-    <button class="dock-btn" type="button" data-label="Privat" data-acc="#D9A86C" data-acc-hell="#A56B2F" aria-label="Privat">
-      <svg viewBox="0 0 24 24"><path d="M4 11.5 12 5l8 6.5"/><path d="M6.5 9.8V19h11V9.8"/><path d="M10 19v-4.6h4V19"/></svg></button>
-    <button class="dock-btn" type="button" data-label="Werkzeugkasten" data-acc="#B79CF2" data-acc-hell="#7552C9" aria-label="Mein Werkzeugkasten">
-      <svg viewBox="0 0 24 24"><path d="M3.5 10.5h17V19a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 19z"/><path d="M3.5 10.5 6 7h12l2.5 3.5"/><path d="M9.5 7V5h5v2"/><path d="M3.5 14.2h17M11 14.2v1.8h2v-1.8"/></svg></button>
   </div>
-  <div class="dock-name" id="dockName">Firma</div>
+  <div class="dock-name" id="dockName">Kontor</div>
   <div class="dock-bead" id="bead" role="slider" tabindex="0" aria-label="Ansicht, mit den Pfeiltasten wechseln"
-       aria-valuemin="1" aria-valuemax="5" aria-valuenow="1" aria-valuetext="Firma"></div>
+       aria-valuemin="1" aria-valuemax="3" aria-valuenow="1" aria-valuetext="Kontor"></div>
   <p class="dock-hint" id="dhint">Tippen – oder die Kugel ziehen</p>
 </nav>
 
 <footer>
   <span>© <span id="yr"></span> Maik Unverricht</span>
-  <span><a href="https://maikunverricht.github.io/WerkbankUnverricht/">Werkbank</a></span>
+  <span><a href="#" id="lizenzFuss">Lizenz</a> · <a href="https://maikunverricht.github.io/WerkbankUnverricht/">Werkbank</a></span>
 </footer>
 
 <dialog class="bus-dlg" id="dlgBus"><div class="sheet">
@@ -959,6 +694,21 @@ html.wb-vorab .slides,html.wb-vorab .dock{visibility:hidden}
     <button class="pill" type="button" id="busDatei">Datei lesen</button>
     <button class="pill" type="button" id="busSichern">Als JSON sichern</button>
     <button class="pill primary" type="button" id="busWerkzeug">Werkzeug öffnen</button>
+  </footer>
+</div></dialog>
+
+<dialog class="bus-dlg" id="dlgLizenz"><div class="sheet">
+  <header><h3>Lizenz</h3>
+    <button class="pill icon-btn" type="button" id="lzZu" aria-label="Schließen">✕</button></header>
+  <div class="body">
+    <p id="lzStand"></p>
+    <textarea id="lzFeld" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="WB1.…"></textarea>
+    <p id="lzMeld"></p>
+  </div>
+  <footer>
+    <label class="pill">Datei wählen<input type="file" id="lzDatei" accept=".wblic,.txt,.json" hidden></label>
+    <button class="pill" type="button" id="lzWeg">Lizenz entfernen</button>
+    <button class="pill primary" type="button" id="lzOk" style="margin-left:auto">Freischalten</button>
   </footer>
 </div></dialog>
 
@@ -999,8 +749,6 @@ html.wb-vorab .slides,html.wb-vorab .dock{visibility:hidden}
      wb-auftragsstatus-data  Prozessschritt und To-dos   (Auftragsstatus)
      wb-terminbuch-data      Termine und Wiedervorlagen  (Terminbuch)
      wb-rechnungsbuch-data   Rechnungen und Zahlungen    (Rechnungsbuch)
-     wb-belegbuch-<bereich>-data     Zähler und Summen   (Belegbuch, kontor | privat)
-     wb-belegbuch-<bereich>-fristen  offene Rechnungen   (Belegbuch → Terminbuch)
    ════════════════════════════════════════════════════════════════ */
 const WB = (function(){
   const KANAL = 'werkbank', WECK = 'wb-signal';
@@ -1053,27 +801,6 @@ const WB_NOTES_LS = 'wb-noteos-stand';
 const WB_STATUS_LS = 'wb-auftragsstatus-data';
 const WB_TERMIN_LS = 'wb-terminbuch-data';
 const WB_RECH_LS = 'wb-rechnungsbuch-data';
-/* Belegbuch: je Bereich eine Lesekopie mit Zählern und eine mit Fristen.
-   Keine Beträge einzelner Rechnungen, keine Pfade, kein Volltext. */
-const WB_BELEG_LS = { kontor:'wb-belegbuch-kontor-data', privat:'wb-belegbuch-privat-data' };
-const WB_BELEGFRIST_LS = { kontor:'wb-belegbuch-kontor-fristen', privat:'wb-belegbuch-privat-fristen' };
-function belegStand(bereich){
-  const d = WB.lesen(WB_BELEG_LS[bereich]);
-  if (!d || typeof d !== 'object') return null;
-  const jahr = String(new Date().getFullYear());
-  const abgelegt = d.jahre && d.jahre[jahr] ? (+d.jahre[jahr].anzahl || 0) : 0;
-  return { eingang:+d.eingang || 0, offen:+d.offen || 0, ueber:+d.ueberfaellig || 0, abgelegt, jahr };
-}
-function belegText(b){
-  return b.eingang + ' im Eingang · ' + b.offen + (b.offen === 1 ? ' Rechnung' : ' Rechnungen') + ' offen'
-       + (b.ueber ? ' (' + b.ueber + ' überfällig)' : '') + ' · ' + b.abgelegt + ' abgelegt ' + b.jahr;
-}
-/* Zahl an der Ecke: überfällige Rechnungen haben Vorrang (rot), sonst der Eingang. */
-function belegZahl(bereich){
-  const b = belegStand(bereich); if (!b) return null;
-  if (b.ueber) return { n:b.ueber, rot:true, titel:belegText(b) };
-  return b.eingang ? { n:b.eingang, titel:belegText(b) } : null;
-}
 
 /* Aussehen gilt für die ganze Werkbank. Geschrieben werden beide
    Schlüssel — jedes Werkzeug liest beim Start seinen eigenen, und so
@@ -1115,12 +842,7 @@ const APPS = [
   { id:'rechnungsbuch',  name:'Rechnungsbuch',  tag:'Abrechnung',     gruppe:'prozess', schritt:5,
     url:'https://maikunverricht.github.io/Rechnungsbuch/',  repo:'Rechnungsbuch',
     fluss:'führt Rechnungen und Zahlungen · liest Stammdaten und Zeit · meldet Abgerechnetes zurück', rc:'var(--geld)',
-    desc:'Rechnung aus gebuchter Zeit: Entwurf, Festschreibung, offene Posten – Druck und Factur-X.' },
-  { id:'belegbuch',      name:'Belegbuch',      tag:'Belege',         gruppe:'prozess', schritt:6,
-    url:'https://maikunverricht.github.io/Belegbuch/?bereich=kontor', repo:'Belegbuch',
-    fluss:'führt Belege, Steuerrubriken und Zahlstatus · meldet Rechnungsfristen', rc:'var(--geld)',
-    desc:'Eingangsbelege sammeln, lokal auswerten und nach Rubrik ablegen – mit offenen Rechnungen und Steuerpaket.',
-    zahl:() => belegZahl('kontor') }
+    desc:'Rechnung aus gebuchter Zeit: Entwurf, Festschreibung, offene Posten – Druck und Factur-X.' }
   /* Das Notizbuch (früher NoteOS) steht seit 30.10.2026 unter „Produktiv“:
      ohne Leitung zum Auftragsbuch. Der Auftragsbezug lebt im Auftragsstatus. */
 ];
@@ -1258,10 +980,6 @@ function standVon(id){
          + (spaet ? ' · ' + spaet + '× überfällig' : '')
          + (entw ? ' · ' + entw + (entw === 1 ? ' Entwurf' : ' Entwürfe') : '');
   }
-  if (id === 'belegbuch') {
-    const b = belegStand('kontor');
-    return b ? belegText(b) : null;
-  }
   if (id === 'stempeluhr') {
     const z = WB.lesen(WB_ZEIT_LS);
     if (!z || !z.gesamt) return null;
@@ -1335,13 +1053,9 @@ function offeneWelt(){
       text:'<b>' + woche + '</b> ' + (woche === 1 ? 'Frist' : 'Fristen') + ' in sieben Tagen' });
   }
 
-  const bk = belegStand('kontor');
-  if (bk && bk.ueber) p.push({ zu:'belegbuch', spaet:true, rot:true,
-    text:'<b>' + bk.ueber + '</b> ' + (bk.ueber === 1 ? 'Eingangsrechnung' : 'Eingangsrechnungen') + ' überfällig' });
-
   const el = document.getElementById('offen');
   if (!el) return;
-  el.innerHTML = p.map(x =>
+  el.innerHTML = p.filter(x => byId[x.zu]).map(x =>
     '<button type="button" class="' + (x.spaet ? 'spaet' : '') + (x.rot ? ' rot' : '') + '" data-zu="' + x.zu + '">'
     + x.text + '</button>').join('');
   el.querySelectorAll('[data-zu]').forEach(b =>
@@ -1350,22 +1064,11 @@ function offeneWelt(){
 
 function staendeZeigen(){
   tiles.forEach(t => {
-    if (t.app.zahl) zahlSetzen(t, t.app.zahl);
     const s = standVon(t.app.id);
     if (!s) return;
     t.push.textContent = s;
     t.push.classList.toggle('run', /läuft/.test(s));
   });
-}
-
-/* Zahl an der Ecke eines Zeichens setzen (Kontor, Produktiv, Büro, Privat). */
-function zahlSetzen(t, fn){
-  let el = t.el.querySelector('.t-zahl');
-  if (!el) { el = document.createElement('span'); el.className = 't-zahl'; el.hidden = true; t.shot.appendChild(el); }
-  let z = null; try { z = fn(); } catch (e) {}
-  el.hidden = !z;
-  el.classList.toggle('rot', !!(z && z.rot));
-  if (z) { el.textContent = z.n > 999 ? '999+' : String(z.n); el.title = z.titel || ''; el.setAttribute('aria-label', z.titel || String(z.n)); }
 }
 
 /* ───────── Zeichen je Werkzeug ─────────
@@ -1379,11 +1082,10 @@ const ZEICHEN = {
   auftragsstatus: SVG('<path d="M4.6 6.6h14.8M4.6 12h9.4M4.6 17.4h5.4"/>'),
   terminbuch:     SVG('<rect x="3.6" y="5.4" width="16.8" height="15" rx="2.2"/><path d="M3.6 10h16.8M8 3.4v3.4M16 3.4v3.4"/><path d="M7.6 13.8h2.2M13.6 13.8h2.8M7.6 17h4.6"/>'),
   rechnungsbuch:  SVG('<path d="M6 3.4h9.2L19 7.2V20.6H6z"/><path d="M14.6 3.6v3.8H18.8"/><path d="M8.8 11.6h7M8.8 14.8h7M8.8 18h3.6"/>'),
-  belegbuch:      SVG('<path d="M6 3.4h12V21l-2.4-1.5L13.2 21l-2.4-1.5L8.4 21 6 19.5z"/><path d="M9 8h6M9 11.4h6M9 14.8h3.6"/>'),
   noteos:         SVG('<path d="M6.6 4.4A1.4 1.4 0 0 1 8 3h8a1.4 1.4 0 0 1 1.4 1.4V21l-5.4-3.1L6.6 21z"/><path d="M9.8 8h4.4"/>'),
 };
 const SYMFARBE = { auftragsbuch:'var(--amber)', stempeluhr:'var(--teal)', auftragsstatus:'var(--em-2)',
-                   terminbuch:'var(--info)', rechnungsbuch:'var(--geld)', belegbuch:'var(--geld)',
+                   terminbuch:'var(--info)', rechnungsbuch:'var(--geld)',
                    noteos:'var(--text-3)' };
 
 /* ───────── Kacheln aufbauen ───────── */
@@ -1416,7 +1118,7 @@ APPS.forEach((app, i) => {
       </span>
       <span class="t-nm">
         <span class="t-idx">${app.schritt ? `<b>${pad2(app.schritt)}</b> · ` : ''}${esc(app.tag)}</span>
-        <h2>${esc(app.name).replace(/^(Auftrags|Rechnungs|Termin|Stempel|Beleg)/,'$1&shy;')}</h2>
+        <h2>${esc(app.name).replace(/^(Auftrags|Rechnungs|Termin|Stempel)/,'$1&shy;')}</h2>
       </span>
       <button class="more" type="button" aria-expanded="false">…mehr</button>
     </div>
@@ -1550,13 +1252,10 @@ const FLUSS = [
   { von:'rechnungsbuch',  nach:'auftragsbuch',   art:'geld',  seite:-1, was:'Abgerechnet je Auftrag' },
   /* Seit 20.09.2026 im Datenfluss beschrieben, im Bild bis 01.10.2026 vergessen:
      die Stempeluhr liest, welche Buchung schon auf einer Rechnung steht. */
-  { von:'rechnungsbuch',  nach:'stempeluhr',     art:'abger', seite:-1, was:'Abgerechnete Buchungen' },
-  /* Seit 05.11.2026: offene Eingangsrechnungen laufen als Fristen ins Terminbuch.
-     Die Leitung Rechnungsbuch → Belegbuch (WB-17) kommt erst, wenn die Übernahme im Belegbuch eingeschaltet ist. */
-  { von:'belegbuch',      nach:'terminbuch',     art:'belegfrist', seite:-1, was:'Fristen offener Eingangsrechnungen' }
+  { von:'rechnungsbuch',  nach:'stempeluhr',     art:'abger', seite:-1, was:'Abgerechnete Buchungen' }
 ];
 const BUSFARBE = { abger:'var(--geld)', stamm:'var(--amber)', kat:'var(--amber)', zeit:'var(--teal)', summe:'var(--teal)',
-                   frist:'var(--em-2)', geld:'var(--geld)', belegfrist:'var(--geld)', opt:'var(--text-3)', notiz:'var(--text-3)' };
+                   frist:'var(--em-2)', geld:'var(--geld)', opt:'var(--text-3)', notiz:'var(--text-3)' };
 /* Durchgezogen heißt: verknüpft über IDs. Gepunktet: wandert nur mit
    gesetztem Haken zurück.
    Seit NoteOS die `agbId` an der Notiz führt, läuft keine Leitung mehr über
@@ -1580,9 +1279,7 @@ const QUELLE = {
   /* Was je Auftrag gestellt wurde – das Auftragsbuch rechnet daraus
      den tatsächlichen Stundensatz. Gelesen wird die ganze Kopie. */
   geld:  { ls:'wb-rechnungsbuch-data', idb:'wb-rechnungsbuch', datei:'rechnungsbuch.json', feld:'rechnungen' },
-  abger: { ls:'wb-rechnungsbuch-data', idb:'wb-rechnungsbuch', datei:'rechnungsbuch.json', feld:'abgerechnet' },
-  /* Nur Aussteller und Datum offener Rechnungen – ohne Beträge (WB-10). */
-  belegfrist: { ls:'wb-belegbuch-kontor-fristen', idb:null, datei:'belegbuch-fristen.json', feld:null }
+  abger: { ls:'wb-rechnungsbuch-data', idb:'wb-rechnungsbuch', datei:'rechnungsbuch.json', feld:'abgerechnet' }
 };
 function kennzahlen(art, d){
   const z = [];
@@ -1622,14 +1319,6 @@ function kennzahlen(art, d){
     z.push(['Rechnungen', r.length]);
     z.push(['festgeschrieben', r.filter(x => x && x.festgeschrieben).length]);
     z.push(['mit Auftrag', r.filter(x => x && x.aufId).length]);
-  } else if (art === 'belegfrist' && Array.isArray(d)) {
-    const heute = isoTag(Date.now());
-    z.push(['offene Rechnungen', d.length]);
-    z.push(['davon überfällig', d.filter(x => x && x.faellig && x.faellig < heute).length]);
-    const n = d.filter(x => x && x.faellig && x.faellig >= heute).sort((a, b) => a.faellig.localeCompare(b.faellig))[0];
-    if (n) z.push(['nächste Fälligkeit', nfT.format(new Date(n.faellig + 'T12:00:00'))]);
-    const b = belegStand('kontor'); if (b) z.push(['im Eingang', b.eingang]);
-    return z;
   } else if (art === 'abger') {
     const k = d.abgerechnet && typeof d.abgerechnet === 'object' ? d.abgerechnet : {};
     z.push(['abgerechnete Buchungen', Object.keys(k).length]);
@@ -1878,6 +1567,7 @@ $('#alleSichern').addEventListener('click', () => {
     for (let i = 0; i < localStorage.length; i++) {
       const k = localStorage.key(i);
       if (!/^(wb-|stempeluhr|noteos)/i.test(k)) continue;
+      if (SICHERN_NIE.test(k)) continue;
       const r = localStorage.getItem(k);
       try { daten[k] = JSON.parse(r); } catch (e) { daten[k] = r; }
     }
@@ -1908,10 +1598,15 @@ $('#ladeDatei').addEventListener('change', async ev => {
     if (!o || o.app !== 'werkbank-kontor-sicherung' || !o.daten || typeof o.daten !== 'object') {
       kurz('Keine Sicherung'); return;
     }
-    const keys = Object.keys(o.daten).filter(k => /^(wb-|stempeluhr|noteos)/i.test(k));
-    if (!keys.length) { kurz('Leer'); return; }
+    const alle = Object.keys(o.daten).filter(k => /^(wb-|stempeluhr|noteos)/i.test(k) && !SICHERN_NIE.test(k));
+    /* Eingespielt wird nur, was zu einem freigeschalteten Werkzeug gehört
+       (oder allgemein ist: Aussehen, zuletzt gewählte Ansicht). */
+    const keys = alle.filter(darfLaden);
+    const weg = alle.length - keys.length;
+    if (!keys.length) { kurz(alle.length ? 'Ohne Lizenz' : 'Leer'); return; }
     if (!confirm(keys.length + ' Bestände aus der Sicherung vom ' + String(o.exportiert || '?').slice(0, 10)
-        + ' einspielen?\nBestehende Bestände gleichen Namens werden überschrieben.')) return;
+        + ' einspielen?\nBestehende Bestände gleichen Namens werden überschrieben.'
+        + (weg ? '\n' + weg + ' Bestände ohne Lizenz werden übersprungen.' : ''))) return;
     keys.forEach(k => {
       const v = o.daten[k];
       localStorage.setItem(k, typeof v === 'string' ? v : JSON.stringify(v));
@@ -2038,7 +1733,6 @@ function close({ animate = true } = {}){
     t.frame.classList.remove('fixed'); clearRect(t);
     root.classList.remove('locked');
     current = null; busy = false; fit(t);
-    if (meinNachholen) { meinNachholen = false; meinBauen(); }
     document.title = 'Kontor · Werkbank Unverricht';
     t.shot.focus({ preventScroll:true });
   });
@@ -2121,16 +1815,6 @@ const BUERO = [
   { name:'Frei', tag:'folgt' },
   { name:'Frei', tag:'folgt' }
 ];
-/* Seit 05.11.2026: die private Seite. Gleiche Kacheln, eigene Ablage dahinter:
-   das Belegbuch läuft hier im Bereich Privat und mischt nichts mit dem Kontor. */
-const PRIVAT = [
-  { id:'belegbuch-privat', name:'Belegbuch', tag:'Steuerbelege', url:'https://maikunverricht.github.io/Belegbuch/?bereich=privat',
-    desc:'Steuerbelege sammeln und je Rubrik ablegen – mit offenen Rechnungen und Steuerpaket fürs Jahr.', farbe:'var(--geld)',
-    zahl:() => belegZahl('privat'),
-    zeichen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3.4h12V21l-2.4-1.5L13.2 21l-2.4-1.5L8.4 21 6 19.5z"/><path d="M9 8h6M9 11.4h6M9 14.8h3.6"/></svg>' },
-  { name:'Frei', tag:'folgt' },
-  { name:'Frei', tag:'folgt' }
-];
 function ansichtBauen(LISTE, gridEl){
 const prodTiles = [];
 LISTE.forEach((w, i) => {
@@ -2142,10 +1826,10 @@ LISTE.forEach((w, i) => {
   el.innerHTML = `
     <div class="tile-bg"></div>
     <div class="t-head">
-      <span class="shot"${echt ? ` role="button" tabindex="0" aria-label="${esc(w.name)} öffnen" style="color:${w.farbe || 'var(--teal)'}"` : ' aria-hidden="true"'}>${w.zeichen || PLUS}${echt ? '<span class="state" data-s="bereit"><span class="dot"></span><span class="s-txt">bereit</span></span>' : ''}${w.zahl ? '<span class="t-zahl" hidden></span>' : ''}</span>
+      <span class="shot"${echt ? ` role="button" tabindex="0" aria-label="${esc(w.name)} öffnen" style="color:var(--teal)"` : ' aria-hidden="true"'}>${w.zeichen || PLUS}${echt ? '<span class="state" data-s="bereit"><span class="dot"></span><span class="s-txt">bereit</span></span>' : ''}${w.zahl ? '<span class="t-zahl" hidden></span>' : ''}</span>
       <span class="t-nm">
         <span class="t-idx"><b>${pad2(i+1)}</b> · ${esc(w.tag || '')}</span>
-        <h2>${esc(w.name).replace(/^(Code|Kapazitäten|Belegungs|Testcase|Auftrags|Rechnungs|Termin|Stempel|Beleg)/,'$1&shy;')}</h2>
+        <h2>${esc(w.name).replace(/^(Code|Kapazitäten|Belegungs|Testcase)/,'$1&shy;')}</h2>
       </span>
     </div>
     <span class="push">${w.desc ? esc(w.desc) : (echt ? '' : 'Platz für ein Werkzeug')}</span>`;
@@ -2161,573 +1845,27 @@ LISTE.forEach((w, i) => {
   el.addEventListener('click', () => { if (!t.frame.classList.contains('live')) open(w.id); });
   t.shot.addEventListener('keydown', e => { if ((e.key==='Enter'||e.key===' ') && !current) { e.preventDefault(); open(w.id); } });
 });
-return prodTiles;
 }
 ansichtBauen(PRODUKTIV, $('#gridProd'));
 ansichtBauen(BUERO, $('#gridBuero'));
-ansichtBauen(PRIVAT, $('#gridPrivat'));
-
-/* ───────── Mein Werkzeugkasten ─────────
-   Seit 12.11.2026. Zeigt nur die Werkzeuge, die die Lizenz auf diesem Gerät
-   freischaltet (localStorage `wb-lizenz`, siehe lizenz.md). Geprüft wird wie in
-   jedem Werkzeug: ECDSA P-256 gegen den Prüfschlüssel der Lizenzstelle, offline.
-   Die Ansicht schreibt nichts – freigeschaltet wird weiter im Werkzeug selbst. */
-const LIZ_LS = 'wb-lizenz';
-const LIZ_PUB = 'MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAESwn5vJH6rMd87uKAXdmC4qXnI47PQn7lpnDtpPfzuv4bhSIp2QkxeL2RC7cVaXbnD0lZRdh6g3b+x3MYKm61Pg==';
-/* Kennung in der Lizenz → Kacheln. Das Notizbuch heißt in der Lizenz noch `noteos`;
-   das Belegbuch steht im Kontor und unter Privat. */
-const LIZ_KACHEL = { noteos:['notizbuch'], belegbuch:['belegbuch','belegbuch-privat'] };
-const KATALOG = [].concat(
-  APPS.map(a => Object.assign({}, a, { zeichen:ZEICHEN[a.id], farbe:SYMFARBE[a.id], bereich:'firma' })),
-  PRODUKTIV.map(a => Object.assign({}, a, { bereich:'produktiv' })),
-  BUERO.map(a => Object.assign({}, a, { bereich:'buero' })),
-  PRIVAT.map(a => Object.assign({}, a, { bereich:'privat' }))
-).filter(w => w.id && w.url);
-
-const b64u = s => { s = String(s).replace(/-/g,'+').replace(/_/g,'/'); while (s.length % 4) s += '=';
-  return Uint8Array.from(atob(s), c => c.charCodeAt(0)); };
-const tagDe = iso => iso ? String(iso).split('-').reverse().join('.') : '';
-async function lizenzLesen(){
-  const roh = store.get(LIZ_LS);
-  if (!roh) return { grund:'keine' };
-  try {
-    const m = String(roh).replace(/\s+/g,'').match(/WB1\.([A-Za-z0-9\-_]+)\.([A-Za-z0-9\-_]+)/);
-    if (!m) return { grund:'format' };
-    const daten = b64u(m[1]), sig = b64u(m[2]);
-    const key = await crypto.subtle.importKey('spki', Uint8Array.from(atob(LIZ_PUB), c => c.charCodeAt(0)),
-      { name:'ECDSA', namedCurve:'P-256' }, false, ['verify']);
-    if (!await crypto.subtle.verify({ name:'ECDSA', hash:'SHA-256' }, key, sig, daten)) return { grund:'signatur' };
-    const p = JSON.parse(new TextDecoder().decode(daten));
-    if (!p || p.v !== 1 || !Array.isArray(p.w)) return { grund:'format' };
-    return { p };
-  } catch (e) { return { grund:'ungueltig' }; }
-}
-
-let MEIN = [], MEIN_ALLE = [], meinTiles = [], meinErst = true, LIZ = null;
-/* Werkzeuge, die im Werkzeugkasten von Hand ausgeblendet sind (Kennungen ohne `mein-`). */
-const KASTEN_AUS_LS = 'wb-kontor-kasten-aus';
-function kastenAus(){ try { const a = JSON.parse(store.get(KASTEN_AUS_LS) || '[]'); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
-function lizenzIds(p){
-  if (!p) return null;
-  const ids = new Set();
-  p.w.forEach(k => (LIZ_KACHEL[k] || [k]).forEach(x => ids.add(x)));
-  return { alle: p.w.indexOf('*') >= 0, ids };
-}
-async function meinBauen(){
-  LIZ = await lizenzLesen();
-  try { meinKacheln(LIZ); } finally { ansichtenAnwenden(); }
-}
-function meinKacheln({ p, grund }){
-  /* Unter einem offenen Werkzeug wird nicht umgebaut – beim Schließen holt es nach. */
-  if (current && current.app.id.startsWith('mein-')) { meinNachholen = true; return; }
-  meinTiles.forEach(t => { t.frame.remove(); delete byId[t.app.id]; });
-  document.getElementById('ordnenLeiste').hidden = true;
-  const g = $('#gridMein'), info = $('#meinInfo');
-  g.innerHTML = '';
-  MEIN = []; MEIN_ALLE = [];
-  if (!p) {
-    info.textContent = '';
-    g.innerHTML = '<p class="mein-leer">' + (grund === 'keine'
-      ? 'Auf diesem Gerät liegt noch keine Lizenz. Öffne ein Werkzeug und tippe auf „Freischalten“ – danach steht es hier.'
-      : 'Die hinterlegte Lizenz lässt sich nicht prüfen. Füge den Schlüssel in einem Werkzeug neu ein.') + '</p>';
-    meinTiles = [];
-    return;
-  }
-  const alle = p.w.indexOf('*') >= 0;
-  const ids = new Set();
-  p.w.forEach(k => (LIZ_KACHEL[k] || [k]).forEach(x => ids.add(x)));
-  const heute = isoTag(Date.now());
-  const abgelaufen = p.m === 'miete' && p.b && heute > p.b;
-  MEIN_ALLE = KATALOG.filter(w => alle || ids.has(w.id));
-  const aus = kastenAus();
-  MEIN = MEIN_ALLE.filter(w => aus.indexOf(w.id) < 0).map(w => Object.assign({}, w, {
-    id:'mein-' + w.id, tag: abgelaufen ? 'nur lesen' : (w.id === 'belegbuch-privat' ? 'Privat · ' + w.tag : w.tag),
-    /* Ohne Bereichsüberschriften wären die beiden Belegbücher nicht zu unterscheiden. */
-    name: w.id === 'belegbuch-privat' ? w.name + ' · Privat' : w.name }));
-  const zeile = (k, v) => '<span><i>' + k + '</i>' + v + '</span>';
-  info.innerHTML = zeile('Lizenz', '<b>' + esc(p.id || '–') + '</b>')
-    + (p.n ? zeile('Für', esc(p.n)) : '')
-    + zeile(p.m === 'miete' ? 'Miete' : 'Kauf', p.m === 'miete'
-        ? (p.b ? (abgelaufen ? 'abgelaufen am ' : 'bis ') + tagDe(p.b) : 'unbefristet')
-        : (p.b ? 'Wartung bis ' + tagDe(p.b) : 'ohne Wartungsende'))
-    + zeile('Umfang', (alle ? 'alle Werkzeuge' : MEIN_ALLE.length + (MEIN_ALLE.length === 1 ? ' Werkzeug' : ' Werkzeuge'))
-        + (MEIN.length < MEIN_ALLE.length ? ', ' + (MEIN_ALLE.length - MEIN.length) + ' ausgeblendet' : ''));
-  if (!MEIN.length) {
-    g.innerHTML = '<p class="mein-leer">' + (MEIN_ALLE.length
-      ? 'Alle Werkzeuge sind ausgeblendet. Über „Ansichten“ oben rechts holst du sie zurück.'
-      : 'Die Lizenz nennt kein Werkzeug, das hier steht.') + '</p>';
-    meinTiles = [];
-    return;
-  }
-  meinTiles = kastenBauen(MEIN, g);
-  document.getElementById('ordnenLeiste').hidden = MEIN.length < 2;
-  if (abgelaufen) meinTiles.forEach(t => t.el.classList.add('nurlesen'));
-  zahlenZeigen();
-  if (meinErst) {
-    meinErst = false;
-    const h = location.hash.slice(1);
-    if (h.startsWith('mein-') && byId[h] && !current) open(h, { animate:false });
-  }
-}
-
-/* ───────── Werkzeugkasten: Live-Kacheln ─────────
-   Seit 12.11.2026 (Richtung C). Werkzeuge, deren Lesekopie hier ankommt,
-   zeigen ihren Inhalt: die laufende Uhr, offene Beträge, den nächsten
-   Termin, das Budget je Auftrag. Alle anderen bleiben kleine Kacheln.
-   Gelesen wird nur, was die Werkzeuge ohnehin im localStorage spiegeln –
-   geschrieben wird nichts. Fehlt eine Lesekopie, wird die Kachel klein. */
-const KASTEN_BEREICH = [['firma','Meine Firma'],['produktiv','Produktiv'],['buero','Büro'],['privat','Privat']];
-const lsJson = k => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch (e) { return null; } };
-const OFFEN_ST = new Set(['geplant','aktiv','pausiert']);
-const uhrHM = sec => { const m = Math.floor(sec / 60); return Math.floor(m / 60) + ':' + pad2(m % 60); };
-const uhrHMS = sec => uhrHM(sec) + ':' + pad2(Math.floor(sec % 60));
-const uhrzeit = ms => new Date(ms).toLocaleTimeString('de-DE', { hour:'2-digit', minute:'2-digit' });
-const nfTag = new Intl.DateTimeFormat('de-DE', { weekday:'short', day:'2-digit', month:'2-digit' });
-function tagName(iso){
-  const h = isoTag(Date.now());
-  if (iso === h) return 'Heute';
-  if (iso === isoTag(Date.now() + 864e5)) return 'Morgen';
-  return nfTag.format(new Date(iso + 'T12:00:00'));
-}
-const mz = (n, eins, mehr) => n + ' ' + (n === 1 ? eins : mehr);
-
-const LIVE = {
-  stempeluhr: { breit:true, w(){
-    const run = lsJson('stempeluhr_run_v1'), roh = lsJson('stempeluhr_entries_v2');
-    const ent = Array.isArray(roh) ? roh : [];
-    const laeuft = !!(run && run.running);
-    if (!ent.length && !laeuft) return null;
-    const mo = new Date(); mo.setHours(0,0,0,0); mo.setDate(mo.getDate() - (mo.getDay() + 6) % 7);
-    const tage = [0,1,2,3,4,5,6].map(i => {
-      const a = mo.getTime() + i * 864e5, b = a + 864e5;
-      return ent.reduce((s, e) => s + (e && e.start >= a && e.start < b ? (+e.dur || 0) : 0), 0);
-    });
-    const hi = (new Date().getDay() + 6) % 7, max = Math.max(1, ...tage), woche = tage.reduce((a, b) => a + b, 0);
-    const bars = '<div class="lw-woche">' + ['Mo','Di','Mi','Do','Fr','Sa','So'].map((n, i) =>
-      '<i class="' + (i === hi ? 'heute' : '') + '"><b style="height:' + Math.max(4, Math.round(tage[i] / max * 100)) + '%"></b>' + n + '</i>').join('')
-      + '</div><span class="lw-fuss">Woche ' + nf1.format(woche / 3600) + ' h</span>';
-    if (laeuft) {
-      const el = (+run.accumSec || 0) + (run.segStart ? (Date.now() - run.segStart) / 1000 : 0);
-      return { gross:uhrHMS(el), mono:true, punkt:run.paused ? 'pause' : 'lauf',
-        sub:(run.paused ? 'pausiert · seit ' : 'läuft seit ') + uhrzeit(run.bookingStart || Date.now()), extra:bars };
-    }
-    return { gross:nf1.format(tage[hi] / 3600) + ' h', sub:'heute gebucht · Uhr steht', extra:bars };
-  }},
-  rechnungsbuch: { w(){
-    const d = lsJson(WB_RECH_LS);
-    if (!d || !Array.isArray(d.rechnungen) || !d.rechnungen.length) return null;
-    const heute = isoTag(Date.now());
-    let offen = 0, n = 0, spaet = 0, entw = 0;
-    d.rechnungen.forEach(x => {
-      if (!x) return;
-      if (!x.festgeschrieben) { entw++; return; }
-      if (x.storniert || x.stornoVon) return;
-      const sm = rechSumme(x);
-      if (sm.rest <= 0.005) return;
-      offen = cent(offen + sm.rest); n++;
-      const ziel = new Date((x.datum || heute) + 'T12:00:00');
-      ziel.setDate(ziel.getDate() + (parseInt(x.ziel, 10) || 0));
-      if (isoTag(ziel) < heute) spaet++;
-    });
-    if (!offen) return { gross:'bezahlt', sub:entw ? mz(entw, 'Entwurf', 'Entwürfe') : 'nichts offen' };
-    return { gross:nfE.format(offen), sub:n + ' offen' + (spaet ? ' · ' + spaet + ' überfällig' : ''), rot:spaet > 0 };
-  }},
-  terminbuch: { w(){
-    const d = lsJson(WB_TERMIN_LS);
-    if (!d || !Array.isArray(d.termine) || !d.termine.length) return null;
-    const heute = isoTag(Date.now());
-    const offen = d.termine.filter(t => t && t.datum && !t.erledigt);
-    const kommend = offen.filter(t => t.datum >= heute)
-      .sort((a, b) => (a.datum + (a.von || '00:00')).localeCompare(b.datum + (b.von || '00:00')));
-    const faellig = offen.filter(t => t.art === 'erinnerung' && t.datum < heute).length;
-    const rest = faellig ? '<div class="lw-s rot">' + mz(faellig, 'Wiedervorlage', 'Wiedervorlagen') + ' fällig</div>' : '';
-    if (!kommend.length) return { gross:'frei', sub:'keine Termine', extra:rest };
-    const t = kommend[0];
-    return { gross:tagName(t.datum), sub:(t.von ? t.von + ' · ' : 'ganztägig · ') + (t.titel || 'Termin')
-      + (kommend.length > 1 ? ' · ' + (kommend.length - 1) + ' weitere' : ''), extra:rest };
-  }},
-  auftragsstatus: { breit:true, w(){
-    const ab = lsJson(WB_AB_LS), st = lsJson(WB_STATUS_LS), z = lsJson(WB_ZEIT_LS);
-    const alle = (ab && Array.isArray(ab.auftraege) ? ab.auftraege : [])
-      .concat(st && Array.isArray(st.auftraege) ? st.auftraege : []);
-    const ueber = st && st.status && typeof st.status === 'object' ? st.status : {};
-    const offen = alle.filter(a => a && OFFEN_ST.has(ueber[a.id] || a.status));
-    let todos = 0;
-    const inh = st && st.inhalte && typeof st.inhalte === 'object' ? st.inhalte : {};
-    Object.keys(inh).forEach(k => { const l = inh[k] && Array.isArray(inh[k].todos) ? inh[k].todos : []; todos += l.filter(x => x && !x.erledigt).length; });
-    if (!offen.length && !todos) return null;
-    const je = z && z.jeAuftrag ? z.jeAuftrag : {};
-    const balken = offen.filter(a => +a.budgetStunden > 0)
-      .map(a => ({ n:a.name || 'Auftrag', p:((je[a.id] && je[a.id].sec) || 0) / 36 / (+a.budgetStunden) }))
-      .sort((x, y) => y.p - x.p).slice(0, 3);
-    const extra = balken.length ? '<div class="lw-pb">' + balken.map(b =>
-        '<span>' + esc(b.n) + '</span><small>' + Math.round(b.p) + ' %</small>'
-        + '<em class="' + (b.p > 100 ? 'rot' : b.p >= 80 ? 'warn' : '') + '" style="--p:' + Math.min(100, b.p) + '%"></em>').join('')
-      + '</div><span class="lw-fuss">Budget nach gebuchten Stunden</span>' : '';
-    return { gross:mz(offen.length, 'offener Auftrag', 'offene Aufträge'), klein:true,
-      sub:todos ? mz(todos, 'offenes To-do', 'offene To-dos') : 'keine offenen To-dos', extra };
-  }},
-  auftragsbuch: { w(){
-    const d = lsJson(WB_AB_LS);
-    if (!d || !Array.isArray(d.auftraggeber) || !d.auftraggeber.length) return null;
-    const n = d.auftraggeber.filter(x => x && x.aktiv !== false).length;
-    const o = (d.auftraege || []).filter(x => x && OFFEN_ST.has(x.status)).length;
-    return { gross:String(o), sub:(o === 1 ? 'offener Auftrag' : 'offene Aufträge') + ' · ' + n + ' Auftraggeber' };
-  }},
-  belegbuch: { w(){ return belegLive('kontor'); } },
-  'belegbuch-privat': { w(){ return belegLive('privat'); } },
-  notizbuch: { w(){
-    const d = lsJson(WB_NOTES_LS);
-    if (!d) return null;
-    const s = d.jeStatus;
-    /* Titel der offenen Notizen laufen durch – seit 12.11.2026 schreibt das
-       Notizbuch sie mit in seine Lesekopie. Ältere Fassungen: nur die Zahl. */
-    const tl = Array.isArray(d.titel) ? d.titel.filter(x => x && x.t) : [];
-    const zeile = x => '<li class="' + (x.s === 'arbeit' ? 'arbeit' : '') + '"><i></i><span>' + esc(x.t) + '</span>'
-      + (x.p === 'hoch' ? '<b>!</b>' : '') + '</li>';
-    const lauf = tl.length ? '<div class="lw-lauf' + (tl.length > 3 ? ' laeuft' : '') + '" style="--dauer:' + (tl.length * 2.6) + 's"><ul>'
-      + tl.map(zeile).join('') + (tl.length > 3 ? tl.map(zeile).join('') : '') + '</ul></div>' : '';
-    if (s) { const o = +s.offen || 0, a = +s.arbeit || 0;
-      return { gross:String(o + a), sub:'offen · ' + a + ' in Arbeit · ' + mz(+d.anzahl || 0, 'Notiz', 'Notizen'), extra:lauf }; }
-    return d.anzahl ? { gross:String(d.anzahl), sub:d.anzahl === 1 ? 'Notiz' : 'Notizen', extra:lauf } : null;
-  }},
-  kapazitaetenplaner: { breit:true, w(){
-    const d = lsJson('wb-kapa-stand');
-    if (!d || !Array.isArray(d.wochen) || !d.wochen.length) return null;
-    const farbe = v => v > 110 ? 'rot' : v > 100 ? 'ueber' : v > 85 ? 'warn' : '';
-    const max = Math.max(110, ...d.wochen.map(w => +w.pct || 0));
-    const w0 = d.wochen[0];
-    const bars = '<div class="lw-kapa">' + d.wochen.map((w, i) =>
-      '<i class="' + farbe(+w.pct || 0) + (i === 0 ? ' heute' : '') + '"><em>' + (+w.pct || 0) + '</em>'
-      + '<b style="height:' + Math.max(4, Math.round((+w.pct || 0) / max * 100)) + '%"></b>KW' + w.kw + '</i>').join('') + '</div>';
-    const ue = +d.ueberlastet || 0;
-    const wer = d.nur ? 'Deine Woche · ' + d.nur : 'Team diese Woche · ' + mz(+d.mitarbeiter || 0, 'Person', 'Personen')
-      + (ue ? ' · ' + ue + ' überlastet' : '');
-    /* Seit 15.11.2026: die offenen Workitems der erkannten Person, nach Start
-       und Plandatum. Laufende bekommen einen Punkt, „startet heute“ und
-       „über Plan“ sind markiert. Mehr als vier laufen langsam durch. */
-    let liste = '';
-    const mw = Array.isArray(d.meine) ? d.meine : null;
-    if (mw) {
-      const heute = isoTag(Date.now());
-      const kurz = iso => iso ? iso.slice(8, 10) + '.' + iso.slice(5, 7) + '.' : '–';
-      const zeile = x => {
-        const art = x.e && x.e < heute ? 'ueber' : x.s === heute ? 'heute' : x.s && x.s < heute ? 'laeuft' : 'kommt';
-        const marke = art === 'ueber' ? '<em class="rot">über Plan</em>' : art === 'heute' ? '<em>startet heute</em>' : '';
-        return '<li class="' + art + '"><i></i><span class="wi-t">' + esc(x.t) + '</span><small class="wi-h">'
-          + (x.h != null ? nf1.format(+x.h) + ' h' : '') + '</small>'
-          + '<span class="wi-d">' + kurz(x.s) + ' → ' + kurz(x.e) + (x.fc || x.bc ? ' · ' + esc(x.fc || x.bc) : '') + marke + '</span></li>';
-      };
-      liste = '<div class="wi-kopf">Meine Workitems' + (d.wer ? ' · ' + esc(d.wer) : '') + '<b>' + mw.length + '</b></div>'
-        + (mw.length
-          ? '<div class="lw-lauf wi' + (mw.length > 4 ? ' laeuft' : '') + '" style="--dauer:' + (mw.length * 3.2) + 's"><ul>'
-            + mw.map(zeile).join('') + (mw.length > 4 ? mw.map(zeile).join('') : '') + '</ul></div>'
-          : '<div class="lw-s">Keine offenen Workitems.</div>');
-    }
-    return { gross:(+w0.pct || 0) + ' %', sub:wer, rot:(+w0.pct || 0) > 100, extra:bars + liste };
-  }},
-  codecompare: { w(){
-    const d = lsJson('wb-codecompare-stand');
-    const v = d && d.letzter;
-    if (!v || !v.a || !v.b) return null;
-    const ver = x => x.version ? 'v' + String(x.version).replace(/^v/i, '') : (x.datei || '–');
-    const gleicheFc = v.a.fc === v.b.fc;
-    const titel = gleicheFc ? v.a.fc : v.a.fc + ' ⇄ ' + v.b.fc;
-    const wann = new Date(v.zeit || Date.now());
-    const zeitTxt = isoTag(wann) === isoTag(Date.now()) ? 'heute ' + uhrzeit(wann) : nfT.format(wann) + ' ' + uhrzeit(wann);
-    const frueher = Array.isArray(d.verlauf) ? d.verlauf.length - 1 : 0;
-    return { gross:titel, klein:true,
-      sub:(gleicheFc ? ver(v.a) + ' ⇄ ' + ver(v.b) : ver(v.a) + ' gegen ' + ver(v.b)),
-      extra:'<span class="lw-urteil ' + (v.identisch ? 'gut' : 'rot') + '">' + (v.identisch ? '✓ identisch'
-        : '✕ ' + mz(+v.abweichungen || 0, 'Abweichung', 'Abweichungen')) + '</span>'
-        + '<span class="lw-fuss">' + zeitTxt + (frueher > 0 ? ' · ' + frueher + ' frühere' : '') + '</span>' };
-  }},
-  ideahub: { breit:true, w(){
-    const roh = lsJson('ideahub:cores');
-    const kerne = (Array.isArray(roh) ? roh : []).filter(c => c && c.text && !c.composted);
-    if (!kerne.length) return null;
-    const item = (c, i) => {
-      const dt = Array.isArray(c.details) ? c.details : [];
-      const fertig = dt.filter(x => x && x.status === 'erledigt').length;
-      const p = dt.length ? Math.round(fertig / dt.length * 100) : 0;
-      return '<div class="' + (i === 0 ? 'an' : '') + '"><strong>' + esc(c.text) + '</strong>'
-        + (c.subtitle ? '<span>' + esc(c.subtitle) + '</span>' : '')
-        + (dt.length ? '<em style="--p:' + p + '%"></em><small>' + fertig + ' von ' + dt.length + ' Details erledigt</small>'
-                     : '<small>noch keine Details</small>') + '</div>';
-    };
-    const liste = kerne.slice(0, 12);
-    return { gross:mz(kerne.length, 'Kernidee', 'Kernideen'), klein:true, sub:'',
-      extra:'<div class="lw-dreh" data-n="' + liste.length + '">' + liste.map(item).join('') + '</div>'
-        + (liste.length > 1 ? '<div class="lw-punkte">' + liste.map((_, i) => '<i class="' + (i === 0 ? 'an' : '') + '"></i>').join('') + '</div>' : '') };
-  }}
-};
-function belegLive(bereich){
-  const b = belegStand(bereich);
-  if (!b) return null;
-  return { gross:String(b.eingang), sub:'im Eingang · ' + b.offen + ' offen' + (b.ueber ? ' · ' + b.ueber + ' überfällig' : ''), rot:b.ueber > 0 };
-}
-
-const basisId = t => t.app.id.replace(/^mein-/, '');
-/* Größen (seit 15.11.2026): S = kompakte Zeile, M = eine Spalte,
-   L = zwei Spalten, XL = drei Spalten. Ohne eigene Wahl: Werkzeuge mit
-   Inhalt M (die breiten L), ohne Inhalt S. Gemerkt je Gerät. */
-const GROESSE_LS = 'wb-kontor-kasten-groesse', BEREICHE_LS = 'wb-kontor-kasten-bereiche';
-const GROESSEN = ['S','M','L','XL'];
-function groessen(){ try { const o = JSON.parse(store.get(GROESSE_LS) || '{}'); return o && typeof o === 'object' ? o : {}; } catch (e) { return {}; } }
-function groesseVon(t, d){
-  const g = groessen()[basisId(t)];
-  if (GROESSEN.indexOf(g) >= 0) return g;
-  const L = LIVE[basisId(t)];
-  return d ? (L && L.breit ? 'L' : 'M') : 'S';
-}
-const nachBereichen = () => store.get(BEREICHE_LS) === '1';
-
-function kachelNeu(t){
-  const L = LIVE[basisId(t)];
-  let d = null; try { d = L ? L.w() : null; } catch (e) {}
-  const w = t.app, gr = groesseVon(t, d), kompakt = gr === 'S' || !d;
-  GROESSEN.forEach(x => t.el.classList.toggle('gr-' + x, x === gr));
-  t.el.classList.toggle('klein', kompakt);
-  if (t.knopf) t.knopf.textContent = gr;
-  const html = !kompakt
-    ? '<div class="lw-k"><span class="lw-ic">' + (w.zeichen || '') + '</span><span class="lw-n">' + esc(w.name) + '</span>'
-      + (d.punkt ? '<span class="lw-p ' + d.punkt + '"></span>' : '') + '</div>'
-      + '<div class="lw-g' + (d.mono ? ' mono' : '') + (d.klein ? ' mittel' : '') + '">' + esc(d.gross) + '</div>'
-      + (d.sub ? '<div class="lw-s' + (d.rot ? ' rot' : '') + '">' + esc(d.sub) + '</div>' : '') + (d.extra || '')
-    /* Kompakt: Zeichen, Name – und, wenn es Inhalt gibt, die wichtigste Zahl. */
-    : '<span class="lw-ic">' + (w.zeichen || '') + '</span><span class="lw-kn"><b>' + esc(w.name) + '</b><small>'
-      + esc(d ? (d.sub || w.tag || '') : (w.tag || '')) + '</small></span>'
-      + (d ? '<span class="lw-kz' + (d.rot ? ' rot' : '') + (d.mono ? ' mono' : '') + '">' + esc(d.gross) + '</span>'
-           + (d.punkt ? '<span class="lw-p ' + d.punkt + '"></span>' : '') : '');
-  if (html !== t.html) { t.html = html; t.inner.innerHTML = html; }
-  t.el.setAttribute('aria-label', w.name + (d ? ': ' + d.gross + ', ' + (d.sub || '') : '') + ' – öffnen');
-}
-function groesseSetzen(t, schritt){
-  const o = groessen(), id = basisId(t);
-  let d = null; try { d = LIVE[id] ? LIVE[id].w() : null; } catch (e) {}
-  const i = GROESSEN.indexOf(groesseVon(t, d));
-  o[id] = GROESSEN[(i + schritt + GROESSEN.length) % GROESSEN.length];
-  store.set(GROESSE_LS, JSON.stringify(o));
-  kachelNeu(t);
-  document.getElementById('ordnenReset').hidden = false;
-}
-const mauerRO = 'ResizeObserver' in window ? new ResizeObserver(es => es.forEach(e => mauern(e.target))) : null;
-function mauern(el){
-  if (!el.parentNode) return;
-  const abstand = parseFloat(getComputedStyle(el.parentNode).columnGap) || 12;
-  const h = el.getBoundingClientRect().height;
-  if (h) el.style.gridRowEnd = 'span ' + Math.max(1, Math.ceil((h + abstand) / 4));
-}
-function kastenBauen(liste, g){
-  const tl = [];
-  if (mauerRO) mauerRO.disconnect();
-  const folge = kastenFolge();
-  const rang = w => { const i = folge.indexOf(w.id.replace(/^mein-/, '')); return i < 0 ? 1e4 + liste.indexOf(w) : i; };
-  /* Frei: eine Fläche, alle Kacheln in eigener Reihenfolge. Nach Bereichen:
-     je Bereich eine Fläche mit Überschrift, verschoben wird darin. */
-  const flaechen = nachBereichen()
-    ? KASTEN_BEREICH.map(([b, titel]) => ({ titel, ws:liste.filter(w => w.bereich === b) })).filter(f => f.ws.length)
-    : [{ titel:'', ws:liste.slice() }];
-  g.classList.toggle('frei', !nachBereichen());
-  flaechen.forEach(({ titel, ws }) => {
-    if (titel) { const kopf = document.createElement('p'); kopf.className = 'lw-gr'; kopf.textContent = titel; g.appendChild(kopf); }
-    const box = document.createElement('div'); box.className = 'lw-grid'; g.appendChild(box);
-    ws.slice().sort((a, b) => rang(a) - rang(b)).forEach(w => {
-      const el = document.createElement('article');
-      el.className = 'lw';
-      el.tabIndex = 0; el.setAttribute('role', 'button');
-      el.style.setProperty('--c', w.farbe || 'var(--teal)');
-      el.innerHTML = '<div class="lw-in"></div><button type="button" class="lw-gk" tabindex="-1" title="Größe ändern (S · M · L · XL)"></button>'
-        + '<span class="state" data-s="bereit"><span class="s-txt"></span></span>';
-      box.appendChild(el);
-      if (mauerRO) mauerRO.observe(el);
-      const rahmen = document.createElement('div');
-      rahmen.className = 'frame';
-      rahmen.innerHTML = '<div class="vp"></div><div class="veil"><span>' + esc(w.name) + ' wird geladen …</span></div>';
-      document.body.appendChild(rahmen);
-      const t = { app:w, i:tl.length, el, shot:el, inner:$('.lw-in', el), knopf:$('.lw-gk', el), frame:rahmen, vp:$('.vp', rahmen),
-                  veil:$('.veil', rahmen), state:$('.state', el), push:document.createElement('span'), loaded:false, liste:tl };
-      tl.push(t); byId[w.id] = t;
-      el.dataset.wz = w.id.replace(/^mein-/, '');
-      kachelNeu(t);
-      t.knopf.addEventListener('click', e => { e.stopPropagation(); groesseSetzen(t, 1); });
-      el.addEventListener('click', () => { if (ordnen || schonGezogen) return; if (!t.frame.classList.contains('live')) open(w.id); });
-      el.addEventListener('keydown', e => {
-        if (ordnen) {
-          if (e.key === '+' || e.key === '-') { e.preventDefault(); groesseSetzen(t, e.key === '+' ? 1 : -1); return; }
-          ordnenTaste(e, el); return;
-        }
-        if ((e.key === 'Enter' || e.key === ' ') && !current) { e.preventDefault(); open(w.id); }
-      });
-      el.addEventListener('pointerdown', e => ziehenStart(e, el));
-    });
-  });
-  return tl;
-}
-/* Nachziehen, sobald ein Werkzeug etwas spiegelt – und die Uhr im Sekundentakt. */
-let kastenT = null;
-function kastenFrisch(){ clearTimeout(kastenT); kastenT = setTimeout(() => meinTiles.forEach(kachelNeu), 120); }
-addEventListener('storage', e => { if (!e.key || /^(wb-|stempeluhr_|ideahub:)/.test(e.key)) kastenFrisch(); });
-WB.horchen(null, kastenFrisch);
-addEventListener('visibilitychange', () => { if (!document.hidden) kastenFrisch(); });
-/* Kernideen wechseln alle fünf Sekunden – außer die Maus steht darauf
-   oder Bewegung ist abgestellt. */
-const ruhig = matchMedia('(prefers-reduced-motion: reduce)');
-setInterval(() => {
-  if (document.hidden || current || ruhig.matches) return;
-  document.querySelectorAll('#gridMein .lw-dreh').forEach(box => {
-    const karte = box.closest('.lw');
-    if (karte && karte.matches(':hover')) return;
-    const teile = box.children, n = teile.length;
-    if (n < 2) return;
-    let i = [...teile].findIndex(x => x.classList.contains('an'));
-    teile[i].classList.remove('an');
-    i = (i + 1) % n;
-    teile[i].classList.add('an');
-    const pk = karte && karte.querySelectorAll('.lw-punkte i');
-    if (pk) pk.forEach((p, j) => p.classList.toggle('an', j === i));
-  });
-}, 5000);
-setInterval(() => {
-  const t = byId['mein-stempeluhr'];
-  if (!t || document.hidden || current || document.getElementById('s-mein').hidden) return;
-  const run = lsJson('stempeluhr_run_v1');
-  if (run && run.running && !run.paused) kachelNeu(t);
-}, 1000);
-
-/* ───────── Werkzeugkasten: selbst anordnen ─────────
-   Seit 13.11.2026. „Anordnen“ schaltet die Kacheln beweglich: ziehen mit
-   Maus oder Finger, oder auswählen und mit den Pfeiltasten schieben.
-   Verschoben wird innerhalb einer Reihe – große Kacheln unter großen,
-   kleine unter kleinen, je Bereich. Gemerkt wird die Reihenfolge je Gerät. */
-const FOLGE_LS = 'wb-kontor-kasten-folge';
-function kastenFolge(){ try { const a = JSON.parse(store.get(FOLGE_LS) || '[]'); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
-function folgeSichern(){
-  const ids = [...document.querySelectorAll('#gridMein .lw')].map(x => x.dataset.wz).filter(Boolean);
-  /* Ausgeblendete Werkzeuge behalten ihren Platz in der Liste. */
-  const alt = kastenFolge().filter(x => ids.indexOf(x) < 0);
-  store.set(FOLGE_LS, JSON.stringify(ids.concat(alt)));
-  document.getElementById('ordnenReset').hidden = false;
-}
-let ordnen = false, schonGezogen = false;
-function ordnenSetzen(an){
-  ordnen = an;
-  const g = document.getElementById('gridMein'), b = document.getElementById('ordnenBtn');
-  g.classList.toggle('ordnen', an);
-  b.textContent = an ? 'Fertig' : 'Anordnen';
-  b.setAttribute('aria-pressed', String(an));
-  b.classList.toggle('an', an);
-  document.getElementById('ordnenHinweis').classList.toggle('sichtbar', an);
-  document.getElementById('ordnenReset').hidden = !an || (!kastenFolge().length && !Object.keys(groessen()).length);
-  const bb = document.getElementById('bereicheBtn');
-  bb.hidden = !an; bb.setAttribute('aria-pressed', String(nachBereichen())); bb.classList.toggle('an2', nachBereichen());
-}
-document.getElementById('bereicheBtn').addEventListener('click', () => {
-  store.set(BEREICHE_LS, nachBereichen() ? '0' : '1');
-  meinKacheln(LIZ || {});
-  ordnenSetzen(true);
-});
-document.getElementById('ordnenBtn').addEventListener('click', () => ordnenSetzen(!ordnen));
-document.getElementById('ordnenReset').addEventListener('click', () => {
-  store.set(FOLGE_LS, '[]');
-  store.set(GROESSE_LS, '{}');
-  meinKacheln(LIZ || {});
-  ordnenSetzen(true);
-  document.getElementById('ordnenReset').hidden = true;
-});
-addEventListener('keydown', e => { if (e.key === 'Escape' && ordnen) ordnenSetzen(false); });
-
-/* Mit der Tastatur: Pfeil links/oben schiebt nach vorn, rechts/unten nach hinten. */
-function ordnenTaste(e, el){
-  const vor = e.key === 'ArrowLeft' || e.key === 'ArrowUp', nach = e.key === 'ArrowRight' || e.key === 'ArrowDown';
-  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); ordnenSetzen(false); return; }
-  if (!vor && !nach) return;
-  e.preventDefault(); e.stopPropagation();
-  if (vor && el.previousElementSibling) el.parentNode.insertBefore(el, el.previousElementSibling);
-  else if (nach && el.nextElementSibling) el.parentNode.insertBefore(el.nextElementSibling, el);
-  else return;
-  el.focus();
-  folgeSichern();
-}
-
-/* Ziehen: die Kachel folgt dem Zeiger, die anderen rücken nach. */
-let zug = null;
-function ziehenStart(e, el){
-  if (!ordnen || e.button > 0 || e.target.closest('.lw-gk')) return;
-  e.preventDefault();
-  const r0 = el.getBoundingClientRect();
-  zug = { el, dx:e.clientX - r0.left, dy:e.clientY - r0.top, x0:e.clientX, y0:e.clientY, bewegt:false };
-  el.setPointerCapture(e.pointerId);
-  el.addEventListener('pointermove', ziehen);
-  el.addEventListener('pointerup', ziehenEnde);
-  el.addEventListener('pointercancel', ziehenEnde);
-}
-function ziehen(e){
-  if (!zug) return;
-  const el = zug.el;
-  if (!zug.bewegt) {
-    if (Math.hypot(e.clientX - zug.x0, e.clientY - zug.y0) < 4) return;
-    zug.bewegt = true; el.classList.add('zieht');
-  }
-  /* Ziel: die Kachel derselben Reihe unter dem Zeiger. */
-  const unter = document.elementsFromPoint(e.clientX, e.clientY)
-    .find(x => x !== el && x.classList && x.classList.contains('lw') && x.parentNode === el.parentNode);
-  if (unter) {
-    /* Die Kachel nimmt den Platz der überfahrenen ein: von vorn kommend
-       dahinter, von hinten kommend davor. */
-    const kinder = [...el.parentNode.children];
-    if (kinder.indexOf(el) < kinder.indexOf(unter)) el.parentNode.insertBefore(el, unter.nextElementSibling);
-    else el.parentNode.insertBefore(el, unter);
-  }
-  el.style.transform = 'none';
-  const n = el.getBoundingClientRect();
-  el.style.transform = 'translate(' + (e.clientX - zug.dx - n.left) + 'px,' + (e.clientY - zug.dy - n.top) + 'px) scale(1.03)';
-  /* Am Rand mitscrollen, sonst kommt man am Telefon nicht weit. */
-  if (e.clientY < 70) scrollBy(0, -12); else if (e.clientY > innerHeight - 110) scrollBy(0, 12);
-}
-function ziehenEnde(){
-  if (!zug) return;
-  const el = zug.el, bewegt = zug.bewegt;
-  el.removeEventListener('pointermove', ziehen);
-  el.removeEventListener('pointerup', ziehenEnde);
-  el.removeEventListener('pointercancel', ziehenEnde);
-  el.classList.remove('zieht');
-  el.style.transform = '';
-  zug = null;
-  if (bewegt) { folgeSichern(); schonGezogen = true; setTimeout(() => { schonGezogen = false; }, 50); }
-}
-
-let meinNachholen = false;
-{
-  const huelle = document.querySelector('.mein-i'), knopf = huelle.querySelector('.mein-i-btn');
-  const zeigen = auf => { huelle.classList.toggle('offen', auf); knopf.setAttribute('aria-expanded', String(auf)); };
-  knopf.addEventListener('click', e => { e.stopPropagation(); zeigen(!huelle.classList.contains('offen')); });
-  document.addEventListener('click', e => { if (!e.target.closest('.mein-i')) zeigen(false); });
-  addEventListener('keydown', e => { if (e.key === 'Escape') zeigen(false); });
-}
-addEventListener('storage', e => { if (!e.key || e.key === LIZ_LS) meinBauen(); });
-
 /* Zahlen an den Ecken der Zeichen – aus den Lesekopien, ohne Netz. */
 function zahlenZeigen(){
-  PRODUKTIV.concat(BUERO, PRIVAT, MEIN).forEach(w => {
+  PRODUKTIV.concat(BUERO).forEach(w => {
     if (!w.zahl || !byId[w.id]) return;
     const el = byId[w.id].el.querySelector('.t-zahl');
     if (!el) return;
     let z = null; try { z = w.zahl(); } catch(e){}
     el.hidden = !z;
-    el.classList.toggle('rot', !!(z && z.rot));
     if (z){ el.textContent = z.n > 999 ? '999+' : String(z.n); el.title = z.titel || ''; el.setAttribute('aria-label', z.titel || String(z.n)); }
   });
 }
 zahlenZeigen();
 WB.horchen(null, zahlenZeigen);
-addEventListener('storage', e => { if (!e.key || e.key === WB_NOTES_LS || e.key.startsWith('wb-belegbuch-')) { zahlenZeigen(); staendeZeigen(); offeneWelt(); } });
+addEventListener('storage', e => { if (!e.key || e.key === WB_NOTES_LS) zahlenZeigen(); });
 addEventListener('visibilitychange', () => { if (!document.hidden) zahlenZeigen(); });
 
 const slidesEl = $('#slides');
 const SLIDE_LS = 'wb-kontor-ansicht';
-/* Vor dem Aufbau des Docks lesen – das Dock schreibt beim Start die erste Ansicht hinein. */
-const ansGemerkt = store.get(SLIDE_LS);
 function slideIdx(){ return Math.round(slidesEl.scrollLeft / Math.max(1, slidesEl.clientWidth)); }
 function zuSlide(k, glatt = true){
   slidesEl.scrollTo({ left: k * slidesEl.clientWidth, behavior: glatt && !reduce ? 'smooth' : 'auto' });
@@ -2749,17 +1887,13 @@ const Dock = (function(){
   const K = DOCK;
   const dock=$('#dock'), row=$('#drow'), skin=$('#skin'), plate=$('#plate'),
         blur=$('#dblur'), wash=$('#wash'), bead=$('#bead'), nameEl=$('#dockName'), hint=$('#dhint');
-  const alleBtns=[...row.querySelectorAll('.dock-btn')];
-  let btns=alleBtns.slice(), aktivBtn=null;
+  const btns=[...row.querySelectorAll('.dock-btn')];
   const G={}, centers=[];
   let active=0, x=0, vx=0, ziel=0, zieht=false, raf=null, last=0;
   const kannSchneiden = window.CSS && CSS.supports && CSS.supports('clip-path','path("M0 0Z")');
   if (!kannSchneiden) blur.style.display='none';
 
   function masse(){
-    btns = alleBtns.filter(b => !b.hidden);
-    centers.length = 0;
-    if (active >= btns.length) active = 0;
     const schmal = innerWidth < K.schmalAb;
     G.item=schmal?K.feldSchmal:K.feldBreit; G.pad=schmal?K.randSchmal:K.randBreit;
     G.R=schmal?K.eckradiusSchmal:K.eckradius;
@@ -2780,7 +1914,6 @@ const Dock = (function(){
     btns.forEach((b,i) => { b.style.width=G.item+'px'; centers[i]=G.pad+G.item*i+G.item/2; });
     bead.style.width=bead.style.height=(G.rb*2)+'px';
     nameEl.style.top=(G.top+G.H-17)+'px';
-    bead.setAttribute('aria-valuemax', btns.length);
     x=ziel=centers[active]; vx=0;
     zeichnen();
   }
@@ -2847,21 +1980,21 @@ const Dock = (function(){
   function sperren(){ gesperrt=true; clearTimeout(sperrT); sperrT=setTimeout(() => { gesperrt=false; }, 700); }
   function setzen(i, hinfahren, still){
     if (i<0 || i>=btns.length) return;
-    const anders = btns[i]!==aktivBtn || !bead.firstChild;
-    active=i; aktivBtn=btns[i];
-    alleBtns.forEach(el => el.classList.toggle('is-active', el===btns[i]));
+    const anders = i!==active || !bead.firstChild;
+    active=i;
+    btns.forEach((el,j) => el.classList.toggle('is-active', j===i));
     farbe();
     nameEl.textContent=btns[i].dataset.label;
     bead.setAttribute('aria-valuenow', i+1);
     bead.setAttribute('aria-valuetext', btns[i].dataset.label);
     if (anders) { bead.innerHTML=btns[i].querySelector('svg').outerHTML; if (!still) welle(); }
     if (hinfahren) { sperren(); zuSlide(i); }
-    try { localStorage.setItem(SLIDE_LS, btns[i].dataset.label); } catch (e) {}
+    try { localStorage.setItem(SLIDE_LS, String(i)); } catch (e) {}
   }
   let getippt=false;
   function hinweisWeg(){ if (!getippt) { getippt=true; hint.style.opacity=0; } }
 
-  alleBtns.forEach(b => b.addEventListener('click', () => { const i=btns.indexOf(b); if (i<0) return; hinweisWeg(); ziel=centers[i]; setzen(i,true); feder(); }));
+  btns.forEach((b,i) => b.addEventListener('click', () => { hinweisWeg(); ziel=centers[i]; setzen(i,true); feder(); }));
   bead.addEventListener('pointerdown', e => {
     zieht=true; hinweisWeg(); e.preventDefault();
     try { bead.setPointerCapture(e.pointerId); } catch (err) {}
@@ -2904,116 +2037,200 @@ const Dock = (function(){
 
   addEventListener('resize', () => { aufbauen(); zuSlide(active, false); });
   new MutationObserver(farbe).observe(root, { attributes:true, attributeFilter:['data-theme'] });
-  return { aufbauen, setzen, get active(){ return active; }, get anzahl(){ return btns.length; },
-           get label(){ return btns[active] ? btns[active].dataset.label : ''; },
-           indexVon(label){ return btns.findIndex(b => b.dataset.label === label); },
+  return { aufbauen, setzen, get active(){ return active; },
            gehe(i){ hinweisWeg(); ziel=centers[i]; setzen(i,true); feder(); } };
 })();
 Dock.aufbauen(); Dock.setzen(0,false,true);
 
 addEventListener('keydown', e => {
   if (current || e.target.closest('input,textarea,select,[contenteditable],#bead')) return;
-  if (e.key === 'ArrowRight' && Dock.active < Dock.anzahl - 1) Dock.gehe(Dock.active + 1);
+  if (e.key === 'ArrowRight' && Dock.active < 2) Dock.gehe(Dock.active + 1);
   else if (e.key === 'ArrowLeft' && Dock.active > 0) Dock.gehe(Dock.active - 1);
 });
-/* ───────── Ansichten ein- und ausblenden ─────────
-   Seit 12.11.2026. Eine Ansicht erscheint im Dock nur, wenn die Lizenz
-   mindestens ein Werkzeug darin freischaltet – und sie nicht von Hand
-   ausgeblendet ist. Der Werkzeugkasten bleibt immer: dort steht, was
-   fehlt, und dort sitzen die Schalter. Gemerkt wird je Gerät. */
-const AUS_LS = 'wb-kontor-ausgeblendet';
-const ANSICHTEN = [
-  { slide:'s-kontor',    label:'Firma',          name:'Meine Firma', liste:APPS },
-  { slide:'s-produktiv', label:'Produktiv',      name:'Produktiv',   liste:PRODUKTIV },
-  { slide:'s-buero',     label:'Büro',           name:'Büro',        liste:BUERO },
-  { slide:'s-privat',    label:'Privat',         name:'Privat',      liste:PRIVAT },
-  { slide:'s-mein',      label:'Werkzeugkasten', name:'Werkzeugkasten', fest:true }
-];
-const dockBtns = [...document.querySelectorAll('#drow .dock-btn')];
-function ausgeblendet(){
-  try { const a = JSON.parse(store.get(AUS_LS) || '[]'); return Array.isArray(a) ? a : []; } catch (e) { return []; }
+try {
+  const k = +localStorage.getItem(SLIDE_LS);
+  if (k > 0 && k < 3) requestAnimationFrame(() => { zuSlide(k, false); Dock.setzen(k, false, true); Dock.aufbauen(); });
+} catch (e) {}
+
+/* ───────── Lizenz im Kontor (seit 15.11.2026) ─────────
+   Der Kontor zeigt nur noch Werkzeuge, die die hinterlegte Lizenz nennt –
+   auf allen drei Ansichten. Ohne Lizenz bleiben die Ansichten leer.
+   Geprüft wird wie in lizenz.js: ECDSA P-256 / SHA-256 über die rohen
+   Bytes der Nutzdaten, offline, mit demselben Prüfschlüssel. Ein Schlüssel
+   (`wb-lizenz`) gilt für alle Werkzeuge dieser Herkunft.
+
+   Sichern bleibt für alle eigenen Bestände offen (Daten sind nie Geisel),
+   ohne den Lizenzschlüssel. Laden spielt nur ein, was zu einem
+   freigeschalteten Werkzeug gehört. */
+const LZ_LS = 'wb-lizenz';
+const LZ_PUB = 'MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAESwn5vJH6rMd87uKAXdmC4qXnI47PQn7lpnDtpPfzuv4bhSIp2QkxeL2RC7cVaXbnD0lZRdh6g3b+x3MYKm61Pg==';
+/* Kachel-ID → Werkzeugkennung in der Lizenz, wo sie abweichen. */
+const LZ_KENNUNG = { notizbuch:'noteos' };
+const kennungVon = id => LZ_KENNUNG[id] || id;
+/* Nie in die Sicherung, nie zurückgespielt. */
+const SICHERN_NIE = /^wb-(lizenz|signal)$/i;
+/* Allgemein – gehört keinem Werkzeug, darf immer zurück. */
+const ALLGEMEIN = /^wb-(theme|cockpit-theme|kontor-ansicht)$/i;
+
+const LZ = { frei:new Set(), sichtbar:new Set(), daten:null, grund:'keine' };
+
+const lzBytes = s => { s = String(s).replace(/-/g,'+').replace(/_/g,'/'); while (s.length % 4) s += '=';
+  const b = atob(s), a = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) a[i] = b.charCodeAt(i); return a; };
+function lzSaeubern(t){
+  const roh = String(t || '').replace(/\s+/g, '');
+  const m = roh.match(/WB1\.[A-Za-z0-9\-_]+\.[A-Za-z0-9\-_]+/i);
+  return m ? 'WB1.' + m[0].slice(4) : roh;
 }
-function lizenziert(a, frei){
-  if (a.fest) return true;
-  if (!frei) return false;
-  return frei.alle || a.liste.some(w => w.id && frei.ids.has(w.id));
+let lzKey = null;
+async function lzPruefe(text){
+  const t = lzSaeubern(text);
+  if (!t) throw new Error('leer');
+  if (t.indexOf('WB1.') !== 0) throw new Error(/^MFkw/.test(t) ? 'pruefschluessel' : 'format');
+  const teile = t.slice(4).split('.');
+  if (teile.length !== 2) throw new Error('format');
+  const daten = lzBytes(teile[0]), sig = lzBytes(teile[1]);
+  if (!lzKey) lzKey = crypto.subtle.importKey('spki', lzBytes(LZ_PUB.replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')),
+    { name:'ECDSA', namedCurve:'P-256' }, false, ['verify']);
+  const ok = await crypto.subtle.verify({ name:'ECDSA', hash:'SHA-256' }, await lzKey, sig, daten);
+  if (!ok) throw new Error('signatur');
+  let p; try { p = JSON.parse(new TextDecoder().decode(daten)); } catch (e) { throw new Error('format'); }
+  if (!p || p.v !== 1 || !Array.isArray(p.w)) throw new Error('format');
+  return p;
 }
-let ansErst = true;
-function ansichtenAnwenden(){
-  const frei = lizenzIds(LIZ && LIZ.p), aus = ausgeblendet();
-  /* Welche Ansicht soll danach vorne stehen? Beim Start die gemerkte,
-     sonst die aktuelle – fällt sie weg, die erste sichtbare. */
-  let wunsch = Dock.label;
-  if (ansErst) {
-    const g = ansGemerkt;
-    wunsch = /^\d+$/.test(g || '') ? (ANSICHTEN[+g] || {}).label : g;   /* alte Fassung merkte die Nummer */
+const LZ_GRUND = {
+  keine:'Noch keine Lizenz hinterlegt.',
+  signatur:'Der Schlüssel ist beschädigt oder stammt nicht von der Lizenzstelle.',
+  format:'Das sieht nicht nach einem Lizenzschlüssel aus – er beginnt mit „WB1.“.',
+  pruefschluessel:'Das ist der Prüfschlüssel der Lizenzstelle. Gebraucht wird der Lizenzschlüssel – er beginnt mit „WB1.“.',
+  leer:'Kein Schlüssel eingegeben.',
+  speicher:'Der Browser lässt kein Speichern zu (privates Fenster?).'
+};
+const lzHeute = () => { const d = new Date(); return new Date(d - d.getTimezoneOffset()*6e4).toISOString().slice(0,10); };
+
+/* Lizenz aus der Adresse (…#lizenz=WB1.…) übernehmen, wie in den Werkzeugen. */
+async function lzAusUrl(){
+  const m = (String(location.hash || '') + '&' + String(location.search || '')).match(/[#?&]lizenz=([^&#]+)/i);
+  if (!m) return;
+  try { await lzPruefe(decodeURIComponent(m[1])); localStorage.setItem(LZ_LS, lzSaeubern(decodeURIComponent(m[1]))); } catch (e) {}
+  try { history.replaceState(null, '', location.pathname + location.search.replace(/([?&])lizenz=[^&]*&?/i,'$1').replace(/[?&]$/,'')); } catch (e) {}
+}
+
+async function lizenzPruefen(){
+  root.classList.add('lz-warten');
+  await lzAusUrl();
+  let roh = null; try { roh = localStorage.getItem(LZ_LS); } catch (e) {}
+  if (roh) {
+    try {
+      const p = await lzPruefe(roh);
+      LZ.daten = p; LZ.grund = null;
+      const alle = p.w.indexOf('*') >= 0;
+      const abgelaufen = p.m === 'miete' && p.b && lzHeute() > p.b;
+      Object.keys(byId).forEach(id => {
+        const k = kennungVon(id);
+        if (!alle && p.w.indexOf(k) < 0) return;
+        LZ.sichtbar.add(id);                 /* Miete abgelaufen: sichtbar, lesen bleibt */
+        if (!abgelaufen) LZ.frei.add(k);     /* … aber nichts mehr einspielen */
+      });
+    } catch (e) { LZ.grund = e.message || 'signatur'; }
   }
-  ANSICHTEN.forEach((a, i) => {
-    const zeigen = a.fest || (lizenziert(a, frei) && aus.indexOf(a.slide) < 0);
-    document.getElementById(a.slide).hidden = !zeigen;
-    if (dockBtns[i]) dockBtns[i].hidden = !zeigen;
+}
+
+function lzLeer(gridEl, text){
+  if (!gridEl || gridEl.querySelector('.tile:not(.platz)')) return;
+  gridEl.querySelectorAll('.tile.platz').forEach(x => x.remove());
+  const d = document.createElement('div');
+  d.className = 'lz-leer';
+  d.innerHTML = '<b>' + text + '</b>' + (LZ.daten ? 'Die hinterlegte Lizenz nennt hier kein Werkzeug.' : esc(LZ_GRUND[LZ.grund] || LZ_GRUND.keine))
+    + '<br><button class="pill primary" type="button">Lizenz eingeben</button>';
+  d.querySelector('button').addEventListener('click', lizenzDialog);
+  gridEl.appendChild(d);
+}
+
+function lizenzAnwenden(){
+  Object.keys(byId).forEach(id => {
+    if (LZ.sichtbar.has(id)) return;
+    const t = byId[id];
+    const L = t.liste || tiles;
+    const k = L.indexOf(t); if (k >= 0) L.splice(k, 1);
+    try { ro.unobserve(t.shot); } catch (e) {}
+    t.el.remove(); t.frame.remove();
+    delete byId[id];
   });
-  Dock.aufbauen();
-  let k = Dock.indexVon(wunsch); if (k < 0) k = 0;
-  Dock.setzen(k, false, true); Dock.aufbauen();
-  requestAnimationFrame(() => zuSlide(k, false));
-  ansWahlZeigen(frei, aus);
-  if (ansErst) { ansErst = false; root.classList.remove('wb-vorab'); }
-  busNeu();
+  /* Nummern für ‹ › neu vergeben – sonst springt das Blättern ins Leere. */
+  tiles.forEach((t, i) => { t.i = i; });
+  new Set(Object.values(byId).map(t => t.liste).filter(Boolean)).forEach(L => L.forEach((t, i) => { t.i = i; }));
+  if (!byId.rechnungsbuch) ausgang.remove();
+  if (!tiles.length) { busEl.innerHTML = ''; busEl.classList.remove('on'); $('#offen').innerHTML = ''; }
+  lzLeer(grid, 'Keine Werkzeuge freigeschaltet');
+  lzLeer($('#gridProd'), 'Keine produktiven Werkzeuge freigeschaltet');
+  lzLeer($('#gridBuero'), 'Keine Büro-Werkzeuge freigeschaltet');
+  root.classList.remove('lz-warten');
+  staendeZeigen(); offeneWelt(); zahlenZeigen();
+  if (tiles.length) { busNeu(); measure(); }
 }
-function ansWahlZeigen(frei, aus){
-  const el = document.getElementById('ansWahl');
-  el.innerHTML = ANSICHTEN.filter(a => !a.fest).map(a => {
-    const lz = lizenziert(a, frei), an = lz && aus.indexOf(a.slide) < 0;
-    return '<label class="ans-zeile' + (lz ? '' : ' aus') + '"><span>' + esc(a.name)
-      + (lz ? '' : '<small>keine Lizenz</small>') + '</span>'
-      + '<input type="checkbox" role="switch" data-slide="' + a.slide + '"' + (an ? ' checked' : '') + (lz ? '' : ' disabled') + '></label>';
-  }).join('');
-  el.querySelectorAll('input:not(:disabled)').forEach(b => b.addEventListener('change', () => {
-    const liste = ausgeblendet().filter(x => x !== b.dataset.slide);
-    if (!b.checked) liste.push(b.dataset.slide);
-    store.set(AUS_LS, JSON.stringify(liste));
-    ansichtenAnwenden();
-    const neu = el.querySelector('[data-slide="' + b.dataset.slide + '"]'); if (neu) neu.focus();
-  }));
-  kastenWahlZeigen();
+
+/* Welche Werkzeugkennung gehört zu einem Ablageschlüssel? '' = allgemein, null = unbekannt. */
+function kennungVonSchluessel(k){
+  if (ALLGEMEIN.test(k)) return '';
+  const m = String(k).toLowerCase().match(/^(?:wb-)?(auftragsbuch|stempeluhr|auftragsstatus|terminbuch|rechnungsbuch|noteos)(?=$|[-_.])/);
+  return m ? m[1] : null;
 }
-/* Einzelne Werkzeuge im Werkzeugkasten – nur, was die Lizenz freischaltet. */
-function kastenWahlZeigen(){
-  const el = document.getElementById('kastenWahl'), aus = kastenAus();
-  document.getElementById('kastenKopf').hidden = !MEIN_ALLE.length;
-  el.innerHTML = MEIN_ALLE.map(w => '<label class="ans-zeile"><span>' + esc(w.name)
-      + (w.id === 'belegbuch-privat' ? '<small>Privat</small>' : '') + '</span>'
-      + '<input type="checkbox" role="switch" data-wz="' + esc(w.id) + '"' + (aus.indexOf(w.id) < 0 ? ' checked' : '') + '></label>').join('');
-  el.querySelectorAll('input').forEach(b => b.addEventListener('change', () => {
-    const liste = kastenAus().filter(x => x !== b.dataset.wz);
-    if (!b.checked) liste.push(b.dataset.wz);
-    store.set(KASTEN_AUS_LS, JSON.stringify(liste));
-    meinKacheln(LIZ || {});
-  }));
+function darfLaden(k){
+  const w = kennungVonSchluessel(k);
+  if (w === '') return true;
+  return !!w && LZ.frei.has(w);
 }
-addEventListener('storage', e => { if (e.key === AUS_LS) ansichtenAnwenden();
-  if (e.key === KASTEN_AUS_LS) { meinKacheln(LIZ || {}); kastenWahlZeigen(); } });
-const ansBtn = $('#ansBtn'), ansPanel = $('#ansPanel');
-function ansMenue(auf){
-  ansPanel.hidden = !auf; ansBtn.setAttribute('aria-expanded', String(auf));
-  if (auf) { const f = ansPanel.querySelector('input:not(:disabled)'); if (f) f.focus(); }
+
+function lizenzDialog(){
+  const d = $('#dlgLizenz'), feld = $('#lzFeld'), msg = $('#lzMeld');
+  const p = LZ.daten;
+  $('#lzStand').textContent = p
+    ? 'Lizenziert für ' + (p.n || '–') + (p.id ? ' · ' + p.id : '')
+      + (p.m === 'miete' && p.b ? ' · Laufzeit bis ' + p.b.split('-').reverse().join('.') : '')
+      + ' · ' + (p.w.indexOf('*') >= 0 ? 'alle Werkzeuge' : p.w.length + (p.w.length === 1 ? ' Werkzeug' : ' Werkzeuge'))
+    : (LZ_GRUND[LZ.grund] || LZ_GRUND.keine) + ' Schlüssel einfügen oder die Lizenzdatei wählen.';
+  let roh = null; try { roh = localStorage.getItem(LZ_LS); } catch (e) {}
+  feld.value = roh || ''; msg.textContent = ''; msg.className = '';
+  d.showModal(); feld.focus();
 }
-ansBtn.addEventListener('click', e => { e.stopPropagation(); ansMenue(ansPanel.hidden); });
-document.addEventListener('click', e => { if (!ansPanel.hidden && !e.target.closest('.ans-menue')) ansMenue(false); });
-addEventListener('keydown', e => { if (e.key === 'Escape' && !ansPanel.hidden) { ansMenue(false); ansBtn.focus(); } });
-/* Falls die Prüfung hängt: nach anderthalb Sekunden trotzdem zeigen. */
-setTimeout(() => { if (ansErst) ansichtenAnwenden(); }, 1500);
+(function(){
+  const sag = (t, gut) => { const m = $('#lzMeld'); m.textContent = t; m.className = gut ? 'gut' : 'schlecht'; };
+  $('#lizenzBtn').addEventListener('click', lizenzDialog);
+  $('#lizenzFuss').addEventListener('click', e => { e.preventDefault(); lizenzDialog(); });
+  $('#lzZu').addEventListener('click', () => $('#dlgLizenz').close());
+  $('#lzDatei').addEventListener('change', async e => {
+    const f = e.target.files && e.target.files[0]; e.target.value = '';
+    if (!f) return;
+    const t = await f.text(), m = t.match(/WB1\.[A-Za-z0-9\-_]+\.[A-Za-z0-9\-_]+/);
+    $('#lzFeld').value = m ? m[0] : t.trim(); sag('Datei gelesen – jetzt freischalten.', true);
+  });
+  $('#lzWeg').addEventListener('click', () => {
+    try { localStorage.removeItem(LZ_LS); } catch (e) {}
+    sag('Lizenz entfernt.', true); setTimeout(() => location.reload(), 600);
+  });
+  $('#lzOk').addEventListener('click', async () => {
+    try {
+      const p = await lzPruefe($('#lzFeld').value);
+      try { localStorage.setItem(LZ_LS, lzSaeubern($('#lzFeld').value)); } catch (e) { throw new Error('speicher'); }
+      sag('Freigeschaltet für ' + (p.n || 'dich') + '.', true);
+      setTimeout(() => location.reload(), 700);
+    } catch (e) { sag(LZ_GRUND[e.message] || 'Die Lizenz konnte nicht geprüft werden.'); }
+  });
+  /* Wird in einem Werkzeug oder Tab freigeschaltet, zieht der Kontor nach. */
+  addEventListener('storage', e => { if (e.key === LZ_LS) location.reload(); });
+})();
 
 /* ───────── Start ───────── */
-meinBauen();
 measure();
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
 const startId = location.hash.slice(1);
-if (byId[startId]) {
-  history.replaceState({ cockpit:null }, '', location.pathname + location.search);
-  requestAnimationFrame(() => open(startId, { animate:false }));
-}
+lizenzPruefen().then(() => {
+  lizenzAnwenden();
+  if (byId[startId]) {
+    history.replaceState({ cockpit:null }, '', location.pathname + location.search);
+    requestAnimationFrame(() => open(startId, { animate:false }));
+  }
+});
 })();
 </script>
 </body>
