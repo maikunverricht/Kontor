@@ -699,6 +699,8 @@ a.tile{color:inherit;text-decoration:none}
 /* Ansichten ein- und ausblenden (12.11.2026) */
 html.wb-vorab .slides,html.wb-vorab .dock{visibility:hidden}
 .slide[hidden],.dock-btn[hidden]{display:none!important}
+/* Nicht lizenzierte Kacheln (seit 15.11.2026): in den Ansichten nicht zu sehen. */
+.tile.lz-aus,.ausgang.lz-aus{display:none!important}
 .ans-menue{position:relative}
 .ans-pfeil{font-size:10px;color:var(--text-3);transition:transform var(--t-s)}
 #ansBtn[aria-expanded="true"]{background:var(--glass);border-color:var(--line-hi)}
@@ -1341,7 +1343,7 @@ function offeneWelt(){
 
   const el = document.getElementById('offen');
   if (!el) return;
-  el.innerHTML = p.map(x =>
+  el.innerHTML = p.filter(x => byId[x.zu] && !byId[x.zu].gesperrt).map(x =>
     '<button type="button" class="' + (x.spaet ? 'spaet' : '') + (x.rot ? ' rot' : '') + '" data-zu="' + x.zu + '">'
     + x.text + '</button>').join('');
   el.querySelectorAll('[data-zu]').forEach(b =>
@@ -1685,6 +1687,7 @@ function busZeichnen(){
   let maxR = 0, minL = Infinity;
   const HUB = 'auftragsbuch';
   tiles.forEach(t => {
+    if (t.gesperrt) return;                      /* ausgeblendet: keine Leitung */
     const b = t.el.getBoundingClientRect();
     const r = { l:b.left-gb.left, t:b.top-gb.top, r:b.right-gb.left, b:b.bottom-gb.top };
     r.cx = (r.l+r.r)/2; r.cy = (r.t+r.b)/2;
@@ -2026,7 +2029,7 @@ function setBar(t){
   $('#barName').textContent = t.app.name;
   $('#barTag').textContent = t.app.tag;
   $('#openBtn').href = t.app.url;
-  const einzeln = (t.liste || tiles).length < 2;
+  const einzeln = (t.liste || tiles).filter(x => !x.gesperrt).length < 2;
   ['#prevBtn','#nextBtn'].forEach(q => { $(q).style.display = einzeln ? 'none' : ''; });
   document.title = t.app.name + ' · Kontor';
 }
@@ -2037,7 +2040,7 @@ function focusApp(t, on){
 
 function open(id, { push = true, animate = true } = {}){
   const t = byId[id];
-  if (!t || busy) return;
+  if (!t || t.gesperrt || busy) return;
   if (current === t) return;
   if (current) { swap(t, push); return; }
   busy = true; current = t;
@@ -2087,9 +2090,9 @@ function requestClose(){
 }
 function step(dir){
   if (!current || busy) return;
-  const L = current.liste || tiles;
+  const L = (current.liste || tiles).filter(x => !x.gesperrt);
   if (L.length < 2) return;
-  const n = L[(current.i + dir + L.length) % L.length];
+  const n = L[(L.indexOf(current) + dir + L.length) % L.length];
   swap(n, true);
 }
 
@@ -2966,8 +2969,22 @@ function lizenziert(a, frei){
   return frei.alle || a.liste.some(w => w.id && frei.ids.has(w.id));
 }
 let ansErst = true;
+/* Kacheln ohne Lizenz verschwinden aus Firma, Produktiv, Büro und Privat.
+   Umkehrbar: kommt eine Lizenz dazu, sind sie beim nächsten Durchlauf wieder da. */
+function kachelnSperren(frei){
+  Object.keys(byId).forEach(id => {
+    const t = byId[id];
+    if (id.startsWith('mein-')) return;
+    t.gesperrt = !(frei && (frei.alle || frei.ids.has(id)));
+    t.el.classList.toggle('lz-aus', t.gesperrt);
+  });
+  ausgang.classList.toggle('lz-aus', !byId.rechnungsbuch || !!byId.rechnungsbuch.gesperrt);
+  if (current && current.gesperrt) close({ animate:false });
+  try { offeneWelt(); } catch (e) {}
+}
 function ansichtenAnwenden(){
   const frei = lizenzIds(LIZ && LIZ.p), aus = ausgeblendet();
+  kachelnSperren(frei);
   /* Welche Ansicht soll danach vorne stehen? Beim Start die gemerkte,
      sonst die aktuelle – fällt sie weg, die erste sichtbare. */
   let wunsch = Dock.label;
@@ -3039,7 +3056,9 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
 const startId = location.hash.slice(1);
 if (byId[startId]) {
   history.replaceState({ cockpit:null }, '', location.pathname + location.search);
-  requestAnimationFrame(() => open(startId, { animate:false }));
+  /* Erst öffnen, wenn die Lizenz geprüft ist – sonst ginge ein gesperrtes Werkzeug auf. */
+  const warte = () => ansErst ? setTimeout(warte, 80) : open(startId, { animate:false });
+  requestAnimationFrame(warte);
 }
 })();
 </script>
