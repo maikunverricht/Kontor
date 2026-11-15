@@ -2700,8 +2700,10 @@ Object.assign(LIVE, {
     const umfang = p.w.indexOf('*') >= 0 ? 'alle Werkzeuge' : mz(p.w.length, 'Werkzeug', 'Werkzeuge');
     if (tage == null) return { gross:'unbefristet', klein:true, sub:(p.m === 'miete' ? 'Miete' : 'Kauf') + ' · ' + umfang };
     const was = p.m === 'miete' ? 'Laufzeit' : 'Wartung';
-    return { gross: tage < 0 ? was + ' vorbei' : 'noch ' + mz(tage, 'Tag', 'Tage'), klein:true, rot:tage < 30,
-      sub:was + ' bis ' + tagDe(p.b) + ' · ' + umfang
+    /* Ab einem Jahr Restlaufzeit zählt niemand Tage: dann steht das Datum vorn. */
+    const gross = tage < 0 ? was + ' vorbei' : tage > 365 ? 'bis ' + tagDe(p.b) : 'noch ' + mz(tage, 'Tag', 'Tage');
+    return { gross, klein:true, rot:tage < 30,
+      sub:(tage > 365 ? was : was + ' bis ' + tagDe(p.b)) + ' · ' + umfang
         + (tage < 0 && p.m === 'miete' ? ' · nur lesen' : tage < 0 ? ' · läuft weiter' : '') };
   }},
   'x-ust': { w(){
