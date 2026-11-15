@@ -556,6 +556,16 @@ a.tile{color:inherit;text-decoration:none}
 .lw-pb em::after{content:"";position:absolute;inset:0 auto 0 0;width:var(--p);border-radius:3px;background:var(--c)}
 .lw-pb em.warn::after{background:var(--over,#EE8E6A)}
 .lw-pb em.rot::after{background:var(--red-ink,#E8646E)}
+/* Überblick-Widgets (seit 15.11.2026) */
+.lw-frist{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:5px;font-size:12.5px}
+.lw-frist li{display:grid;grid-template-columns:78px minmax(0,1fr) auto;gap:8px;align-items:baseline}
+.lw-frist b{font-family:var(--mono);font-size:10.5px;font-weight:500;color:var(--text-2);white-space:nowrap}
+.lw-frist span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lw-frist small{font-family:var(--mono);font-size:10px;color:var(--text-3)}
+.lw-frist li.rot b,.lw-frist li.rot span{color:var(--red-ink,#E8646E)}
+.lw-zielknopf{margin-top:8px;align-self:flex-start;height:26px;padding:0 11px;border-radius:100px;border:1px solid var(--line);
+  background:transparent;color:var(--text-2);font:inherit;font-size:11.5px;cursor:pointer}
+.lw-zielknopf:hover{border-color:var(--c);color:var(--text)}
 .lw.klein{padding:12px 14px}
 .lw.klein::before{display:none}
 .lw.klein .lw-in{display:grid;grid-template-columns:auto minmax(45%,1fr) minmax(0,auto);align-items:center;gap:0 11px}
@@ -1921,6 +1931,8 @@ $('#alleSichern').addEventListener('click', () => {
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 8000);
     btn.textContent = 'Gesichert (' + n + ')';
+    store.set(GESICHERT_LS, new Date().toISOString());
+    try { kastenFrisch(); } catch (e) {}
   } catch (e) { btn.textContent = 'Sichern nicht möglich'; }
   setTimeout(() => btn.textContent = alt, 3000);
 });
@@ -2272,6 +2284,10 @@ function meinKacheln({ p, grund }){
   const heute = isoTag(Date.now());
   const abgelaufen = p.m === 'miete' && p.b && heute > p.b;
   MEIN_ALLE = KATALOG.filter(w => alle || ids.has(w.id));
+  const nWz = MEIN_ALLE.length;
+  /* Überblick-Widgets vorne – nur, wenn die Lizenz ihre Quellen nennt. */
+  const freiK = lizenzIds(p);
+  MEIN_ALLE = KOMBI.filter(w => nWz && kombiFrei(w, freiK)).concat(MEIN_ALLE);
   const aus = kastenAus();
   MEIN = MEIN_ALLE.filter(w => aus.indexOf(w.id) < 0).map(w => Object.assign({}, w, {
     id:'mein-' + w.id, tag: abgelaufen ? 'nur lesen' : (w.id === 'belegbuch-privat' ? 'Privat · ' + w.tag : w.tag),
@@ -2283,7 +2299,7 @@ function meinKacheln({ p, grund }){
     + zeile(p.m === 'miete' ? 'Miete' : 'Kauf', p.m === 'miete'
         ? (p.b ? (abgelaufen ? 'abgelaufen am ' : 'bis ') + tagDe(p.b) : 'unbefristet')
         : (p.b ? 'Wartung bis ' + tagDe(p.b) : 'ohne Wartungsende'))
-    + zeile('Umfang', (alle ? 'alle Werkzeuge' : MEIN_ALLE.length + (MEIN_ALLE.length === 1 ? ' Werkzeug' : ' Werkzeuge'))
+    + zeile('Umfang', (alle ? 'alle Werkzeuge' : nWz + (nWz === 1 ? ' Werkzeug' : ' Werkzeuge'))
         + (MEIN.length < MEIN_ALLE.length ? ', ' + (MEIN_ALLE.length - MEIN.length) + ' ausgeblendet' : ''));
   if (!MEIN.length) {
     g.innerHTML = '<p class="mein-leer">' + (MEIN_ALLE.length
@@ -2309,7 +2325,7 @@ function meinKacheln({ p, grund }){
    Termin, das Budget je Auftrag. Alle anderen bleiben kleine Kacheln.
    Gelesen wird nur, was die Werkzeuge ohnehin im localStorage spiegeln –
    geschrieben wird nichts. Fehlt eine Lesekopie, wird die Kachel klein. */
-const KASTEN_BEREICH = [['firma','Meine Firma'],['produktiv','Produktiv'],['buero','Büro'],['privat','Privat']];
+const KASTEN_BEREICH = [['ueberblick','Überblick'],['firma','Meine Firma'],['produktiv','Produktiv'],['buero','Büro'],['privat','Privat']];
 const lsJson = k => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch (e) { return null; } };
 const OFFEN_ST = new Set(['geplant','aktiv','pausiert']);
 const uhrHM = sec => { const m = Math.floor(sec / 60); return Math.floor(m / 60) + ':' + pad2(m % 60); };
@@ -2494,6 +2510,249 @@ const LIVE = {
         + (liste.length > 1 ? '<div class="lw-punkte">' + liste.map((_, i) => '<i class="' + (i === 0 ? 'an' : '') + '"></i>').join('') + '</div>' : '') };
   }}
 };
+
+/* ───────── Werkzeugkasten: Überblick-Widgets ─────────
+   Seit 15.11.2026. Diese Kacheln gehören keinem einzelnen Werkzeug: sie
+   führen Lesekopien mehrerer Werkzeuge zusammen, was nur der Kontor kann.
+   Erscheinen nur, wenn die Lizenz die Werkzeuge nennt, aus denen sie lesen
+   (`braucht` = alle davon, `eins` = mindestens eines). Gelesen wird nur. */
+const KOMBI_ZIEL = id => (KATALOG.find(w => w.id === id) || {}).url || null;
+const KOMBI = [
+  { id:'x-unberechnet', name:'Noch nicht abgerechnet', tag:'Überblick', braucht:['stempeluhr','rechnungsbuch'], ziel:'rechnungsbuch',
+    farbe:'var(--geld)', zeichen:SVG('<path d="M12 3v18M16.5 7.5c-.8-1.3-2.5-2-4.5-2-2.5 0-4.2 1.3-4.2 3.1 0 4.2 9 2.4 9 6.6 0 1.9-1.9 3.3-4.8 3.3-2.1 0-3.9-.8-4.7-2.2"/>') },
+  { id:'x-budget', name:'Budget-Ampel', tag:'Überblick', braucht:['auftragsbuch','stempeluhr'], ziel:'auftragsbuch',
+    farbe:'var(--amber)', zeichen:SVG('<rect x="8" y="2.8" width="8" height="18.4" rx="4"/><circle cx="12" cy="7.2" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="16.8" r="1.6"/>') },
+  { id:'x-geldfluss', name:'Geldfluss', tag:'Überblick', braucht:['stempeluhr','rechnungsbuch'], ziel:'rechnungsbuch',
+    farbe:'var(--geld)', zeichen:SVG('<path d="M4 20V11M10 20V6M16 20v-5M21 20H3"/>') },
+  { id:'x-konto', name:'Stundenkonto', tag:'Überblick', braucht:['stempeluhr'], ziel:'stempeluhr',
+    farbe:'var(--teal)', zeichen:SVG('<path d="M5 4h14v16H5z"/><path d="M8.5 9h7M8.5 13h4M15 16.5l1.5 1.5 3-3"/>') },
+  { id:'x-fristen', name:'Fristen-Radar', tag:'14 Tage', eins:['terminbuch','auftragsstatus','rechnungsbuch'], ziel:'terminbuch',
+    farbe:'var(--em-2)', zeichen:SVG('<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><path d="M12 12l5.5-5.5"/>') },
+  { id:'x-sicherung', name:'Sicherungsstand', tag:'Tippen sichert alles', braucht:[],
+    farbe:'var(--teal)', zeichen:SVG('<path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.3 7.5 9.5 4.3-1.2 7.5-4.9 7.5-9.5V6z"/><path d="M9 12l2.2 2.2L15.5 10"/>'),
+    aktion(){ const b = document.getElementById('alleSichern'); if (b) b.click(); } },
+  { id:'x-lizenz', name:'Lizenz', tag:'Laufzeit', braucht:[],
+    farbe:'var(--text-2)', zeichen:SVG('<circle cx="8" cy="15" r="4"/><path d="M10.8 12.2 20 3M16 7l3 3M14 9l2 2"/>'),
+    aktion(){ const b = document.querySelector('.mein-i-btn'); if (b) b.click(); } },
+  { id:'x-ust', name:'Umsatzsteuer', tag:'laufendes Quartal', braucht:['rechnungsbuch'], ziel:'rechnungsbuch',
+    farbe:'var(--geld)', zeichen:SVG('<path d="M18.5 5.5l-13 13"/><circle cx="7" cy="7" r="2.5"/><circle cx="17" cy="17" r="2.5"/>') },
+  { id:'x-woche', name:'Wochenbilanz', tag:'Stunden gegen Ziel', braucht:['stempeluhr'], ziel:'stempeluhr',
+    farbe:'var(--teal)', zeichen:SVG('<rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 9.5h17M8 3v4M16 3v4M8 14l2.5 2.5L16 12"/>') }
+].map(w => Object.assign(w, { bereich:'ueberblick', kombi:true, url: w.ziel ? KOMBI_ZIEL(w.ziel) : null }));
+
+function kombiFrei(w, frei){
+  if (!frei) return false;
+  const hat = id => frei.alle || frei.ids.has(id);
+  if (w.eins) return w.eins.some(hat);
+  return (w.braucht || []).every(hat);
+}
+/* Für die Widgets: ist ein Werkzeug gerade lizenziert? */
+const kombiHat = id => { const f = lizenzIds(LIZ && LIZ.p); return !!(f && (f.alle || f.ids.has(id))); };
+const WOCHENZIEL_LS = 'wb-kontor-wochenziel';
+const GESICHERT_LS = 'wb-kontor-gesichert';
+const nfMonat = new Intl.DateTimeFormat('de-DE', { month:'long' });
+const tageSeit = iso => { const t = Date.parse(iso); return Number.isFinite(t) ? Math.floor((Date.now() - t) / 864e5) : null; };
+const seitText = n => n == null ? 'nie' : n < 1 ? 'heute' : n === 1 ? 'gestern' : 'vor ' + n + ' Tagen';
+const ymDe = ym => ym ? ym.slice(5, 7) + '/' + ym.slice(0, 4) : '';
+const balkenZeile = (n, wert, p, klasse) => '<span>' + esc(n) + '</span><small>' + wert + '</small>'
+  + '<em class="' + (klasse || '') + '" style="--p:' + Math.max(0, Math.min(100, p)) + '%"></em>';
+function auftragsNamen(){
+  const ab = lsJson(WB_AB_LS) || {};
+  const agb = {}; (ab.auftraggeber || []).forEach(x => { if (x && x.id) agb[x.id] = x.name || 'Auftraggeber'; });
+  const auf = {}; (ab.auftraege || []).forEach(x => { if (x && x.id) auf[x.id] = x; });
+  return { agb, auf, ab };
+}
+function wocheStart(){ const mo = new Date(); mo.setHours(0,0,0,0); mo.setDate(mo.getDate() - (mo.getDay() + 6) % 7); return mo.getTime(); }
+
+Object.assign(LIVE, {
+  'x-unberechnet': { w(){
+    const z = lsJson(WB_ZEIT_LS);
+    if (!z || !z.offen) return null;           /* ohne Rechnungsbuch-Karte weiß niemand, was offen ist */
+    const { agb, auf } = auftragsNamen();
+    const je = {};
+    Object.keys(z.jeAuftrag || {}).forEach(id => {
+      const x = z.jeAuftrag[id]; if (!x || !(+x.offenEur > 0)) return;
+      const n = auf[id] ? (agb[auf[id].auftraggeberId] || 'ohne Auftraggeber') : 'ohne Auftrag';
+      je[n] = (je[n] || 0) + (+x.offenEur);
+    });
+    const liste = Object.keys(je).map(n => [n, je[n]]).sort((a, b) => b[1] - a[1]).slice(0, 4);
+    const max = liste.length ? liste[0][1] : 1;
+    const eur = +z.offen.eur || 0;
+    if (eur < 0.5) return { gross:'alles berechnet', klein:true, sub:'keine offenen Buchungen' };
+    return { gross:nfE.format(eur), sub:mz(+z.offen.buchungen || 0, 'Buchung', 'Buchungen') + ' · ' + nf1.format((+z.offen.sec || 0) / 3600) + ' h',
+      extra: liste.length ? '<div class="lw-pb">' + liste.map(([n, v]) => balkenZeile(n, nfE.format(v), v / max * 100)).join('') + '</div>' : '' };
+  }},
+  'x-budget': { breit:true, w(){
+    const z = lsJson(WB_ZEIT_LS) || {}, je = z.jeAuftrag || {};
+    const { ab } = auftragsNamen();
+    const auftr = (ab.auftraege || []).filter(a => a && OFFEN_ST.has(a.status) && (+a.budgetStunden > 0 || +a.budgetEuro > 0));
+    if (!auftr.length) return null;
+    const zeilen = auftr.map(a => {
+      const x = je[a.id] || {};
+      const ph = +a.budgetStunden > 0 ? (+x.sec || 0) / 36 / (+a.budgetStunden) : 0;
+      const pe = +a.budgetEuro > 0 ? (+x.eur || 0) * 100 / (+a.budgetEuro) : 0;
+      return { n:a.name || 'Auftrag', p:Math.max(ph, pe) };
+    }).sort((a, b) => b.p - a.p);
+    const ueber = zeilen.filter(x => x.p > 100).length, knapp = zeilen.filter(x => x.p >= 80 && x.p <= 100).length;
+    return { gross: ueber ? mz(ueber, 'Auftrag', 'Aufträge') + ' drüber' : knapp ? mz(knapp, 'Auftrag', 'Aufträge') + ' knapp' : 'im Rahmen',
+      klein:true, rot:ueber > 0, punkt: ueber ? '' : knapp ? 'pause' : 'lauf',
+      sub: mz(zeilen.length, 'Auftrag', 'Aufträge') + ' mit Budget',
+      extra:'<div class="lw-pb">' + zeilen.slice(0, 6).map(x => balkenZeile(x.n, Math.round(x.p) + ' %', x.p,
+        x.p > 100 ? 'rot' : x.p >= 80 ? 'warn' : '')).join('') + '</div>'
+        + '<span class="lw-fuss">gebuchte Stunden und Euro gegen das Budget</span>' };
+  }},
+  'x-geldfluss': { w(){
+    const roh = lsJson('stempeluhr_entries_v2'), r = lsJson(WB_RECH_LS);
+    const ent = Array.isArray(roh) ? roh : [];
+    if (!ent.length && !(r && Array.isArray(r.rechnungen) && r.rechnungen.length)) return null;
+    const ym = isoTag(Date.now()).slice(0, 7);
+    const a = new Date(); a.setHours(0,0,0,0); a.setDate(1);
+    const b = new Date(a); b.setMonth(b.getMonth() + 1);
+    const gearbeitet = ent.reduce((s, e) => e && e.start >= a.getTime() && e.start < b.getTime()
+      ? s + (+e.dur || 0) / 3600 * (+e.satz || 60) : s, 0);
+    let berechnet = 0, bezahlt = 0;
+    (r && Array.isArray(r.rechnungen) ? r.rechnungen : []).forEach(x => {
+      if (!x || !x.festgeschrieben) return;
+      if (String(x.datum || '').slice(0, 7) === ym) berechnet = cent(berechnet + rechSumme(x).netto);
+      (x.zahlungen || []).forEach(zz => { if (zz && String(zz.datum || '').slice(0, 7) === ym) bezahlt = cent(bezahlt + (+zz.betrag || 0)); });
+    });
+    const max = Math.max(1, gearbeitet, berechnet, bezahlt);
+    return { gross:nfE.format(gearbeitet), sub:'gearbeitet im ' + nfMonat.format(new Date()),
+      extra:'<div class="lw-pb">'
+        + balkenZeile('gearbeitet', nfE.format(gearbeitet), gearbeitet / max * 100)
+        + balkenZeile('berechnet (netto)', nfE.format(berechnet), berechnet / max * 100)
+        + balkenZeile('bezahlt (brutto)', nfE.format(bezahlt), bezahlt / max * 100) + '</div>' };
+  }},
+  'x-konto': { w(){
+    const z = lsJson(WB_ZEIT_LS);
+    const k = z && z.konto && typeof z.konto === 'object' ? z.konto : null;
+    if (!k || !Object.keys(k).length) return null;
+    const { agb } = auftragsNamen();
+    const ids = Object.keys(k).sort((x, y) => (+k[y].h || 0) - (+k[x].h || 0));
+    const a = k[ids[0]], warn = a.ausgleichBis && (+a.alter || 0) >= 10;
+    const zeilen = ids.map(id => {
+      const x = k[id];
+      return '<div class="lw-s' + ((+x.alter || 0) >= 10 && +x.h > 0 ? ' rot' : '') + '">' + esc(agb[id] || 'Auftraggeber') + ': '
+        + nf1.format(+x.h || 0) + ' h'
+        + (x.frei != null ? ' · noch ' + (+x.frei > 0 ? nf1.format(+x.frei) + ' h frei' : '0 h – Grenze erreicht') : '') + '</div>'
+        + (x.ausgleichBis && +x.h > 0 ? '<div class="lw-s' + ((+x.alter || 0) >= 10 ? ' rot' : '') + '">Ausgleich bis ' + ymDe(x.ausgleichBis) + '</div>' : '');
+    }).join('');
+    return { gross:nf1.format(+a.h || 0) + ' h', rot:!!warn,
+      sub:(+a.h > 0 ? 'Guthaben · ' + nfE.format(+a.eur || 0) : 'ausgeglichen') + (a.grenze != null ? ' · Grenze ' + nfE.format(+a.grenze) : ''),
+      extra:zeilen };
+  }},
+  'x-fristen': { breit:true, w(){
+    const heute = isoTag(Date.now()), bis = isoTag(Date.now() + 14 * 864e5);
+    const p = [];
+    if (kombiHat('terminbuch')) {
+      const t = lsJson(WB_TERMIN_LS);
+      (t && Array.isArray(t.termine) ? t.termine : []).forEach(x => {
+        if (x && x.datum && !x.erledigt && x.datum <= bis) p.push({ d:x.datum, t:(x.von ? x.von + ' ' : '') + (x.titel || 'Termin'), q:'Termin' });
+      });
+    }
+    if (kombiHat('auftragsstatus')) {
+      const st = lsJson(WB_STATUS_LS), inh = st && st.inhalte && typeof st.inhalte === 'object' ? st.inhalte : {};
+      const { auf } = auftragsNamen();
+      Object.keys(inh).forEach(id => {
+        const n = auf[id] ? auf[id].name : '';
+        (inh[id].meilensteine || []).forEach(m => { if (m && m.datum && !m.erreicht && m.datum <= bis) p.push({ d:m.datum, t:(m.titel || 'Meilenstein') + (n ? ' · ' + n : ''), q:'Meilenstein' }); });
+        (inh[id].todos || []).forEach(m => { if (m && m.faellig && !m.erledigt && m.faellig <= bis) p.push({ d:m.faellig, t:(m.text || 'To-do') + (n ? ' · ' + n : ''), q:'To-do' }); });
+      });
+    }
+    if (kombiHat('rechnungsbuch')) {
+      const r = lsJson(WB_RECH_LS);
+      (r && Array.isArray(r.rechnungen) ? r.rechnungen : []).forEach(x => {
+        if (!x || !x.festgeschrieben || x.storniert || x.stornoVon) return;
+        if (rechSumme(x).rest <= 0.005) return;
+        const f = new Date((x.datum || heute) + 'T12:00:00'); f.setDate(f.getDate() + (parseInt(x.ziel, 10) || 0));
+        const d = isoTag(f);
+        if (d <= bis) p.push({ d, t:'Zahlung ' + (x.nummer || '') + (x.empf && x.empf.name ? ' · ' + x.empf.name : ''), q:'Rechnung' });
+      });
+    }
+    if (!p.length) return { gross:'frei', klein:true, sub:'nichts in den nächsten 14 Tagen' };
+    p.sort((a, b) => a.d.localeCompare(b.d));
+    const spaet = p.filter(x => x.d < heute).length;
+    const li = x => '<li class="' + (x.d < heute ? 'rot' : '') + '"><b>' + (x.d < heute ? 'überfällig' : esc(tagName(x.d))) + '</b><span>'
+      + esc(x.t) + '</span><small>' + x.q + '</small></li>';
+    return { gross:mz(p.length, 'Frist', 'Fristen'), klein:true, rot:spaet > 0,
+      sub:spaet ? spaet + ' überfällig · ' + (p.length - spaet) + ' in 14 Tagen' : 'in den nächsten 14 Tagen',
+      extra:'<ul class="lw-frist">' + p.slice(0, 7).map(li).join('') + '</ul>'
+        + (p.length > 7 ? '<span class="lw-fuss">und ' + (p.length - 7) + ' weitere</span>' : '') };
+  }},
+  'x-sicherung': { w(){
+    const n = tageSeit(store.get(GESICHERT_LS));
+    const quellen = [['rechnungsbuch','Rechnungsbuch','wb-rechnungsbuch-export'], ['auftragsstatus','Auftragsstatus','wb-auftragsstatus-export'],
+                     ['terminbuch','Terminbuch','wb-terminbuch-export']].filter(q => kombiHat(q[0]));
+    const zeilen = quellen.map(([, name, k]) => {
+      const t = tageSeit(store.get(k));
+      return '<div class="lw-s' + (t == null || t > 30 ? ' rot' : '') + '">' + name + ': ' + seitText(t) + '</div>';
+    }).join('');
+    const alt = n == null || n > 30;
+    return { gross:seitText(n), rot:alt, punkt: alt ? '' : 'lauf',
+      sub:'Gesamtsicherung des Kontors' + (alt ? ' · bitte sichern' : ''), extra:zeilen
+        + '<span class="lw-fuss">Tippen lädt die Sicherung herunter</span>' };
+  }},
+  'x-lizenz': { w(){
+    const p = LIZ && LIZ.p;
+    if (!p) return null;
+    const heute = isoTag(Date.now());
+    const tage = p.b ? Math.round((Date.parse(p.b + 'T12:00:00') - Date.parse(heute + 'T12:00:00')) / 864e5) : null;
+    const umfang = p.w.indexOf('*') >= 0 ? 'alle Werkzeuge' : mz(p.w.length, 'Werkzeug', 'Werkzeuge');
+    if (tage == null) return { gross:'unbefristet', klein:true, sub:(p.m === 'miete' ? 'Miete' : 'Kauf') + ' · ' + umfang };
+    const was = p.m === 'miete' ? 'Laufzeit' : 'Wartung';
+    return { gross: tage < 0 ? was + ' vorbei' : 'noch ' + mz(tage, 'Tag', 'Tage'), klein:true, rot:tage < 30,
+      sub:was + ' bis ' + tagDe(p.b) + ' · ' + umfang
+        + (tage < 0 && p.m === 'miete' ? ' · nur lesen' : tage < 0 ? ' · läuft weiter' : '') };
+  }},
+  'x-ust': { w(){
+    const r = lsJson(WB_RECH_LS);
+    if (!r || !Array.isArray(r.rechnungen) || !r.rechnungen.length) return null;
+    const jetzt = new Date(), q = Math.floor(jetzt.getMonth() / 3);
+    const von = jetzt.getFullYear() + '-' + pad2(q * 3 + 1) + '-01';
+    const bisD = new Date(jetzt.getFullYear(), q * 3 + 3, 1), bis = isoTag(bisD);
+    let fakt = 0, verein = 0;
+    r.rechnungen.forEach(x => {
+      if (!x || !x.festgeschrieben || x.steuerfall !== 'regel') return;
+      const s = rechSumme(x), st = cent(s.brutto - s.netto);
+      if (x.datum >= von && x.datum < bis) fakt = cent(fakt + st);
+      if (s.brutto) (x.zahlungen || []).forEach(z => {
+        if (z && z.datum >= von && z.datum < bis) verein = cent(verein + (+z.betrag || 0) * st / s.brutto);
+      });
+    });
+    return { gross:nfE.format(fakt), sub:'USt auf Rechnungen · Q' + (q + 1) + ' ' + jetzt.getFullYear(),
+      extra:'<div class="lw-s">davon vereinnahmt: ' + nfE.format(verein) + '</div>'
+        + '<span class="lw-fuss">ohne Vorsteuer – Schätzung, keine Voranmeldung</span>' };
+  }},
+  'x-woche': { w(){
+    const roh = lsJson('stempeluhr_entries_v2'), ent = Array.isArray(roh) ? roh : [];
+    const a = wocheStart(), b = a + 7 * 864e5;
+    const h = ent.reduce((s, e) => e && e.start >= a && e.start < b ? s + (+e.dur || 0) / 3600 : s, 0);
+    const ziel = Math.max(1, parseFloat(store.get(WOCHENZIEL_LS)) || 40);
+    const p = h / ziel * 100;
+    const tag = (new Date().getDay() + 6) % 7 + 1;                 /* Mo = 1 … So = 7 */
+    const soll = ziel * Math.min(5, tag) / 5;                      /* gleichmäßig auf Mo–Fr */
+    return { gross:nf1.format(h) + ' / ' + nf1.format(ziel) + ' h', sub: h >= ziel ? 'Wochenziel erreicht'
+        : (h >= soll ? 'im Plan' : nf1.format(soll - h) + ' h hinter Plan') + ' · noch ' + nf1.format(ziel - h) + ' h',
+      extra:'<div class="lw-pb">' + balkenZeile('diese Woche', Math.round(p) + ' %', p, h >= soll ? '' : 'warn') + '</div>'
+        + '<button type="button" class="lw-zielknopf" data-wochenziel>Ziel ändern</button>' };
+  }}
+});
+/* Wochenziel ändern, ohne die Stempeluhr zu öffnen. */
+document.addEventListener('click', e => {
+  const b = e.target.closest && e.target.closest('[data-wochenziel]');
+  if (!b) return;
+  e.preventDefault(); e.stopPropagation();
+  const alt = store.get(WOCHENZIEL_LS) || '40';
+  const neu = prompt('Wochenziel in Stunden', alt);
+  if (neu == null) return;
+  const v = parseFloat(String(neu).replace(',', '.'));
+  if (!(v > 0 && v < 200)) return;
+  store.set(WOCHENZIEL_LS, String(v));
+  kastenFrisch();
+}, true);
+/* Die Widgets hängen auch an der Uhr: einmal je Minute neu rechnen. */
+setInterval(() => { if (!document.hidden) meinTiles.forEach(t => { if (t.app.kombi) kachelNeu(t); }); }, 60000);
+
 function belegLive(bereich){
   const b = belegStand(bereich);
   if (!b) return null;
@@ -2584,13 +2843,13 @@ function kastenBauen(liste, g){
       el.dataset.wz = w.id.replace(/^mein-/, '');
       kachelNeu(t);
       t.knopf.addEventListener('click', e => { e.stopPropagation(); groesseSetzen(t, 1); });
-      el.addEventListener('click', () => { if (ordnen || schonGezogen) return; if (!t.frame.classList.contains('live')) open(w.id); });
+      el.addEventListener('click', () => { if (ordnen || schonGezogen) return; if (w.aktion) { w.aktion(); return; } if (!t.frame.classList.contains('live')) open(w.id); });
       el.addEventListener('keydown', e => {
         if (ordnen) {
           if (e.key === '+' || e.key === '-') { e.preventDefault(); groesseSetzen(t, e.key === '+' ? 1 : -1); return; }
           ordnenTaste(e, el); return;
         }
-        if ((e.key === 'Enter' || e.key === ' ') && !current) { e.preventDefault(); open(w.id); }
+        if ((e.key === 'Enter' || e.key === ' ') && !current) { e.preventDefault(); if (w.aktion) w.aktion(); else open(w.id); }
       });
       el.addEventListener('pointerdown', e => ziehenStart(e, el));
     });
@@ -3030,7 +3289,7 @@ function kastenWahlZeigen(){
   const el = document.getElementById('kastenWahl'), aus = kastenAus();
   document.getElementById('kastenKopf').hidden = !MEIN_ALLE.length;
   el.innerHTML = MEIN_ALLE.map(w => '<label class="ans-zeile"><span>' + esc(w.name)
-      + (w.id === 'belegbuch-privat' ? '<small>Privat</small>' : '') + '</span>'
+      + (w.id === 'belegbuch-privat' ? '<small>Privat</small>' : w.kombi ? '<small>Überblick</small>' : '') + '</span>'
       + '<input type="checkbox" role="switch" data-wz="' + esc(w.id) + '"' + (aus.indexOf(w.id) < 0 ? ' checked' : '') + '></label>').join('');
   el.querySelectorAll('input').forEach(b => b.addEventListener('change', () => {
     const liste = kastenAus().filter(x => x !== b.dataset.wz);
