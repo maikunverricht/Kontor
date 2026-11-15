@@ -1892,6 +1892,8 @@ async function ladeErlaubnis(){
     const w = kennungVonSchluessel(k);
     if (w === '') return true;
     if (!w || !p || abgelaufen) return false;
+    /* Die Belegbuch-Ablage teilen sich Firma und Privat. */
+    if (w === 'belegbuch') return p.w.indexOf('*') >= 0 || p.w.indexOf('belegbuch') >= 0 || p.w.indexOf('belegbuch-privat') >= 0;
     return p.w.indexOf('*') >= 0 || p.w.indexOf(w) >= 0;
   };
 }
@@ -2204,9 +2206,10 @@ ansichtBauen(PRIVAT, $('#gridPrivat'));
    Die Ansicht schreibt nichts – freigeschaltet wird weiter im Werkzeug selbst. */
 const LIZ_LS = 'wb-lizenz';
 const LIZ_PUB = 'MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAESwn5vJH6rMd87uKAXdmC4qXnI47PQn7lpnDtpPfzuv4bhSIp2QkxeL2RC7cVaXbnD0lZRdh6g3b+x3MYKm61Pg==';
-/* Kennung in der Lizenz → Kacheln. Das Notizbuch heißt in der Lizenz noch `noteos`;
-   das Belegbuch steht im Kontor und unter Privat. */
-const LIZ_KACHEL = { noteos:['notizbuch'], belegbuch:['belegbuch','belegbuch-privat'] };
+/* Kennung in der Lizenz → Kacheln. Das Notizbuch heißt in der Lizenz noch `noteos`.
+   Seit 15.11.2026 hat das private Belegbuch eine eigene Kennung `belegbuch-privat`:
+   `belegbuch` schaltet nur noch das Belegbuch der Firma frei. */
+const LIZ_KACHEL = { noteos:['notizbuch'] };
 const KATALOG = [].concat(
   APPS.map(a => Object.assign({}, a, { zeichen:ZEICHEN[a.id], farbe:SYMFARBE[a.id], bereich:'firma' })),
   PRODUKTIV.map(a => Object.assign({}, a, { bereich:'produktiv' })),
