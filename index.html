@@ -503,12 +503,17 @@ a.tile{color:inherit;text-decoration:none}
 .tile.nurlesen .shot{opacity:.55}
 
 /* ───── Werkzeugkasten: Live-Kacheln (12.11.2026) ───── */
-#gridMein{display:block}
+#gridMein{display:block;padding-left:0;padding-right:0}
+/* Mauerwerk (15.11.2026): feine Zeilen von 4 px, jede Kachel belegt so viele,
+   wie sie hoch ist. So rückt unter einer kurzen Kachel die nächste nach,
+   statt dass eine hohe die ganze Reihe streckt. */
+#gridMein .lw-grid{grid-auto-rows:4px;row-gap:0;align-items:start}
+#gridMein .lw{align-self:start}
 .lw-gr{margin:22px 0 10px;font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--text-3);
   display:flex;align-items:center;gap:10px}
 .lw-gr:first-child{margin-top:4px}
 .lw-gr::after{content:"";flex:1;height:1px;background:var(--line)}
-.lw-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;grid-auto-flow:dense}
+.lw-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;grid-auto-flow:row dense}
 .lw{position:relative;overflow:hidden;min-width:0;border-radius:20px;border:1px solid var(--line);background:var(--glass);
   -webkit-backdrop-filter:blur(14px) saturate(1.2);backdrop-filter:blur(14px) saturate(1.2);box-shadow:var(--shadow);
   padding:14px 16px 15px;cursor:pointer;outline:none;
@@ -516,10 +521,12 @@ a.tile{color:inherit;text-decoration:none}
 .lw::before{content:"";position:absolute;inset:0 0 auto 0;height:2px;background:var(--c);opacity:.85}
 .lw:hover,.lw:focus-visible{transform:translateY(-2px);border-color:var(--line-hi)}
 .lw:focus-visible{box-shadow:0 0 0 2px var(--amber),var(--shadow)}
-.lw.breit{grid-column:span 2}
+.lw.gr-L{grid-column:span 2}
+.lw.gr-XL{grid-column:span 3}
+.lw.gr-S,.lw.klein{align-self:start}
 .lw-grid:empty{display:none}
-.lw-grid + .lw-grid{margin-top:12px}
-.lw-grid.kl{grid-template-columns:repeat(auto-fill,minmax(200px,1fr));align-items:start}
+#gridMein.frei .lw-grid{margin-top:4px}
+@media (max-width:900px){ .lw.gr-XL{grid-column:span 2} }
 .lw-in{display:flex;flex-direction:column;gap:2px;min-width:0}
 .lw-k{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-2);margin-bottom:6px;min-width:0}
 .lw-n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -551,7 +558,16 @@ a.tile{color:inherit;text-decoration:none}
 .lw-pb em.rot::after{background:var(--red-ink,#E8646E)}
 .lw.klein{padding:12px 14px}
 .lw.klein::before{display:none}
-.lw.klein .lw-in{flex-direction:row;align-items:center;gap:11px}
+.lw.klein .lw-in{display:grid;grid-template-columns:auto minmax(45%,1fr) minmax(0,auto);align-items:center;gap:0 11px}
+.lw-kz{min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;font-size:17px;font-weight:700;letter-spacing:-.02em;white-space:nowrap;font-variation-settings:'wdth' 108}
+.lw-kz.mono{font-family:var(--mono);font-weight:500;font-size:15px}
+.lw-kz.rot{color:var(--red-ink,#E8646E)}
+.lw.klein .lw-p{position:absolute;top:9px;right:9px;width:6px;height:6px}
+@media (max-width:720px){
+  .lw.klein .lw-in{grid-template-columns:auto minmax(0,1fr);row-gap:7px}
+  .lw.klein .lw-kn{grid-column:1/-1;grid-row:2}
+  .lw.klein .lw-kz{justify-self:end}
+}
 .lw.klein .lw-ic svg{width:19px;height:19px}
 .lw-kn{min-width:0;display:flex;flex-direction:column}
 .lw-kn b{font-size:13.5px;font-weight:650;letter-spacing:-.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -564,9 +580,6 @@ a.tile{color:inherit;text-decoration:none}
   .lw-g{font-size:21px}.lw-g.mono{font-size:27px}.lw-g.mittel{font-size:16px}
   .lw-urteil{font-size:10px;padding:2px 7px}
   .lw.klein{padding:11px 12px}
-  .lw-grid + .lw-grid{margin-top:9px}
-  .lw-grid.kl{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .lw.klein .lw-in{flex-direction:column;align-items:flex-start;gap:7px}
   .lw-kn b{font-size:13px}
 }
 @media (prefers-reduced-motion:reduce){ .lw-p.lauf{animation:none} }
@@ -584,7 +597,22 @@ a.tile{color:inherit;text-decoration:none}
 #gridMein.ordnen .lw{cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;
   outline:1px dashed var(--line-hi);outline-offset:-1px}
 #gridMein.ordnen .lw-p{display:none}
-#gridMein.ordnen .lw::after{content:"⠿";position:absolute;top:9px;right:11px;font-size:15px;line-height:1;color:var(--text-3)}
+/* Größenknopf: nur beim Anordnen, oben rechts in jeder Kachel */
+.lw-gk{display:none;position:absolute;top:8px;right:8px;z-index:3;min-width:30px;height:22px;padding:0 6px;border-radius:7px;
+  border:1px solid var(--line-hi);background:var(--surface,var(--glass));color:var(--text);
+  font:600 10.5px/20px var(--mono);cursor:pointer;touch-action:manipulation}
+.lw-gk:hover{background:var(--amber);color:var(--ink,#12171F);border-color:transparent}
+#gridMein.ordnen .lw-gk{display:block}
+#gridMein.ordnen .lw.klein{padding-right:46px}
+.lw-knopf.an2{border-color:var(--line-hi);color:var(--text)}
+/* Breite Bildschirme (15.11.2026): das Gerüst wird breiter, aber nur der
+   Werkzeugkasten nutzt die Fläche – die übrigen Ansichten bleiben in ihrer
+   gewohnten Breite und mittig. */
+@media (min-width:1400px){
+  main{max-width:min(1880px,100vw)}
+  .slide > *{max-width:calc(var(--max) - 2 * var(--pad));margin-left:auto;margin-right:auto}
+  #s-mein > *{max-width:none}
+}
 #gridMein.ordnen .lw:hover{transform:none}
 #gridMein .lw.zieht{z-index:30;cursor:grabbing;transition:none;opacity:.96;
   box-shadow:0 24px 50px -18px rgba(0,0,0,.6),0 0 0 2px var(--amber)}
@@ -601,6 +629,22 @@ a.tile{color:inherit;text-decoration:none}
 .lw-lauf li.arbeit i{background:var(--amber)}
 .lw-lauf li b{color:var(--red-ink,#E8646E);font-weight:700;flex:none}
 @keyframes lwLauf{to{transform:translateY(-50%)}}
+/* KapazitätenPlaner: meine Workitems */
+.wi-kopf{display:flex;align-items:center;gap:8px;margin-top:14px;padding-top:11px;border-top:1px solid var(--line);
+  font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-3)}
+.wi-kopf b{margin-left:auto;font-weight:500;color:var(--text-2);letter-spacing:0}
+.lw-lauf.wi{height:162px;margin-top:4px}
+.lw-lauf.wi li{height:40px;display:grid;grid-template-columns:8px minmax(0,1fr) auto;grid-template-rows:20px 16px;
+  column-gap:9px;align-items:center;font-size:12.5px}
+.lw-lauf.wi li i{grid-row:1/3;align-self:center;background:var(--line-strong,var(--line))}
+.lw-lauf.wi li.laeuft i{background:var(--c)}
+.lw-lauf.wi li.heute i{background:var(--amber)}
+.lw-lauf.wi li.ueber i{background:var(--red-ink,#E8646E)}
+.wi-t{color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.wi-h{font-family:var(--mono);font-size:10.5px;color:var(--text-2);text-align:right}
+.wi-d{grid-column:2/4;font-family:var(--mono);font-size:10px;color:var(--text-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wi-d em{font-style:normal;margin-left:8px;color:var(--amber)}
+.wi-d em.rot{color:var(--red-ink,#E8646E)}
 /* KapazitätenPlaner: Team-Auslastung je Woche */
 .lw-kapa{display:flex;gap:6px;align-items:stretch;height:96px;margin-top:10px}
 .lw-kapa i{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:3px;font-style:normal;
@@ -620,7 +664,8 @@ a.tile{color:inherit;text-decoration:none}
 .lw-dreh{position:relative;height:70px;margin-top:8px}
 .lw-dreh > div{position:absolute;inset:0;display:flex;flex-direction:column;gap:3px;opacity:0;transform:translateY(8px);
   transition:opacity .6s var(--kurve,ease),transform .6s var(--kurve,ease);pointer-events:none}
-.lw-dreh > div.an{opacity:1;transform:none}
+.lw-dreh > div{transition-duration:.3s}
+.lw-dreh > div.an{opacity:1;transform:none;transition-duration:.6s;transition-delay:.3s}
 .lw-dreh strong{font-size:17px;font-weight:700;letter-spacing:-.02em;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .lw-dreh span{font-size:12px;color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .lw-dreh em{position:relative;height:4px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:4px}
@@ -847,7 +892,8 @@ html.wb-vorab .slides,html.wb-vorab .dock{visibility:hidden}
           <span class="mein-i-tip" id="meinInfo" role="tooltip"></span></span></h1>
       </section>
       <div class="lw-leiste" id="ordnenLeiste" hidden>
-        <span class="lw-hinweis" id="ordnenHinweis"><span class="mit-maus">Kacheln ziehen – oder auswählen und mit den Pfeiltasten schieben.</span><span class="mit-finger">Kachel festhalten und an den neuen Platz schieben.</span></span>
+        <span class="lw-hinweis" id="ordnenHinweis"><span class="mit-maus">Kacheln ziehen · Größe über das Kästchen oben rechts · Tastatur: Pfeile schieben, + / − Größe.</span><span class="mit-finger">Festhalten und schieben · Kästchen oben rechts ändert die Größe.</span></span>
+        <button type="button" class="lw-knopf" id="bereicheBtn" aria-pressed="false" hidden title="Kacheln nach Firma, Produktiv, Büro und Privat gruppieren">Bereiche</button>
         <button type="button" class="lw-knopf" id="ordnenReset" hidden>Zurücksetzen</button>
         <button type="button" class="lw-knopf" id="ordnenBtn" aria-pressed="false">Anordnen</button>
       </div>
@@ -2195,7 +2241,9 @@ function meinKacheln({ p, grund }){
   MEIN_ALLE = KATALOG.filter(w => alle || ids.has(w.id));
   const aus = kastenAus();
   MEIN = MEIN_ALLE.filter(w => aus.indexOf(w.id) < 0).map(w => Object.assign({}, w, {
-    id:'mein-' + w.id, tag: abgelaufen ? 'nur lesen' : (w.id === 'belegbuch-privat' ? 'Privat · ' + w.tag : w.tag) }));
+    id:'mein-' + w.id, tag: abgelaufen ? 'nur lesen' : (w.id === 'belegbuch-privat' ? 'Privat · ' + w.tag : w.tag),
+    /* Ohne Bereichsüberschriften wären die beiden Belegbücher nicht zu unterscheiden. */
+    name: w.id === 'belegbuch-privat' ? w.name + ' · Privat' : w.name }));
   const zeile = (k, v) => '<span><i>' + k + '</i>' + v + '</span>';
   info.innerHTML = zeile('Lizenz', '<b>' + esc(p.id || '–') + '</b>')
     + (p.n ? zeile('Für', esc(p.n)) : '')
@@ -2355,7 +2403,28 @@ const LIVE = {
     const ue = +d.ueberlastet || 0;
     const wer = d.nur ? 'Deine Woche · ' + d.nur : 'Team diese Woche · ' + mz(+d.mitarbeiter || 0, 'Person', 'Personen')
       + (ue ? ' · ' + ue + ' überlastet' : '');
-    return { gross:(+w0.pct || 0) + ' %', sub:wer, rot:(+w0.pct || 0) > 100, extra:bars };
+    /* Seit 15.11.2026: die offenen Workitems der erkannten Person, nach Start
+       und Plandatum. Laufende bekommen einen Punkt, „startet heute“ und
+       „über Plan“ sind markiert. Mehr als vier laufen langsam durch. */
+    let liste = '';
+    const mw = Array.isArray(d.meine) ? d.meine : null;
+    if (mw) {
+      const heute = isoTag(Date.now());
+      const kurz = iso => iso ? iso.slice(8, 10) + '.' + iso.slice(5, 7) + '.' : '–';
+      const zeile = x => {
+        const art = x.e && x.e < heute ? 'ueber' : x.s === heute ? 'heute' : x.s && x.s < heute ? 'laeuft' : 'kommt';
+        const marke = art === 'ueber' ? '<em class="rot">über Plan</em>' : art === 'heute' ? '<em>startet heute</em>' : '';
+        return '<li class="' + art + '"><i></i><span class="wi-t">' + esc(x.t) + '</span><small class="wi-h">'
+          + (x.h != null ? nf1.format(+x.h) + ' h' : '') + '</small>'
+          + '<span class="wi-d">' + kurz(x.s) + ' → ' + kurz(x.e) + (x.fc || x.bc ? ' · ' + esc(x.fc || x.bc) : '') + marke + '</span></li>';
+      };
+      liste = '<div class="wi-kopf">Meine Workitems' + (d.wer ? ' · ' + esc(d.wer) : '') + '<b>' + mw.length + '</b></div>'
+        + (mw.length
+          ? '<div class="lw-lauf wi' + (mw.length > 4 ? ' laeuft' : '') + '" style="--dauer:' + (mw.length * 3.2) + 's"><ul>'
+            + mw.map(zeile).join('') + (mw.length > 4 ? mw.map(zeile).join('') : '') + '</ul></div>'
+          : '<div class="lw-s">Keine offenen Workitems.</div>');
+    }
+    return { gross:(+w0.pct || 0) + ' %', sub:wer, rot:(+w0.pct || 0) > 100, extra:bars + liste };
   }},
   codecompare: { w(){
     const d = lsJson('wb-codecompare-stand');
@@ -2399,52 +2468,95 @@ function belegLive(bereich){
 }
 
 const basisId = t => t.app.id.replace(/^mein-/, '');
+/* Größen (seit 15.11.2026): S = kompakte Zeile, M = eine Spalte,
+   L = zwei Spalten, XL = drei Spalten. Ohne eigene Wahl: Werkzeuge mit
+   Inhalt M (die breiten L), ohne Inhalt S. Gemerkt je Gerät. */
+const GROESSE_LS = 'wb-kontor-kasten-groesse', BEREICHE_LS = 'wb-kontor-kasten-bereiche';
+const GROESSEN = ['S','M','L','XL'];
+function groessen(){ try { const o = JSON.parse(store.get(GROESSE_LS) || '{}'); return o && typeof o === 'object' ? o : {}; } catch (e) { return {}; } }
+function groesseVon(t, d){
+  const g = groessen()[basisId(t)];
+  if (GROESSEN.indexOf(g) >= 0) return g;
+  const L = LIVE[basisId(t)];
+  return d ? (L && L.breit ? 'L' : 'M') : 'S';
+}
+const nachBereichen = () => store.get(BEREICHE_LS) === '1';
+
 function kachelNeu(t){
   const L = LIVE[basisId(t)];
   let d = null; try { d = L ? L.w() : null; } catch (e) {}
-  const w = t.app;
-  t.el.classList.toggle('klein', !d);
-  t.el.classList.toggle('breit', !!(d && L.breit));
-  const html = d
+  const w = t.app, gr = groesseVon(t, d), kompakt = gr === 'S' || !d;
+  GROESSEN.forEach(x => t.el.classList.toggle('gr-' + x, x === gr));
+  t.el.classList.toggle('klein', kompakt);
+  if (t.knopf) t.knopf.textContent = gr;
+  const html = !kompakt
     ? '<div class="lw-k"><span class="lw-ic">' + (w.zeichen || '') + '</span><span class="lw-n">' + esc(w.name) + '</span>'
       + (d.punkt ? '<span class="lw-p ' + d.punkt + '"></span>' : '') + '</div>'
       + '<div class="lw-g' + (d.mono ? ' mono' : '') + (d.klein ? ' mittel' : '') + '">' + esc(d.gross) + '</div>'
       + (d.sub ? '<div class="lw-s' + (d.rot ? ' rot' : '') + '">' + esc(d.sub) + '</div>' : '') + (d.extra || '')
-    : '<span class="lw-ic">' + (w.zeichen || '') + '</span><span class="lw-kn"><b>' + esc(w.name) + '</b><small>' + esc(w.tag || '') + '</small></span>';
+    /* Kompakt: Zeichen, Name – und, wenn es Inhalt gibt, die wichtigste Zahl. */
+    : '<span class="lw-ic">' + (w.zeichen || '') + '</span><span class="lw-kn"><b>' + esc(w.name) + '</b><small>'
+      + esc(d ? (d.sub || w.tag || '') : (w.tag || '')) + '</small></span>'
+      + (d ? '<span class="lw-kz' + (d.rot ? ' rot' : '') + (d.mono ? ' mono' : '') + '">' + esc(d.gross) + '</span>'
+           + (d.punkt ? '<span class="lw-p ' + d.punkt + '"></span>' : '') : '');
   if (html !== t.html) { t.html = html; t.inner.innerHTML = html; }
   t.el.setAttribute('aria-label', w.name + (d ? ': ' + d.gross + ', ' + (d.sub || '') : '') + ' – öffnen');
 }
+function groesseSetzen(t, schritt){
+  const o = groessen(), id = basisId(t);
+  let d = null; try { d = LIVE[id] ? LIVE[id].w() : null; } catch (e) {}
+  const i = GROESSEN.indexOf(groesseVon(t, d));
+  o[id] = GROESSEN[(i + schritt + GROESSEN.length) % GROESSEN.length];
+  store.set(GROESSE_LS, JSON.stringify(o));
+  kachelNeu(t);
+  document.getElementById('ordnenReset').hidden = false;
+}
+const mauerRO = 'ResizeObserver' in window ? new ResizeObserver(es => es.forEach(e => mauern(e.target))) : null;
+function mauern(el){
+  if (!el.parentNode) return;
+  const abstand = parseFloat(getComputedStyle(el.parentNode).columnGap) || 12;
+  const h = el.getBoundingClientRect().height;
+  if (h) el.style.gridRowEnd = 'span ' + Math.max(1, Math.ceil((h + abstand) / 4));
+}
 function kastenBauen(liste, g){
   const tl = [];
-  KASTEN_BEREICH.forEach(([b, titel]) => {
-    const ws = liste.filter(w => w.bereich === b);
-    if (!ws.length) return;
-    const kopf = document.createElement('p'); kopf.className = 'lw-gr'; kopf.textContent = titel; g.appendChild(kopf);
+  if (mauerRO) mauerRO.disconnect();
+  const folge = kastenFolge();
+  const rang = w => { const i = folge.indexOf(w.id.replace(/^mein-/, '')); return i < 0 ? 1e4 + liste.indexOf(w) : i; };
+  /* Frei: eine Fläche, alle Kacheln in eigener Reihenfolge. Nach Bereichen:
+     je Bereich eine Fläche mit Überschrift, verschoben wird darin. */
+  const flaechen = nachBereichen()
+    ? KASTEN_BEREICH.map(([b, titel]) => ({ titel, ws:liste.filter(w => w.bereich === b) })).filter(f => f.ws.length)
+    : [{ titel:'', ws:liste.slice() }];
+  g.classList.toggle('frei', !nachBereichen());
+  flaechen.forEach(({ titel, ws }) => {
+    if (titel) { const kopf = document.createElement('p'); kopf.className = 'lw-gr'; kopf.textContent = titel; g.appendChild(kopf); }
     const box = document.createElement('div'); box.className = 'lw-grid'; g.appendChild(box);
-    const boxK = document.createElement('div'); boxK.className = 'lw-grid kl'; g.appendChild(boxK);
-    /* Kacheln mit Inhalt zuerst, die kleinen danach – in der Reihenfolge der Ansichten. */
-    const hatInhalt = w => { const L = LIVE[w.id.replace(/^mein-/, '')]; try { return !!(L && L.w()); } catch (e) { return false; } };
-    const folge = kastenFolge();
-    const rang = w => { const i = folge.indexOf(w.id.replace(/^mein-/, '')); return i < 0 ? 1e4 + ws.indexOf(w) : i; };
-    ws.slice().sort((a, b) => rang(a) - rang(b)).map(w => ({ w, v:hatInhalt(w) })).forEach(({ w, v }) => {
+    ws.slice().sort((a, b) => rang(a) - rang(b)).forEach(w => {
       const el = document.createElement('article');
       el.className = 'lw';
       el.tabIndex = 0; el.setAttribute('role', 'button');
       el.style.setProperty('--c', w.farbe || 'var(--teal)');
-      el.innerHTML = '<div class="lw-in"></div><span class="state" data-s="bereit"><span class="s-txt"></span></span>';
-      (v ? box : boxK).appendChild(el);
+      el.innerHTML = '<div class="lw-in"></div><button type="button" class="lw-gk" tabindex="-1" title="Größe ändern (S · M · L · XL)"></button>'
+        + '<span class="state" data-s="bereit"><span class="s-txt"></span></span>';
+      box.appendChild(el);
+      if (mauerRO) mauerRO.observe(el);
       const rahmen = document.createElement('div');
       rahmen.className = 'frame';
       rahmen.innerHTML = '<div class="vp"></div><div class="veil"><span>' + esc(w.name) + ' wird geladen …</span></div>';
       document.body.appendChild(rahmen);
-      const t = { app:w, i:tl.length, el, shot:el, inner:$('.lw-in', el), frame:rahmen, vp:$('.vp', rahmen), veil:$('.veil', rahmen),
-                  state:$('.state', el), push:document.createElement('span'), loaded:false, liste:tl };
+      const t = { app:w, i:tl.length, el, shot:el, inner:$('.lw-in', el), knopf:$('.lw-gk', el), frame:rahmen, vp:$('.vp', rahmen),
+                  veil:$('.veil', rahmen), state:$('.state', el), push:document.createElement('span'), loaded:false, liste:tl };
       tl.push(t); byId[w.id] = t;
-      kachelNeu(t);
       el.dataset.wz = w.id.replace(/^mein-/, '');
+      kachelNeu(t);
+      t.knopf.addEventListener('click', e => { e.stopPropagation(); groesseSetzen(t, 1); });
       el.addEventListener('click', () => { if (ordnen || schonGezogen) return; if (!t.frame.classList.contains('live')) open(w.id); });
       el.addEventListener('keydown', e => {
-        if (ordnen) { ordnenTaste(e, el); return; }
+        if (ordnen) {
+          if (e.key === '+' || e.key === '-') { e.preventDefault(); groesseSetzen(t, e.key === '+' ? 1 : -1); return; }
+          ordnenTaste(e, el); return;
+        }
         if ((e.key === 'Enter' || e.key === ' ') && !current) { e.preventDefault(); open(w.id); }
       });
       el.addEventListener('pointerdown', e => ziehenStart(e, el));
@@ -2506,11 +2618,19 @@ function ordnenSetzen(an){
   b.setAttribute('aria-pressed', String(an));
   b.classList.toggle('an', an);
   document.getElementById('ordnenHinweis').classList.toggle('sichtbar', an);
-  document.getElementById('ordnenReset').hidden = !an || !kastenFolge().length;
+  document.getElementById('ordnenReset').hidden = !an || (!kastenFolge().length && !Object.keys(groessen()).length);
+  const bb = document.getElementById('bereicheBtn');
+  bb.hidden = !an; bb.setAttribute('aria-pressed', String(nachBereichen())); bb.classList.toggle('an2', nachBereichen());
 }
+document.getElementById('bereicheBtn').addEventListener('click', () => {
+  store.set(BEREICHE_LS, nachBereichen() ? '0' : '1');
+  meinKacheln(LIZ || {});
+  ordnenSetzen(true);
+});
 document.getElementById('ordnenBtn').addEventListener('click', () => ordnenSetzen(!ordnen));
 document.getElementById('ordnenReset').addEventListener('click', () => {
   store.set(FOLGE_LS, '[]');
+  store.set(GROESSE_LS, '{}');
   meinKacheln(LIZ || {});
   ordnenSetzen(true);
   document.getElementById('ordnenReset').hidden = true;
@@ -2533,7 +2653,7 @@ function ordnenTaste(e, el){
 /* Ziehen: die Kachel folgt dem Zeiger, die anderen rücken nach. */
 let zug = null;
 function ziehenStart(e, el){
-  if (!ordnen || e.button > 0) return;
+  if (!ordnen || e.button > 0 || e.target.closest('.lw-gk')) return;
   e.preventDefault();
   const r0 = el.getBoundingClientRect();
   zug = { el, dx:e.clientX - r0.left, dy:e.clientY - r0.top, x0:e.clientX, y0:e.clientY, bewegt:false };
