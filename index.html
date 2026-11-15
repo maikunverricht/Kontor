@@ -2037,19 +2037,35 @@ const Dock = (function(){
 
   addEventListener('resize', () => { aufbauen(); zuSlide(active, false); });
   new MutationObserver(farbe).observe(root, { attributes:true, attributeFilter:['data-theme'] });
-  return { aufbauen, setzen, get active(){ return active; },
+  /* Ansichten ohne freigeschaltetes Werkzeug fallen weg (seit 15.11.2026).
+     Bleibt nur eine, verschwindet das Dock ganz. */
+  function entfernen(labels){
+    const alt = btns[active] ? btns[active].dataset.label : null;
+    for (let i = btns.length - 1; i >= 0; i--) {
+      if (labels.indexOf(btns[i].dataset.label) < 0) continue;
+      btns[i].remove(); btns.splice(i, 1);
+    }
+    centers.length = 0;
+    let n = btns.findIndex(b => b.dataset.label === alt); if (n < 0) n = 0;
+    dock.style.display = btns.length < 2 ? 'none' : '';
+    active = -1; setzen(n, false, true); aufbauen(); zuSlide(n, false);
+  }
+  return { aufbauen, setzen, entfernen, get active(){ return active; }, get anzahl(){ return btns.length; },
            gehe(i){ hinweisWeg(); ziel=centers[i]; setzen(i,true); feder(); } };
 })();
+/* Die gemerkte Ansicht vorher lesen – setzen(0) schreibt sie sonst gleich auf 0. */
+let ansichtGemerkt = 0;
+try { ansichtGemerkt = +localStorage.getItem(SLIDE_LS) || 0; } catch (e) {}
 Dock.aufbauen(); Dock.setzen(0,false,true);
 
 addEventListener('keydown', e => {
   if (current || e.target.closest('input,textarea,select,[contenteditable],#bead')) return;
-  if (e.key === 'ArrowRight' && Dock.active < 2) Dock.gehe(Dock.active + 1);
+  if (e.key === 'ArrowRight' && Dock.active < Dock.anzahl - 1) Dock.gehe(Dock.active + 1);
   else if (e.key === 'ArrowLeft' && Dock.active > 0) Dock.gehe(Dock.active - 1);
 });
 try {
-  const k = +localStorage.getItem(SLIDE_LS);
-  if (k > 0 && k < 3) requestAnimationFrame(() => { zuSlide(k, false); Dock.setzen(k, false, true); Dock.aufbauen(); });
+  const k = ansichtGemerkt;
+  if (k > 0 && k < Dock.anzahl) requestAnimationFrame(() => { if (k >= Dock.anzahl) return; zuSlide(k, false); Dock.setzen(k, false, true); Dock.aufbauen(); });
 } catch (e) {}
 
 /* ───────── Lizenz im Kontor (seit 15.11.2026) ─────────
@@ -2162,8 +2178,14 @@ function lizenzAnwenden(){
   if (!byId.rechnungsbuch) ausgang.remove();
   if (!tiles.length) { busEl.innerHTML = ''; busEl.classList.remove('on'); $('#offen').innerHTML = ''; }
   lzLeer(grid, 'Keine Werkzeuge freigeschaltet');
-  lzLeer($('#gridProd'), 'Keine produktiven Werkzeuge freigeschaltet');
-  lzLeer($('#gridBuero'), 'Keine Büro-Werkzeuge freigeschaltet');
+  /* Produktiv und Büro: ohne freigeschaltetes Werkzeug fällt die ganze
+     Ansicht weg, samt Punkt im Dock. Der Kontor bleibt immer. */
+  const weg = [];
+  [['#s-produktiv', '#gridProd', 'Produktiv'], ['#s-buero', '#gridBuero', 'Büro']].forEach(([sl, gr, label]) => {
+    if ($(gr + ' .tile:not(.platz)')) return;
+    $(sl).remove(); weg.push(label);
+  });
+  if (weg.length) Dock.entfernen(weg);
   root.classList.remove('lz-warten');
   staendeZeigen(); offeneWelt(); zahlenZeigen();
   if (tiles.length) { busNeu(); measure(); }
