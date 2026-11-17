@@ -922,6 +922,14 @@ html.wb-vorab .slides,html.wb-vorab .dock{visibility:hidden}
   font:500 9.5px/1 var(--mono);letter-spacing:.06em;white-space:nowrap;cursor:pointer;border:0;color:inherit}
 .vm-ltg-txt.leer{color:var(--text-3)}
 .vm-insp{max-width:880px;margin:6px auto 0}
+.vm-ext{display:none;position:absolute;left:0;transform:translateY(-50%);width:84px;padding:6px 4px;white-space:nowrap;border-radius:10px;border:1px dashed var(--line-strong,var(--line));
+  background:var(--void);color:var(--text-2);font:600 10.5px/1.25 var(--display);text-align:center;cursor:pointer;z-index:1}
+.vm-ext i{display:block;font:500 9px/1.3 var(--mono);font-style:normal;color:var(--text-3);margin-top:2px}
+.vm-ext:hover,.vm-ext[aria-pressed="true"]{border-color:var(--line-hi);color:var(--text)}
+.vm-ext-ltg{display:none}
+@media (min-width:1000px){.vm-ext{display:block}.vm-ext-ltg{display:inline}}
+.vm-lk.ext{border-style:dashed}
+.vm-karte a.knopf{display:inline-flex;align-items:center;height:30px;padding:0 13px;border-radius:100px;border:1px solid var(--line);background:var(--glass-2);color:var(--text);font:500 12.5px/1 var(--display);text-decoration:none}
 .vm-insp-wahl{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .vm-insp-wahl>span{font:600 9.5px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);margin-right:4px}
 .vm-lk{display:inline-flex;align-items:center;gap:7px;height:30px;padding:0 12px;border-radius:100px;border:1px solid var(--line);
@@ -2410,11 +2418,13 @@ function vModellBauen(){
     <div class="vm-feld">
       <svg class="vm-linien" viewBox="0 0 100 100" preserveAspectRatio="none">
         <path class="vm-arm" d="${pfad}"/>${paare}${ltg}
+        ${VM_AUSSEN.map(e => `<line class="vm-pfeil vm-ext-ltg" x1="9" y1="${p[e.ziel].y}" x2="${p[e.ziel].x - 6}" y2="${p[e.ziel].y}"/>`).join('')}
         <line class="vm-pfeil" x1="${VM_VORHER.x}" y1="${VM_VORHER.y + 9}" x2="${p[0].x}" y2="${p[0].y - 6}"/>
       </svg>
       <span class="vm-seite" style="left:2%;top:58%">festlegen ↓</span>
       <span class="vm-seite" style="right:2%;top:58%;text-align:right">↑ prüfen</span>
       ${VM_LEITUNGEN.map(l => { const z = vmLeitung(l); return `<button type="button" class="vm-ltg-txt${z.belegt ? '' : ' leer'}" data-ltg="${l.k}" style="left:${l.tx}%;top:${l.ty(p)}%;${z.belegt ? 'color:' + l.farbe : ''}">${esc(l.kurz)}</button>`; }).join('')}
+      ${VM_AUSSEN.map(e => `<button type="button" class="vm-ext" data-ltg="${e.k}" aria-pressed="${UI_VM.wahl === e.k}" style="top:${p[e.ziel].y}%" title="${esc(e.titel)}">${esc(e.kurz)}<i>MCP, geplant</i></button>`).join('')}
     </div>
     <div class="vm-insp"></div>
     <div class="vm-baender"></div>
@@ -2474,6 +2484,15 @@ const VM_LEITUNGEN = [
     ls:'wb-schaltplan-data', farbe:'var(--info)', tx:57, ty:() => 31,
     d:p => `M ${p[1].x + 5} ${p[1].y - 3} Q 58 26 ${p[6].x - 6} ${p[6].y + 3}` }
 ];
+/* Nach außen (seit 18.11.2026): Platzhalter für die MCP-Anbindung, Konzept als Doc.
+   Gestrichelt, bis Stufe 1 läuft. */
+const VM_KONZEPT = 'https://claude.ai/artifact/VXMpbbsfKBjmCV2Bpa91pC';
+const VM_AUSSEN = [
+  { k:'ext-anf', kurz:'DOORS · RQ1', titel:'DOORS · RQ1 → Anforderungsbuch', ziel:0, zu:'anforderungsbuch',
+    text:'Geplant über den MCP-Server „Anforderungen“: DOORS-Baselines (Classic oder Next) als ReqIF in den Austauschordner, Änderungsaufträge aus RQ1 als Attribut am Stand.' },
+  { k:'ext-cfg', kurz:'SDOM · GitHub', titel:'SDOM · GitHub → Schaltplan', ziel:1, zu:'schaltplan',
+    text:'Geplant über den MCP-Server „Konfiguration“: C- und PaVaSt-Dateien eines Stands aus SDOM oder Git in den Austauschordner, Funktionen in zwei Ständen für den Funktionsentwurf.' }
+];
 function vmLeitung(l){
   const d = WB.lesen(l.ls), r = WB.lesen('wb-testcasemanager-stand');
   const belegt = !!(d && ((l.k === 'anf' && d.reqs && d.reqs.length) || (l.k === 'wk' && d.comps && d.comps.length)));
@@ -2484,7 +2503,11 @@ function vmInspektor(){
   const el = $('#vModell .vm-insp'); if (!el) return;
   const chips = VM_LEITUNGEN.map(l => { const z = vmLeitung(l);
     return `<button type="button" class="vm-lk${z.belegt ? ' an' : ''}" data-ltg="${l.k}" aria-pressed="${UI_VM.wahl === l.k}"><i style="${z.belegt ? 'background:' + l.farbe : ''}"></i>${esc(l.titel)}</button>`; }).join('');
+  const aussen = VM_AUSSEN.map(e => `<button type="button" class="vm-lk ext" data-ltg="${e.k}" aria-pressed="${UI_VM.wahl === e.k}"><i></i>${esc(e.titel)}</button>`).join('');
   let karte = '';
+  const ex = VM_AUSSEN.find(x => x.k === UI_VM.wahl);
+  if (ex) karte = `<div class="vm-karte"><h3>${esc(ex.titel)}</h3><p class="sub">Noch nicht angebunden · Stufe 1 des MCP-Konzepts</p><p style="margin:0;font-size:13px">${esc(ex.text)}</p>` +
+    `<div class="knoepfe"><a class="knopf" href="${VM_KONZEPT}" target="_blank" rel="noopener">Konzept öffnen ↗</a></div></div>`;
   const l = VM_LEITUNGEN.find(x => x.k === UI_VM.wahl);
   if (l){
     const { d, r, belegt } = vmLeitung(l);
@@ -2520,7 +2543,7 @@ function vmInspektor(){
       (warn ? `<p class="sub warn" style="margin:10px 0 0">${warn}</p>` : '') +
       `<div class="knoepfe">${vmZu(l.von) ? '' : `<button type="button" data-oeffne="${l.von}">${esc(nv)} öffnen</button>`}${vmZu(l.zu) ? '' : `<button type="button" data-oeffne="${l.zu}">${esc(nz)} öffnen</button>`}</div></div>`;
   }
-  el.innerHTML = `<div class="vm-insp-wahl"><span>Leitungen</span>${chips}</div>${karte}`;
+  el.innerHTML = `<div class="vm-insp-wahl"><span>Leitungen</span>${chips}</div><div class="vm-insp-wahl" style="margin-top:6px"><span>Nach außen</span>${aussen}</div>${karte}`;
   el.querySelectorAll('[data-oeffne]').forEach(b => b.addEventListener('click', () => vmOeffnen(b.dataset.oeffne, VM_SHOT[b.dataset.oeffne] || b)));
 }
 
