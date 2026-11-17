@@ -2237,6 +2237,13 @@ addEventListener('popstate', () => {
    wie im Kontor im Vollbild auf. Die Pfeile blättern nur innerhalb
    dieser Ansicht. */
 const PRODUKTIV = [
+  { id:'anforderungsbuch', name:'Anforderungsbuch', tag:'Anforderungen', url:'https://maikunverricht.github.io/Anforderungsbuch/',
+    desc:'DOORS-Exporte als ReqIF oder Excel einlesen, Baselines vergleichen und Anforderungen prüfen.',
+    zeichen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/><path d="M10 12h5M10 15.5h5M10 19h3"/></svg>',
+    /* Zahl an der Ecke: neu oder geändert seit dem Vorstand (aus der Lesekopie). */
+    zahl:() => { const d = WB.lesen('wb-anforderungsbuch-data'); const a = d && d.aenderung; if (!a) return null;
+      const n = (+a.neu || 0) + (+a.geaendert || 0); if (!n) return null;
+      return { n, titel:n + ' neu oder geändert seit ' + ((d.vorher && d.vorher.name) || 'dem Vorstand') + (d.befunde ? ' · ' + d.befunde + ' mit Befund' : '') }; } },
   { id:'schaltplan', name:'Schaltplan', tag:'Schnittstellen', url:'https://maikunverricht.github.io/Schaltplan/',
     desc:'Imports und Exports aus C- und PaVaSt-Dateien abgleichen, Aufrufketten als Graph.',
     zeichen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="6" height="6" rx="1.5"/><rect x="15" y="15" width="6" height="6" rx="1.5"/><rect x="15" y="3" width="6" height="6" rx="1.5"/><path d="M9 6h6M18 9v6M6 9v6a3 3 0 0 0 3 3h6"/></svg>' },
@@ -2328,7 +2335,7 @@ ansichtBauen(PRIVAT, $('#gridPrivat'));
    Ein Werkzeug darf zweimal stehen (Schaltplan: Entwurf links, Abgleich rechts);
    die zweite Rolle ist gestrichelt. Geöffnet wird wie aus der Kachel. */
 const VM_STUFEN = [
-  { x:15, y:22, stufe:'SWE.1 · Anforderung', frei:'DOORS – extern' },
+  { x:15, y:22, id:'anforderungsbuch', stufe:'SWE.1 · Anforderung' },
   { x:27, y:44, id:'schaltplan',  stufe:'SWE.2 · Architektur' },
   { x:38, y:66, stufe:'SWE.3 · Feinentwurf', frei:'frei' },
   { x:50, y:86, code:true, name:'C-Code' },
@@ -2372,7 +2379,7 @@ function vModellBauen(){
       <span class="vm-trace" style="left:50%;top:${p[0].y}%">Traceability<small> · TestcaseManager</small></span>
     </div>
     <div class="vm-baender"></div>
-    <p class="vm-hinweis">Gestrichelt: Stufe ohne eigenes Werkzeug oder zweite Rolle eines Werkzeugs.
+    <p class="vm-hinweis">Gestrichelt: Stufe ohne eigenes Werkzeug (SWE.3) oder zweite Rolle eines Werkzeugs.
       Die Systemebene (SYS.1–5) liegt außerhalb dieses V.</p>`;
   const feld = $('.vm-feld', box);
   [VM_VORHER, ...p].forEach(s => {
