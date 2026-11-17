@@ -1892,8 +1892,8 @@ const ALLGEMEIN = /^wb-(theme|cockpit-theme|kontor-.+)$/i;
 function kennungVonSchluessel(k){
   if (ALLGEMEIN.test(k)) return '';
   const m = String(k).toLowerCase()
-    .match(/^(?:wb-)?(auftragsbuch|stempeluhr|auftragsstatus|terminbuch|rechnungsbuch|belegbuch|noteos)(?=$|[-_.])/);
-  return m ? m[1] : null;
+    .match(/^(?:wb-)?(auftragsbuch|stempeluhr|auftragsstatus|terminbuch|rechnungsbuch|belegbuch|noteos|auswertung|ausw)(?=$|[-_.])/);
+  return m ? (m[1] === 'ausw' ? 'auswertung' : m[1]) : null;
 }
 async function ladeErlaubnis(){
   const { p } = await lizenzLesen();
@@ -2143,6 +2143,9 @@ const PRODUKTIV = [
     zeichen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>' },
   { id:'auswertung', name:'Auswertung', tag:'Aufwand', url:'https://maikunverricht.github.io/Auswertung/',
     desc:'Issues, Workitems und gebuchten Aufwand aus Excel auswerten – Plan/Ist je Monat, Anteile, Durchlaufzeiten und Forecast.',
+    /* Zahl an der Ecke: Personen über ihrer Wochenkapazität (aus der Lesekopie). */
+    zahl:() => { const d = WB.lesen('wb-auswertung-stand'); const f = d && d.forecast; const n = f ? +f.ueberlastet || 0 : 0;
+      return n ? { n, rot:true, titel:n + (n === 1 ? ' Person' : ' Personen') + ' über Wochenkapazität · ' + (+f.offen || 0) + ' offene Workitems' } : null; },
     zeichen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20h18"/><path d="M6 16v-5M10 16V7M14 16v-3M18 16V9"/><path d="M5 6.5l4-2.5 4 3 6-4"/></svg>' },
   { id:'ideahub', name:'IdeaHub', tag:'Ideen', url:'https://maikunverricht.github.io/IdeaHub/',
     desc:'Ideen sammeln und ordnen – als Karte oder als Baum.',
@@ -2477,6 +2480,28 @@ const LIVE = {
           : '<div class="lw-s">Keine offenen Workitems.</div>');
     }
     return { gross:(+w0.pct || 0) + ' %', sub:wer, rot:(+w0.pct || 0) > 100, extra:bars + liste };
+  }},
+  /* Seit 17.11.2026: Auswertung (Issues, Workitems, Buchungen). Liest die
+     Lesekopie, die die Auswertung nach jedem Einlesen schreibt – ohne Filter,
+     nie aus Beispieldaten. Balken: offener Workitem-Aufwand gegen eine Woche. */
+  auswertung: { breit:true, w(){
+    const d = lsJson('wb-auswertung-stand');
+    const f = d && d.forecast;
+    if (!f) return null;
+    const ue = +f.ueberlastet || 0, n = +f.n || 0;
+    const pers = (Array.isArray(f.personen) ? f.personen : []).filter(x => x && +x.cap > 0).slice(0, 4);
+    const balken = pers.length ? '<div class="lw-pb">' + pers.map(x => {
+        const pc = (+x.h || 0) / (+x.cap) * 100;
+        return '<span>' + esc(x.a) + (x.abt ? ' · ' + esc(x.abt) : '') + '</span><small>' + nf1.format(+x.h || 0) + ' h</small>'
+          + '<em class="' + (pc > 100 ? 'rot' : pc >= 85 ? 'warn' : '') + '" style="--p:' + Math.min(100, pc) + '%"></em>';
+      }).join('') + '</div>' : '';
+    const fuss = [];
+    if (d.issues && +d.issues.plan > 0) fuss.push('Issues ' + d.jahr + ' · Ist/Plan ' + Math.round(+d.issues.book / +d.issues.plan * 100) + ' %');
+    if (d.lead && d.lead.med != null) fuss.push('Durchlauf Median ' + nf1.format(+d.lead.med) + ' d');
+    if (+f.ueberfaellig) fuss.push(mz(+f.ueberfaellig, 'überfällig', 'überfällig'));
+    return { gross:mz(+f.offen || 0, 'offenes Workitem', 'offene Workitems'), klein:true, rot:ue > 0,
+      sub:nf1.format(+f.h || 0) + ' h offen · ' + (ue ? ue + ' von ' + n + ' über Wochenkapazität' : 'alle in der Wochenkapazität'),
+      extra:balken + (fuss.length ? '<span class="lw-fuss">' + esc(fuss.join(' · ')) + '</span>' : '') };
   }},
   codecompare: { w(){
     const d = lsJson('wb-codecompare-stand');
@@ -3018,7 +3043,7 @@ function zahlenZeigen(){
 }
 zahlenZeigen();
 WB.horchen(null, zahlenZeigen);
-addEventListener('storage', e => { if (!e.key || e.key === WB_NOTES_LS || e.key.startsWith('wb-belegbuch-')) { zahlenZeigen(); staendeZeigen(); offeneWelt(); } });
+addEventListener('storage', e => { if (!e.key || e.key === WB_NOTES_LS || e.key === 'wb-auswertung-stand' || e.key.startsWith('wb-belegbuch-')) { zahlenZeigen(); staendeZeigen(); offeneWelt(); } });
 addEventListener('visibilitychange', () => { if (!document.hidden) zahlenZeigen(); });
 
 const slidesEl = $('#slides');
