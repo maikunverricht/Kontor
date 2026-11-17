@@ -2281,6 +2281,12 @@ const PRODUKTIV = [
     zahl:() => { const d = WB.lesen('wb-anforderungsbuch-data'); const a = d && d.aenderung; if (!a) return null;
       const n = (+a.neu || 0) + (+a.geaendert || 0); if (!n) return null;
       return { n, titel:n + ' neu oder geändert seit ' + ((d.vorher && d.vorher.name) || 'dem Vorstand') + (d.befunde ? ' · ' + d.befunde + ' mit Befund' : '') }; } },
+  { id:'funktionsentwurf', name:'Funktionsentwurf', tag:'Feinentwurf', url:'https://maikunverricht.github.io/Funktionsentwurf/',
+    desc:'Funktionen in C und PaVaSt anpassen, die Änderung als Blockschaltbild zeigen.',
+    zeichen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="9" width="5" height="6" rx="1.5"/><rect x="16.5" y="9" width="5" height="6" rx="1.5"/><path d="M10 7l4 5-4 5z"/><path d="M7.5 12H10M14 12h2.5"/></svg>',
+    /* Zahl an der Ecke: geänderte Funktionen (aus der Lesekopie). */
+    zahl:() => { const d = WB.lesen('wb-funktionsentwurf-stand'); const n = d && Array.isArray(d.geaendert) ? d.geaendert.length : 0;
+      return n ? { n, titel:n + (n === 1 ? ' Funktion' : ' Funktionen') + ' geändert gegenüber dem Original' } : null; } },
   { id:'schaltplan', name:'Schaltplan', tag:'Schnittstellen', url:'https://maikunverricht.github.io/Schaltplan/',
     desc:'Imports und Exports aus C- und PaVaSt-Dateien abgleichen, Aufrufketten als Graph.',
     zeichen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="6" height="6" rx="1.5"/><rect x="15" y="15" width="6" height="6" rx="1.5"/><rect x="15" y="3" width="6" height="6" rx="1.5"/><path d="M9 6h6M18 9v6M6 9v6a3 3 0 0 0 3 3h6"/></svg>' },
@@ -2374,7 +2380,7 @@ ansichtBauen(PRIVAT, $('#gridPrivat'));
 const VM_STUFEN = [
   { x:15, y:22, id:'anforderungsbuch', stufe:'SWE.1 · Anforderung' },
   { x:27, y:44, id:'schaltplan',  stufe:'SWE.2 · Architektur', tab:'arch' },
-  { x:38, y:66, id:'schaltplan',  stufe:'SWE.3 · Feinentwurf', zweit:true, tab:'fn' },
+  { x:38, y:66, id:'funktionsentwurf', stufe:'SWE.3 · Feinentwurf' },
   { x:50, y:86, code:true, name:'C-Code' },
   { x:62, y:66, id:'codecompare', stufe:'SWE.4 · Unit' },
   { x:73, y:44, id:'schaltplan',  stufe:'SWE.5 · Integration', zweit:true, tab:'if' },
@@ -2428,7 +2434,7 @@ function vModellBauen(){
     </div>
     <div class="vm-insp"></div>
     <div class="vm-baender"></div>
-    <p class="vm-hinweis">Gestrichelt: zweite und dritte Rolle des Schaltplans – Integration (SWE.5) und Funktionen (SWE.3).
+    <p class="vm-hinweis">Gestrichelt: zweite Rolle des Schaltplans – Integration (SWE.5).
       Die Systemebene (SYS.1–5) liegt außerhalb dieses V.</p>`;
   const feld = $('.vm-feld', box);
   [VM_VORHER, ...p].forEach(s => {
