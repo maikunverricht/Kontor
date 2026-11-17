@@ -932,8 +932,8 @@ html.wb-vorab .slides,html.wb-vorab .dock{visibility:hidden}
 .vm-karte{margin-top:8px;padding:14px 16px;border-radius:16px;border:1px solid var(--line-hi);background:var(--glass)}
 .vm-karte h3{font-size:14.5px;margin:0 0 2px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .vm-karte .sub{font-size:12px;color:var(--text-3);margin:0 0 10px}
-.vm-karte dl{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:0}
-.vm-karte dl div{background:var(--glass-2);padding:8px 10px}
+.vm-karte dl{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:0;background:var(--glass-2);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:0}
+.vm-karte dl div{padding:8px 10px;box-shadow:inset -1px -1px 0 var(--line)}
 .vm-karte dt{font:500 9.5px/1.3 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--text-3)}
 .vm-karte dd{margin:2px 0 0;font-size:13px}
 .vm-karte .warn{color:var(--amber)}
@@ -2365,11 +2365,11 @@ ansichtBauen(PRIVAT, $('#gridPrivat'));
    die zweite Rolle ist gestrichelt. Geöffnet wird wie aus der Kachel. */
 const VM_STUFEN = [
   { x:15, y:22, id:'anforderungsbuch', stufe:'SWE.1 · Anforderung' },
-  { x:27, y:44, id:'schaltplan',  stufe:'SWE.2 · Architektur' },
-  { x:38, y:66, stufe:'SWE.3 · Feinentwurf', frei:'frei' },
+  { x:27, y:44, id:'schaltplan',  stufe:'SWE.2 · Architektur', tab:'arch' },
+  { x:38, y:66, id:'schaltplan',  stufe:'SWE.3 · Feinentwurf', zweit:true, tab:'fn' },
   { x:50, y:86, code:true, name:'C-Code' },
   { x:62, y:66, id:'codecompare', stufe:'SWE.4 · Unit' },
-  { x:73, y:44, id:'schaltplan',  stufe:'SWE.5 · Integration', zweit:true },
+  { x:73, y:44, id:'schaltplan',  stufe:'SWE.5 · Integration', zweit:true, tab:'if' },
   { x:85, y:22, id:'testcasemanager', stufe:'SWE.6 · Qualifikation' }
 ];
 const VM_VORHER = { x:15, y:3, id:'ideahub', stufe:'Konzept · Idee' };
@@ -2389,7 +2389,13 @@ const vmZahl = (fn, shot) => {
   el.title = z.titel || ''; el.setAttribute('aria-label', z.titel || String(z.n));
   shot.appendChild(el);
 };
-const vmOeffnen = (id, shot) => { const t = byId[id]; if (!t || current) return; t.vShot = shot; open(id); };
+/* tab: Reiter im Werkzeug (Schaltplan: arch, if, fn). Vor dem ersten Laden über ap-tab,
+   danach direkt im Rahmen – dieselbe Herkunft. */
+const vmOeffnen = (id, shot, tab) => { const t = byId[id]; if (!t || current) return; t.vShot = shot;
+  if (tab) { try { localStorage.setItem('ap-tab', tab); } catch (e) {}
+    const f = t.loaded && t.vp && t.vp.querySelector('iframe');
+    if (f) { try { f.contentWindow.openTab(tab); } catch (e) {} } }
+  open(id); };
 
 function vModellBauen(){
   const box = $('#vModell'); if (!box) return;
@@ -2412,7 +2418,7 @@ function vModellBauen(){
     </div>
     <div class="vm-insp"></div>
     <div class="vm-baender"></div>
-    <p class="vm-hinweis">Gestrichelt: Stufe ohne eigenes Werkzeug (SWE.3) oder zweite Rolle eines Werkzeugs.
+    <p class="vm-hinweis">Gestrichelt: zweite und dritte Rolle des Schaltplans – Integration (SWE.5) und Funktionen (SWE.3).
       Die Systemebene (SYS.1–5) liegt außerhalb dieses V.</p>`;
   const feld = $('.vm-feld', box);
   [VM_VORHER, ...p].forEach(s => {
@@ -2430,7 +2436,7 @@ function vModellBauen(){
     if (w && !s.zweit) VM_SHOT[w.id] = shot;
     if (w && !zu) {
       if (w.zahl && !s.zweit) vmZahl(w.zahl, shot);
-      k.addEventListener('click', () => vmOeffnen(w.id, shot));
+      k.addEventListener('click', () => vmOeffnen(w.id, shot, s.tab));
     }
     feld.appendChild(k);
   });
