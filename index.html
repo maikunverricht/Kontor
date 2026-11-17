@@ -498,6 +498,32 @@ a.tile{color:inherit;text-decoration:none}
 /* Mein Werkzeugkasten (12.11.2026): nur, was die Lizenz auf diesem Gerät freischaltet. */
 .mein-info{margin:8px 0 0;font-family:var(--mono);font-size:11.5px;letter-spacing:.04em;color:var(--text-3);line-height:1.5}
 .mein-info b{color:var(--text-2);font-weight:500}
+.liz-kopf{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin:0 0 12px}
+.liz-kopf b{font-size:15px}
+.liz-kopf .liz-stat{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:2px 9px;border-radius:100px;border:1px solid currentColor}
+.liz-stat.ok{color:var(--teal)}.liz-stat.nein{color:var(--text-3)}.liz-stat.rot{color:var(--red-ink,#E8646E)}
+.liz-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin:14px 0 4px}
+.liz-wz{position:relative;display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:12px;border:1px solid var(--line);background:var(--glass);min-width:0}
+.liz-wz .shot{width:32px;height:32px;border-radius:10px;flex:none;display:grid;place-items:center;color:var(--sc,var(--text-2));
+  border:1px solid color-mix(in srgb,var(--sc,var(--text-3)) 32%,transparent);background:color-mix(in srgb,var(--sc,var(--text-3)) 12%,transparent)}
+.liz-wz .shot svg{width:17px;height:17px}
+.liz-wz span{min-width:0;display:flex;flex-direction:column;line-height:1.25}
+.liz-wz b{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.liz-wz small{font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--text-3)}
+.liz-wz i{position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font:700 11px/1 var(--mono);font-style:normal;box-shadow:0 0 0 2px var(--void)}
+.liz-wz.liz-ja i{background:var(--teal);color:#0A0F16}
+.liz-wz.liz-nein{opacity:.62}.liz-wz.liz-nein .shot{--sc:var(--text-3)!important}
+.liz-wz.liz-nein i{background:var(--glass-2);color:var(--text-3);border:1px dashed var(--text-3)}
+.liz-legende{display:flex;gap:16px;flex-wrap:wrap;font-family:var(--mono);font-size:11px;color:var(--text-3);margin:6px 0 0}
+.liz-ein{margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+.liz-ein label{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--text-3);margin-bottom:6px}
+.liz-ein textarea{width:100%;min-height:74px;resize:vertical;border-radius:12px;border:1px solid var(--line);background:var(--void);color:var(--text);
+  padding:10px 12px;font:12px/1.5 var(--mono);box-sizing:border-box}
+.liz-ein textarea:focus{outline:2px solid var(--amber);outline-offset:1px}
+.sheet footer{padding-bottom:13px!important}
+.liz-msg{min-height:20px;margin:8px 0 0;font-size:13px}
+.liz-msg.ok{color:var(--teal)}.liz-msg.rot{color:var(--red-ink,#E8646E)}
+.mein-leer .pill{margin-top:12px}
 .mein-leer{grid-column:1/-1;margin:0;padding:22px 18px;border:1px dashed var(--line);border-radius:15px;
   text-align:center;color:var(--text-3);font-size:14px;line-height:1.55}
 .tile.nurlesen .shot{opacity:.55}
@@ -845,6 +871,9 @@ html.wb-vorab .slides,html.wb-vorab .dock{visibility:hidden}
     <div class="nav-r">
       <span class="clock" id="clock"></span>
       <a class="pill hide-sm" href="https://maikunverricht.github.io/WerkbankUnverricht/">Werkbank ↗</a>
+      <button class="pill" id="lizBtn" type="button" title="Lizenz: freigeschaltete Werkzeuge, Schlüssel eintragen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="M10.8 12.2 20 3M16 7l3 3M14 9l2 2"/></svg>
+        <span class="hide-sm">Lizenz</span></button>
       <button class="pill" id="alleSichern" type="button" title="Bestände aller Werkzeuge als eine JSON-Datei sichern">Sichern ↓</button>
       <button class="pill" id="alleLaden" type="button" title="Sicherung (JSON) einspielen">Laden ↑</button>
       <input type="file" id="ladeDatei" accept=".json,application/json" hidden>
@@ -954,6 +983,15 @@ html.wb-vorab .slides,html.wb-vorab .dock{visibility:hidden}
   <span><a href="https://maikunverricht.github.io/WerkbankUnverricht/">Werkbank</a></span>
 </footer>
 
+<dialog class="bus-dlg" id="dlgLiz" aria-labelledby="lizTitel"><div class="sheet">
+  <header><h3 id="lizTitel">Lizenz</h3>
+    <button class="pill icon-btn" type="button" id="lizZu" aria-label="Schließen">✕</button></header>
+  <div class="body" id="lizBody"></div>
+  <footer>
+    <button class="pill" type="button" id="lizWeg" style="display:none">Schlüssel entfernen</button>
+    <button class="pill primary" type="button" id="lizOk">Prüfen und übernehmen</button>
+  </footer>
+</div></dialog>
 <dialog class="bus-dlg" id="dlgBus"><div class="sheet">
   <header><h3 id="busTitel">Datenfluss</h3>
     <button class="pill icon-btn" type="button" id="busZu" aria-label="Schließen">✕</button></header>
@@ -2238,8 +2276,9 @@ const KATALOG = [].concat(
 const b64u = s => { s = String(s).replace(/-/g,'+').replace(/_/g,'/'); while (s.length % 4) s += '=';
   return Uint8Array.from(atob(s), c => c.charCodeAt(0)); };
 const tagDe = iso => iso ? String(iso).split('-').reverse().join('.') : '';
-async function lizenzLesen(){
-  const roh = store.get(LIZ_LS);
+async function lizenzLesen(){ return lizenzPruefen(store.get(LIZ_LS)); }
+/* Prüft einen Schlüssel (auch einen Freischalt-Link mit #lizenz=…), ohne ihn abzulegen. */
+async function lizenzPruefen(roh){
   if (!roh) return { grund:'keine' };
   try {
     const m = String(roh).replace(/\s+/g,'').match(/WB1\.([A-Za-z0-9\-_]+)\.([A-Za-z0-9\-_]+)/);
@@ -2267,7 +2306,90 @@ function lizenzIds(p){
 async function meinBauen(){
   LIZ = await lizenzLesen();
   try { meinKacheln(LIZ); } finally { ansichtenAnwenden(); }
+  if ($('#dlgLiz').open) lizenzSeiteFuellen();
 }
+
+/* ───────── Lizenz-Seite ─────────
+   Seit 17.11.2026. Zeigt jedes Werkzeug als kleines Zeichen – Haken, wenn die
+   Lizenz es freischaltet, sonst offen – und nimmt einen Schlüssel an, auch ohne
+   Lizenz. Geprüft wird wie überall offline gegen den Prüfschlüssel; abgelegt
+   wird erst ein gültiger Schlüssel (wb-lizenz), dann ziehen alle Werkzeuge
+   dieser Herkunft mit. */
+const LIZ_ZEICHEN = SVG('<circle cx="8" cy="15" r="4"/><path d="M10.8 12.2 20 3M16 7l3 3M14 9l2 2"/>');
+const LIZ_GRUND = { keine:'Auf diesem Gerät liegt keine Lizenz.', format:'Das ist kein Lizenzschlüssel – er beginnt mit „WB1.“.',
+  signatur:'Der Schlüssel ist nicht von der Lizenzstelle signiert.', ungueltig:'Der Schlüssel lässt sich nicht lesen.' };
+function lizenzSeiteFuellen(){
+  const p = LIZ && LIZ.p, frei = lizenzIds(p);
+  const heute = isoTag(Date.now());
+  const vorbei = !!(p && p.b && heute > p.b), nurLesen = vorbei && p.m === 'miete';
+  const zeile = (k, v) => '<div><dt>' + k + '</dt><dd>' + v + '</dd></div>';
+  /* Jedes Werkzeug einmal – das Belegbuch steht für Firma und Privat getrennt. */
+  const gesehen = new Set();
+  const wz = KATALOG.filter(w => !gesehen.has(w.id) && gesehen.add(w.id));
+  const hat = w => !!(frei && (frei.alle || frei.ids.has(w.id)));
+  const nFrei = wz.filter(hat).length;
+  let kopf;
+  if (p) {
+    kopf = '<div class="liz-kopf"><b>' + esc(p.n || p.id || 'Lizenz') + '</b><span class="liz-stat ' + (nurLesen ? 'rot' : 'ok') + '">'
+      + (nurLesen ? 'abgelaufen · nur lesen' : 'gültig') + '</span></div>'
+      + '<dl class="kv">' + zeile('Lizenz', esc(p.id || '–'))
+      + zeile(p.m === 'miete' ? 'Miete' : 'Kauf', p.m === 'miete'
+          ? (p.b ? (vorbei ? 'abgelaufen am ' : 'bis ') + tagDe(p.b) : 'unbefristet')
+          : (p.b ? 'Wartung bis ' + tagDe(p.b) : 'ohne Wartungsende'))
+      + zeile('Umfang', frei.alle ? 'alle Werkzeuge' : nFrei + ' von ' + wz.length + ' Werkzeugen')
+      + (p.a ? zeile('Ausgestellt', tagDe(p.a)) : '') + '</dl>';
+  } else {
+    kopf = '<div class="liz-kopf"><b>Keine gültige Lizenz</b><span class="liz-stat nein">offen</span></div>'
+      + '<p class="hinweis" style="margin:0">' + esc(LIZ_GRUND[(LIZ && LIZ.grund) || 'keine'] || LIZ_GRUND.keine)
+      + ' Ohne Lizenz bleiben die Ansichten leer; vorhandene Bestände sind in den Werkzeugen weiter lesbar.</p>';
+  }
+  const kachel = w => '<div class="liz-wz ' + (hat(w) ? 'liz-ja' : 'liz-nein') + '" title="' + esc(w.name) + (hat(w) ? ' – freigeschaltet' : ' – nicht in der Lizenz') + '">'
+    + '<span class="shot" style="--sc:' + (w.farbe || 'var(--teal)') + '">' + (w.zeichen || LIZ_ZEICHEN) + '</span>'
+    + '<span><b>' + esc(w.name) + (w.id === 'belegbuch-privat' ? ' · Privat' : '') + '</b><small>' + (hat(w) ? 'freigeschaltet' : 'offen') + '</small></span>'
+    + '<i aria-hidden="true">' + (hat(w) ? '✓' : '') + '</i></div>';
+  $('#lizBody').innerHTML = kopf
+    + '<div class="liz-grid">' + wz.map(kachel).join('') + '</div>'
+    + '<div class="liz-legende"><span>✓ freigeschaltet · ' + nFrei + '</span><span>○ offen · ' + (wz.length - nFrei) + '</span></div>'
+    + '<div class="liz-ein"><label for="lizText">' + (p ? 'Anderen Schlüssel eintragen' : 'Schlüssel eintragen') + '</label>'
+    + '<textarea id="lizText" spellcheck="false" autocomplete="off" placeholder="WB1.… – oder den Freischalt-Link einfügen"></textarea>'
+    + '<p class="liz-msg" id="lizMsg" role="status"></p>'
+    + '<p class="hinweis" style="margin:4px 0 0">Der Schlüssel liegt nur auf diesem Gerät und gilt für alle Werkzeuge der Werkbank. Geprüft wird ohne Netz.</p></div>';
+  $('#lizWeg').style.display = store.get(LIZ_LS) ? '' : 'none';
+  $('#lizWeg').textContent = 'Schlüssel entfernen'; $('#lizWeg').dataset.sicher = '';
+}
+function lizenzSeite(){
+  lizenzSeiteFuellen();
+  if (!$('#dlgLiz').open) $('#dlgLiz').showModal();
+  setTimeout(() => { const t = $('#lizText'); if (t && !(LIZ && LIZ.p)) t.focus(); }, 60);
+}
+async function lizenzUebernehmen(){
+  const t = $('#lizText'), msg = $('#lizMsg'), roh = (t && t.value || '').trim();
+  const sag = (txt, art) => { msg.textContent = txt; msg.className = 'liz-msg ' + (art || ''); };
+  if (!roh) { sag('Bitte den Schlüssel einfügen.', 'rot'); t && t.focus(); return; }
+  const m = roh.replace(/\s+/g, '').match(/WB1\.[A-Za-z0-9\-_]+\.[A-Za-z0-9\-_]+/);
+  const r = await lizenzPruefen(m ? m[0] : roh);
+  if (!r.p) { sag(LIZ_GRUND[r.grund] || 'Der Schlüssel ist ungültig.', 'rot'); return; }
+  store.set(LIZ_LS, m[0]);
+  try { WB.melden('lizenz'); } catch (e) {}
+  await meinBauen();
+  const n = r.p.w.indexOf('*') >= 0 ? 'alle Werkzeuge' : mz(r.p.w.length, 'Werkzeug', 'Werkzeuge');
+  lizenzSeiteFuellen();
+  const m2 = $('#lizMsg'); m2.textContent = 'Übernommen – ' + n + ' freigeschaltet.'; m2.className = 'liz-msg ok';
+}
+$('#lizBtn').addEventListener('click', lizenzSeite);
+$('#lizZu').addEventListener('click', () => $('#dlgLiz').close());
+$('#lizOk').addEventListener('click', lizenzUebernehmen);
+$('#dlgLiz').addEventListener('click', e => { if (e.target === e.currentTarget) e.currentTarget.close(); });
+$('#dlgLiz').addEventListener('keydown', e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); lizenzUebernehmen(); } });
+$('#lizWeg').addEventListener('click', async () => {
+  const b = $('#lizWeg');
+  if (!b.dataset.sicher) { b.dataset.sicher = '1'; b.textContent = 'Wirklich entfernen?'; return; }
+  try { localStorage.removeItem(LIZ_LS); } catch (e) {}
+  try { WB.melden('lizenz'); } catch (e) {}
+  await meinBauen(); lizenzSeiteFuellen();
+  const m = $('#lizMsg'); m.textContent = 'Schlüssel entfernt.'; m.className = 'liz-msg';
+});
+document.addEventListener('click', e => { if (e.target.closest('[data-liz]')) lizenzSeite(); });
 function meinKacheln({ p, grund }){
   /* Unter einem offenen Werkzeug wird nicht umgebaut – beim Schließen holt es nach. */
   if (current && current.app.id.startsWith('mein-')) { meinNachholen = true; return; }
@@ -2279,8 +2401,9 @@ function meinKacheln({ p, grund }){
   if (!p) {
     info.textContent = '';
     g.innerHTML = '<p class="mein-leer">' + (grund === 'keine'
-      ? 'Auf diesem Gerät liegt noch keine Lizenz. Öffne ein Werkzeug und tippe auf „Freischalten“ – danach steht es hier.'
-      : 'Die hinterlegte Lizenz lässt sich nicht prüfen. Füge den Schlüssel in einem Werkzeug neu ein.') + '</p>';
+      ? 'Auf diesem Gerät liegt noch keine Lizenz. Trag den Schlüssel hier ein – oder tippe in einem Werkzeug auf „Freischalten“.'
+      : 'Die hinterlegte Lizenz lässt sich nicht prüfen. Trag den Schlüssel neu ein.')
+      + '<br><button type="button" class="pill primary" data-liz>Lizenz eintragen</button></p>';
     meinTiles = [];
     return;
   }
@@ -2561,7 +2684,7 @@ const KOMBI = [
     aktion(){ const b = document.getElementById('alleSichern'); if (b) b.click(); } },
   { id:'x-lizenz', name:'Lizenz', tag:'Laufzeit', braucht:[],
     farbe:'var(--text-2)', zeichen:SVG('<circle cx="8" cy="15" r="4"/><path d="M10.8 12.2 20 3M16 7l3 3M14 9l2 2"/>'),
-    aktion(){ const b = document.querySelector('.mein-i-btn'); if (b) b.click(); } },
+    aktion(){ lizenzSeite(); } },
   { id:'x-ust', name:'Umsatzsteuer', tag:'laufendes Quartal', braucht:['rechnungsbuch'], ziel:'rechnungsbuch',
     farbe:'var(--geld)', zeichen:SVG('<path d="M18.5 5.5l-13 13"/><circle cx="7" cy="7" r="2.5"/><circle cx="17" cy="17" r="2.5"/>') },
   { id:'x-woche', name:'Wochenbilanz', tag:'Stunden gegen Ziel', braucht:['stempeluhr'], ziel:'stempeluhr',
