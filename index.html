@@ -2375,7 +2375,7 @@ ansichtBauen(PRIVAT, $('#gridPrivat'));
 /* ───────── Produktiv als V-Modell (17.11.2026) ─────────
    Dieselben Werkzeuge wie die Kacheln, nur nach ihrer Rolle im V gestellt.
    Lage in Prozent des Felds; Linien im selben Raster (viewBox 100 × 100).
-   Ein Werkzeug darf zweimal stehen (Schaltplan: Entwurf links, Abgleich rechts);
+   Ein Werkzeug darf zweimal stehen (TestcaseManager: Integrationstest SWE.5, Qualifikation SWE.6);
    die zweite Rolle ist gestrichelt. Geöffnet wird wie aus der Kachel. */
 const VM_STUFEN = [
   { x:15, y:22, id:'anforderungsbuch', stufe:'SWE.1 · Anforderung' },
@@ -2383,7 +2383,7 @@ const VM_STUFEN = [
   { x:38, y:66, id:'funktionsentwurf', stufe:'SWE.3 · Feinentwurf' },
   { x:50, y:86, code:true, name:'C-Code' },
   { x:62, y:66, id:'codecompare', stufe:'SWE.4 · Unit' },
-  { x:73, y:44, id:'schaltplan',  stufe:'SWE.5 · Integration', zweit:true, tab:'if' },
+  { x:73, y:44, id:'testcasemanager', stufe:'SWE.5 · Integrationstest', zweit:true },
   { x:85, y:22, id:'testcasemanager', stufe:'SWE.6 · Qualifikation' }
 ];
 const VM_VORHER = { x:15, y:3, id:'ideahub', stufe:'Konzept · Idee' };
@@ -2434,7 +2434,7 @@ function vModellBauen(){
     </div>
     <div class="vm-insp"></div>
     <div class="vm-baender"></div>
-    <p class="vm-hinweis">Gestrichelt: zweite Rolle des Schaltplans – Integration (SWE.5).
+    <p class="vm-hinweis">Gestrichelt: zweite Rolle des TestcaseManagers – Integrationstest gegen die Cluster (L3) aus der Wirkkette (SWE.5).
       Die Systemebene (SYS.1–5) liegt außerhalb dieses V.</p>`;
   const feld = $('.vm-feld', box);
   [VM_VORHER, ...p].forEach(s => {
@@ -2487,8 +2487,8 @@ const VM_LEITUNGEN = [
     ls:'wb-anforderungsbuch-data', farbe:'var(--teal)', tx:50, ty:p => p[0].y,
     d:p => `M ${p[0].x + 6} ${p[0].y} L ${p[6].x - 6} ${p[6].y}` },
   { k:'wk', titel:'Wirkkette → TestcaseManager', kurz:'Wirkkette', von:'schaltplan', zu:'testcasemanager',
-    ls:'wb-schaltplan-data', farbe:'var(--info)', tx:57, ty:() => 31,
-    d:p => `M ${p[1].x + 5} ${p[1].y - 3} Q 58 26 ${p[6].x - 6} ${p[6].y + 3}` }
+    ls:'wb-schaltplan-data', farbe:'var(--info)', tx:50, ty:p => p[1].y - 3,
+    d:p => `M ${p[1].x + 6} ${p[1].y} L ${p[5].x - 6} ${p[5].y}` }
 ];
 /* Nach außen (seit 18.11.2026): Platzhalter für die MCP-Anbindung, Konzept als Doc.
    Gestrichelt, bis Stufe 1 läuft. */
