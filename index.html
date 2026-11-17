@@ -860,6 +860,68 @@ html.wb-vorab .slides,html.wb-vorab .dock{visibility:hidden}
   #grid .a-nm{font-size:11.5px}
   #grid .a-wo{display:none}
 }
+
+/* ═══ Produktiv als V-Modell (17.11.2026) ═══
+   Zweite Ansicht im Reiter Produktiv: die Werkzeuge an ihrer Stelle im V
+   (Software-Ebene, angelehnt an ASPICE SWE.1–6). Links festlegen, rechts prüfen,
+   waagerecht die Paare. Stufen ohne Werkzeug stehen gestrichelt als „frei“.
+   Darunter, außerhalb des V: Projektführung und was alle Phasen begleitet. */
+.pv-wahl{display:inline-flex;gap:6px;margin-top:12px}
+.pv-wahl .lw-knopf{height:28px;font-size:12.5px}
+#s-produktiv.v-an #gridProd{display:none}
+#vModell{display:none;padding:10px 0 130px}
+#s-produktiv.v-an #vModell{display:block}
+.vm-feld{position:relative;width:100%;max-width:880px;margin:0 auto;height:clamp(430px,50vw,500px)}
+.vm-feld svg.vm-linien{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+.vm-arm{fill:none;stroke:var(--line-hi);stroke-width:2;vector-effect:non-scaling-stroke;stroke-linecap:round;stroke-linejoin:round}
+.vm-paar{stroke:var(--line);stroke-width:1.4;stroke-dasharray:3 5;vector-effect:non-scaling-stroke}
+.vm-paar.trace{stroke:color-mix(in srgb,var(--teal) 55%,transparent);stroke-dasharray:none}
+.vm-pfeil{fill:none;stroke:var(--text-3);stroke-width:1.4;stroke-dasharray:2 4;vector-effect:non-scaling-stroke}
+.vm-seite{position:absolute;top:0;font:600 9.5px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--text-3)}
+.vm-trace small{font-size:inherit}
+.vm-trace{position:absolute;transform:translate(-50%,-150%);background:var(--void);padding:1px 6px;border-radius:6px;font:500 9.5px/1 var(--mono);letter-spacing:.06em;color:var(--teal);white-space:nowrap}
+.vm-k{position:absolute;transform:translate(-50%,-23px);width:104px;z-index:1;display:flex;flex-direction:column;align-items:center;gap:5px;
+  padding:0;border:0;background:none;text-align:center;cursor:pointer;color:var(--text)}
+.vm-k .shot{width:46px;height:46px;border-radius:14px;--sc:var(--teal);box-shadow:var(--shadow);background-color:var(--glass-2);
+  transition:transform var(--t-s) ease,border-color var(--t-s) ease}
+.vm-k .shot svg{width:22px;height:22px}
+.vm-k:hover .shot,.vm-k:focus-visible .shot{transform:translateY(-2px);border-color:var(--teal)}
+.vm-k:focus-visible{outline:none}
+.vm-k b,.vm-k i{background:var(--void);border-radius:6px;padding:1px 5px}
+.vm-k b{font-size:12.5px;font-weight:600;line-height:1.15}
+.vm-k i{font:500 9px/1.25 var(--mono);font-style:normal;color:var(--text-3);letter-spacing:.03em}
+.vm-k.zweit .shot{background:var(--void);border-style:dashed;box-shadow:none}
+.vm-k.zweit b{color:var(--text-2);font-weight:500}
+.vm-k.frei,.vm-k.zu{cursor:default}
+.vm-k.zu{opacity:.38}
+.vm-k.zu:hover .shot{transform:none}
+.vm-k.frei .shot{--sc:var(--text-3);border-style:dashed;background:var(--void);box-shadow:none;cursor:default}
+.vm-k.frei b{color:var(--text-3);font-weight:500}
+.vm-k.frei:hover .shot{transform:none;border-color:color-mix(in srgb,var(--text-3) 32%,transparent)}
+.vm-k.code{transform:translate(-50%,-15px)}
+.vm-k.code .shot{background-color:var(--void);width:30px;height:30px;border-radius:50%;--sc:var(--amber);box-shadow:none;cursor:default}
+.vm-k.code{cursor:default}
+.vm-k.code:hover .shot{transform:none}
+.vm-baender{max-width:880px;margin:10px auto 0;display:grid;gap:10px}
+.vm-band{display:flex;align-items:center;flex-wrap:wrap;gap:8px 10px;padding:10px 12px;border:1px solid var(--line);border-radius:15px;background:var(--glass)}
+.vm-band>span{font:600 9.5px/1.3 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);min-width:118px}
+.vm-chip{display:inline-flex;align-items:center;gap:8px;height:34px;padding:0 12px 0 5px;border-radius:100px;border:1px solid var(--line);
+  background:var(--glass-2);cursor:pointer;color:var(--text);font-size:12.5px}
+.vm-chip:hover,.vm-chip:focus-visible{border-color:var(--line-hi);outline:none}
+.vm-chip .shot{width:26px;height:26px;border-radius:50%;--sc:var(--teal)}
+.vm-chip .shot svg{width:14px;height:14px}
+.vm-chip em{font:500 9.5px/1 var(--mono);font-style:normal;color:var(--text-3)}
+.vm-chip .t-zahl,.vm-k .t-zahl{right:-10px;bottom:-6px}
+.vm-hinweis{max-width:880px;margin:12px auto 0;font-size:12px;color:var(--text-3);line-height:1.5}
+@media (max-width:720px){
+  .vm-k{width:84px;transform:translate(-50%,-20px)}
+  .vm-k .shot{width:40px;height:40px;border-radius:12px}
+  .vm-seite,.vm-trace small{display:none}
+  .vm-feld{height:540px}
+  .vm-k b{font-size:11.5px}
+  .vm-k i{font-size:8.5px}
+  .vm-band>span{min-width:0;width:100%}
+}
 </style>
 </head>
 <body>
@@ -911,8 +973,13 @@ html.wb-vorab .slides,html.wb-vorab .dock{visibility:hidden}
     <div class="slide" id="s-produktiv" aria-label="Produktiv">
       <section class="hero">
         <h1><span>Die eigentliche Arbeit</span> <em>produktiv.</em></h1>
+        <div class="pv-wahl" role="group" aria-label="Ansicht">
+          <button type="button" class="lw-knopf an" data-pv="kacheln" aria-pressed="true">Kacheln</button>
+          <button type="button" class="lw-knopf" data-pv="v" aria-pressed="false">V-Modell</button>
+        </div>
       </section>
       <section class="grid" id="gridProd" aria-label="Produktive Werkzeuge"></section>
+      <section id="vModell" aria-label="Produktive Werkzeuge im V-Modell"></section>
     </div>
     <div class="slide" id="s-buero" aria-label="Büro">
       <section class="hero">
@@ -2058,7 +2125,7 @@ addEventListener('resize', measure);
 /* ───────── Zoom ───────── */
 let current = null, busy = false, anim = null;
 const target = () => ({ x:0, y:BAR, w:W, h:H, r:0 });
-const fromShot = t => { const b = t.shot.getBoundingClientRect(); return { x:b.left, y:b.top, w:b.width, h:b.height, r:11 }; };
+const fromShot = t => { const b = ((t.vShot && t.vShot.isConnected && t.vShot.offsetParent) ? t.vShot : t.shot).getBoundingClientRect(); return { x:b.left, y:b.top, w:b.width, h:b.height, r:11 }; };
 function applyRect(t, r){
   const s = t.frame.style;
   s.left = r.x+'px'; s.top = r.y+'px'; s.width = r.w+'px'; s.height = r.h+'px'; s.borderRadius = r.r+'px';
@@ -2254,6 +2321,113 @@ return prodTiles;
 ansichtBauen(PRODUKTIV, $('#gridProd'));
 ansichtBauen(BUERO, $('#gridBuero'));
 ansichtBauen(PRIVAT, $('#gridPrivat'));
+
+/* ───────── Produktiv als V-Modell (17.11.2026) ─────────
+   Dieselben Werkzeuge wie die Kacheln, nur nach ihrer Rolle im V gestellt.
+   Lage in Prozent des Felds; Linien im selben Raster (viewBox 100 × 100).
+   Ein Werkzeug darf zweimal stehen (Schaltplan: Entwurf links, Abgleich rechts);
+   die zweite Rolle ist gestrichelt. Geöffnet wird wie aus der Kachel. */
+const VM_STUFEN = [
+  { x:15, y:22, stufe:'SWE.1 · Anforderung', frei:'DOORS – extern' },
+  { x:27, y:44, id:'schaltplan',  stufe:'SWE.2 · Architektur' },
+  { x:38, y:66, stufe:'SWE.3 · Feinentwurf', frei:'frei' },
+  { x:50, y:86, code:true, name:'C-Code' },
+  { x:62, y:66, id:'codecompare', stufe:'SWE.4 · Unit' },
+  { x:73, y:44, id:'schaltplan',  stufe:'SWE.5 · Integration', zweit:true },
+  { x:85, y:22, id:'testcasemanager', stufe:'SWE.6 · Qualifikation' }
+];
+const VM_VORHER = { x:15, y:3, id:'ideahub', stufe:'Konzept · Idee' };
+const VM_BAENDER = [
+  { titel:'Projektführung', werkzeuge:[['kapazitaetenplaner','Plan'], ['auswertung','Ist · Forecast']] },
+  { titel:'Begleitet alles', werkzeuge:[['notizbuch','Wissen']] }
+];
+const vmApp = id => PRODUKTIV.find(w => w.id === id);
+/* Ohne Lizenz verschwindet die Kachel; im V bleibt die Stufe stehen, blass und ohne Klick. */
+const vmZu = id => !byId[id] || !!byId[id].gesperrt;
+const vmZahl = (fn, shot) => {
+  let z = null; try { z = fn(); } catch (e) {}
+  if (!z) return;
+  const el = document.createElement('span');
+  el.className = 't-zahl' + (z.rot ? ' rot' : '');
+  el.textContent = z.n > 999 ? '999+' : String(z.n);
+  el.title = z.titel || ''; el.setAttribute('aria-label', z.titel || String(z.n));
+  shot.appendChild(el);
+};
+const vmOeffnen = (id, shot) => { const t = byId[id]; if (!t || current) return; t.vShot = shot; open(id); };
+
+function vModellBauen(){
+  const box = $('#vModell'); if (!box) return;
+  const p = VM_STUFEN;
+  const pfad = p.map((s, i) => (i ? 'L' : 'M') + s.x + ' ' + s.y).join(' ');
+  const paare = [[0,6],[1,5],[2,4]].map(([a,b], k) =>
+    `<line class="vm-paar${k === 0 ? ' trace' : ''}" x1="${p[a].x + 6}" y1="${p[a].y}" x2="${p[b].x - 6}" y2="${p[b].y}"/>`).join('');
+  box.innerHTML = `
+    <div class="vm-feld">
+      <svg class="vm-linien" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+        <path class="vm-arm" d="${pfad}"/>${paare}
+        <line class="vm-pfeil" x1="${VM_VORHER.x}" y1="${VM_VORHER.y + 9}" x2="${p[0].x}" y2="${p[0].y - 6}"/>
+      </svg>
+      <span class="vm-seite" style="left:2%;top:58%">festlegen ↓</span>
+      <span class="vm-seite" style="right:2%;top:58%;text-align:right">↑ prüfen</span>
+      <span class="vm-trace" style="left:50%;top:${p[0].y}%">Traceability<small> · TestcaseManager</small></span>
+    </div>
+    <div class="vm-baender"></div>
+    <p class="vm-hinweis">Gestrichelt: Stufe ohne eigenes Werkzeug oder zweite Rolle eines Werkzeugs.
+      Die Systemebene (SYS.1–5) liegt außerhalb dieses V.</p>`;
+  const feld = $('.vm-feld', box);
+  [VM_VORHER, ...p].forEach(s => {
+    const w = s.id ? vmApp(s.id) : null;
+    const k = document.createElement(w && !vmZu(w.id) ? 'button' : 'div');
+    k.className = 'vm-k' + (s.code ? ' code' : '') + (s.zweit ? ' zweit' : '') + (!w && !s.code ? ' frei' : '');
+    k.style.left = s.x + '%'; k.style.top = s.y + '%';
+    const zu = w && vmZu(w.id);
+    if (zu) { k.classList.add('zu'); k.title = 'Ohne Lizenz'; }
+    else if (w) { k.type = 'button'; k.setAttribute('aria-label', w.name + ' öffnen – ' + s.stufe); }
+    const zeichen = s.code ? '' : (w ? (w.zeichen || PLUS) : PLUS);
+    k.innerHTML = `<span class="shot">${zeichen}</span><b>${esc(w ? w.name : (s.name || s.stufe.split(' · ')[1]))}</b>`
+      + (s.stufe ? `<i>${esc(w ? s.stufe : (s.stufe.split(' · ')[0] + ' · ' + s.frei))}</i>` : '');
+    const shot = $('.shot', k);
+    if (w && !zu) {
+      if (w.zahl && !s.zweit) vmZahl(w.zahl, shot);
+      k.addEventListener('click', () => vmOeffnen(w.id, shot));
+    }
+    feld.appendChild(k);
+  });
+  const baender = $('.vm-baender', box);
+  VM_BAENDER.forEach(b => {
+    const z = document.createElement('div'); z.className = 'vm-band';
+    z.innerHTML = `<span>${esc(b.titel)}</span>`;
+    b.werkzeuge.forEach(([id, rolle]) => {
+      const w = vmApp(id); if (!w || vmZu(id)) return;
+      const c = document.createElement('button'); c.type = 'button'; c.className = 'vm-chip';
+      c.innerHTML = `<span class="shot">${w.zeichen || PLUS}</span>${esc(w.name)} <em>${esc(rolle)}</em>`;
+      const shot = $('.shot', c);
+      if (w.zahl) vmZahl(w.zahl, shot);
+      c.addEventListener('click', () => vmOeffnen(id, shot));
+      z.appendChild(c);
+    });
+    if (z.children.length > 1) baender.appendChild(z);
+  });
+}
+
+(function(){
+  const slide = $('#s-produktiv'); if (!slide) return;
+  const knoepfe = [...slide.querySelectorAll('[data-pv]')];
+  const setzen = (art, merken) => {
+    const v = art === 'v';
+    if (v) vModellBauen();
+    slide.classList.toggle('v-an', v);
+    knoepfe.forEach(b => { const an = b.dataset.pv === art; b.classList.toggle('an', an); b.setAttribute('aria-pressed', an); });
+    if (merken) { try { localStorage.setItem('wb-produktiv-ansicht', art); } catch (e) {} }
+  };
+  knoepfe.forEach(b => b.addEventListener('click', () => setzen(b.dataset.pv, true)));
+  let art = 'kacheln'; try { art = localStorage.getItem('wb-produktiv-ansicht') || 'kacheln'; } catch (e) {}
+  setzen(art, false);
+  /* Zahlen an den Zeichen frisch halten, wenn ein Werkzeug gespeichert hat. */
+  const nachziehen = () => { if (slide.classList.contains('v-an') && !current) vModellBauen(); };
+  window.addEventListener('storage', nachziehen);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) nachziehen(); });
+})();
 
 /* ───────── Mein Werkzeugkasten ─────────
    Seit 12.11.2026. Zeigt nur die Werkzeuge, die die Lizenz auf diesem Gerät
@@ -3396,6 +3570,7 @@ function kachelnSperren(frei){
   ausgang.classList.toggle('lz-aus', !byId.rechnungsbuch || !!byId.rechnungsbuch.gesperrt);
   if (current && current.gesperrt) close({ animate:false });
   try { offeneWelt(); } catch (e) {}
+  try { if ($('#s-produktiv').classList.contains('v-an')) vModellBauen(); } catch (e) {}
 }
 function ansichtenAnwenden(){
   const frei = lizenzIds(LIZ && LIZ.p), aus = ausgeblendet();
