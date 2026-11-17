@@ -912,6 +912,35 @@ html.wb-vorab .slides,html.wb-vorab .dock{visibility:hidden}
 .vm-chip .shot svg{width:14px;height:14px}
 .vm-chip em{font:500 9.5px/1 var(--mono);font-style:normal;color:var(--text-3)}
 .vm-chip .t-zahl,.vm-k .t-zahl{right:-10px;bottom:-6px}
+.vm-ltg{fill:none;stroke-width:1.6;vector-effect:non-scaling-stroke;stroke-linecap:round;transition:stroke-width var(--t-s)}
+.vm-ltg.leer{stroke:var(--text-3);opacity:.45;stroke-dasharray:2 5}
+.vm-ltg.an{stroke-dasharray:6 7;animation:vmFluss 1.4s linear infinite}
+.vm-ltg.gewaehlt{stroke-width:3}
+@keyframes vmFluss{to{stroke-dashoffset:-26}}
+.vm-hit{fill:none;stroke:transparent;stroke-width:18;vector-effect:non-scaling-stroke;pointer-events:stroke;cursor:pointer}
+.vm-ltg-txt{position:absolute;transform:translate(-50%,-150%);background:var(--void);padding:1px 6px;border-radius:6px;
+  font:500 9.5px/1 var(--mono);letter-spacing:.06em;white-space:nowrap;cursor:pointer;border:0;color:inherit}
+.vm-ltg-txt.leer{color:var(--text-3)}
+.vm-insp{max-width:880px;margin:6px auto 0}
+.vm-insp-wahl{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.vm-insp-wahl>span{font:600 9.5px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);margin-right:4px}
+.vm-lk{display:inline-flex;align-items:center;gap:7px;height:30px;padding:0 12px;border-radius:100px;border:1px solid var(--line);
+  background:var(--glass);color:var(--text-2);font:500 12px/1 var(--display);cursor:pointer}
+.vm-lk i{width:8px;height:8px;border-radius:50%;background:var(--text-3);opacity:.5}
+.vm-lk.an i{opacity:1}
+.vm-lk[aria-pressed="true"]{border-color:var(--line-hi);color:var(--text)}
+.vm-karte{margin-top:8px;padding:14px 16px;border-radius:16px;border:1px solid var(--line-hi);background:var(--glass)}
+.vm-karte h3{font-size:14.5px;margin:0 0 2px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.vm-karte .sub{font-size:12px;color:var(--text-3);margin:0 0 10px}
+.vm-karte dl{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:0}
+.vm-karte dl div{background:var(--glass-2);padding:8px 10px}
+.vm-karte dt{font:500 9.5px/1.3 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--text-3)}
+.vm-karte dd{margin:2px 0 0;font-size:13px}
+.vm-karte .warn{color:var(--amber)}
+.vm-karte .knoepfe{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.vm-karte .knoepfe button{height:30px;padding:0 13px;border-radius:100px;border:1px solid var(--line);background:var(--glass-2);color:var(--text);font:500 12.5px/1 var(--display);cursor:pointer}
+.vm-karte .knoepfe button:hover{border-color:var(--line-hi)}
+@media (prefers-reduced-motion:reduce){.vm-ltg.an{animation:none}}
 .vm-hinweis{max-width:880px;margin:12px auto 0;font-size:12px;color:var(--text-3);line-height:1.5}
 @media (max-width:720px){
   .vm-k{width:84px;transform:translate(-50%,-20px)}
@@ -2366,18 +2395,22 @@ function vModellBauen(){
   const box = $('#vModell'); if (!box) return;
   const p = VM_STUFEN;
   const pfad = p.map((s, i) => (i ? 'L' : 'M') + s.x + ' ' + s.y).join(' ');
-  const paare = [[0,6],[1,5],[2,4]].map(([a,b], k) =>
-    `<line class="vm-paar${k === 0 ? ' trace' : ''}" x1="${p[a].x + 6}" y1="${p[a].y}" x2="${p[b].x - 6}" y2="${p[b].y}"/>`).join('');
+  const paare = [[1,5],[2,4]].map(([a,b]) =>
+    `<line class="vm-paar" x1="${p[a].x + 6}" y1="${p[a].y}" x2="${p[b].x - 6}" y2="${p[b].y}"/>`).join('');
+  const ltg = VM_LEITUNGEN.map(l => { const z = vmLeitung(l);
+    return `<path class="vm-ltg ${z.belegt ? 'an' : 'leer'}${UI_VM.wahl === l.k ? ' gewaehlt' : ''}" style="stroke:${l.farbe}" d="${l.d(p)}"/>` +
+           `<path class="vm-hit" data-ltg="${l.k}" d="${l.d(p)}"><title>${esc(l.titel)}</title></path>`; }).join('');
   box.innerHTML = `
     <div class="vm-feld">
-      <svg class="vm-linien" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-        <path class="vm-arm" d="${pfad}"/>${paare}
+      <svg class="vm-linien" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <path class="vm-arm" d="${pfad}"/>${paare}${ltg}
         <line class="vm-pfeil" x1="${VM_VORHER.x}" y1="${VM_VORHER.y + 9}" x2="${p[0].x}" y2="${p[0].y - 6}"/>
       </svg>
       <span class="vm-seite" style="left:2%;top:58%">festlegen ↓</span>
       <span class="vm-seite" style="right:2%;top:58%;text-align:right">↑ prüfen</span>
-      <span class="vm-trace" style="left:50%;top:${p[0].y}%">Traceability<small> · TestcaseManager</small></span>
+      ${VM_LEITUNGEN.map(l => { const z = vmLeitung(l); return `<button type="button" class="vm-ltg-txt${z.belegt ? '' : ' leer'}" data-ltg="${l.k}" style="left:${l.tx}%;top:${l.ty(p)}%;${z.belegt ? 'color:' + l.farbe : ''}">${esc(l.kurz)}</button>`; }).join('')}
     </div>
+    <div class="vm-insp"></div>
     <div class="vm-baender"></div>
     <p class="vm-hinweis">Gestrichelt: Stufe ohne eigenes Werkzeug (SWE.3) oder zweite Rolle eines Werkzeugs.
       Die Systemebene (SYS.1–5) liegt außerhalb dieses V.</p>`;
@@ -2394,6 +2427,7 @@ function vModellBauen(){
     k.innerHTML = `<span class="shot">${zeichen}</span><b>${esc(w ? w.name : (s.name || s.stufe.split(' · ')[1]))}</b>`
       + (s.stufe ? `<i>${esc(w ? s.stufe : (s.stufe.split(' · ')[0] + ' · ' + s.frei))}</i>` : '');
     const shot = $('.shot', k);
+    if (w && !s.zweit) VM_SHOT[w.id] = shot;
     if (w && !zu) {
       if (w.zahl && !s.zweit) vmZahl(w.zahl, shot);
       k.addEventListener('click', () => vmOeffnen(w.id, shot));
@@ -2415,6 +2449,73 @@ function vModellBauen(){
     });
     if (z.children.length > 1) baender.appendChild(z);
   });
+  vmInspektor();
+  box.querySelectorAll('[data-ltg]').forEach(el => el.addEventListener('click', () => { UI_VM.wahl = UI_VM.wahl === el.dataset.ltg ? null : el.dataset.ltg; vModellBauen(); }));
+}
+
+/* ───────── Leitungen im V (17.11.2026) ─────────
+   Wie im Schaltbild der Firma: was auf einer Leitung liegt, fließt sichtbar;
+   was fehlt, steht blass gestrichelt. Gelesen werden die Lesekopien der
+   führenden Werkzeuge und die Rückmeldung des TestcaseManagers. Geschrieben
+   wird nichts. */
+const UI_VM = { wahl:null };
+const VM_SHOT = {};
+const VM_LEITUNGEN = [
+  { k:'anf', titel:'Anforderungen → TestcaseManager', kurz:'Anforderungen', von:'anforderungsbuch', zu:'testcasemanager',
+    ls:'wb-anforderungsbuch-data', farbe:'var(--teal)', tx:50, ty:p => p[0].y,
+    d:p => `M ${p[0].x + 6} ${p[0].y} L ${p[6].x - 6} ${p[6].y}` },
+  { k:'wk', titel:'Wirkkette → TestcaseManager', kurz:'Wirkkette', von:'schaltplan', zu:'testcasemanager',
+    ls:'wb-schaltplan-data', farbe:'var(--info)', tx:57, ty:() => 31,
+    d:p => `M ${p[1].x + 5} ${p[1].y - 3} Q 58 26 ${p[6].x - 6} ${p[6].y + 3}` }
+];
+function vmLeitung(l){
+  const d = WB.lesen(l.ls), r = WB.lesen('wb-testcasemanager-stand');
+  const belegt = !!(d && ((l.k === 'anf' && d.reqs && d.reqs.length) || (l.k === 'wk' && d.comps && d.comps.length)));
+  return { d, r, belegt };
+}
+const vmZeit = iso => { if (!iso) return '—'; const t = new Date(iso); return isNaN(t) ? '—' : t.toLocaleDateString('de-DE') + ' ' + t.toLocaleTimeString('de-DE', { hour:'2-digit', minute:'2-digit' }); };
+function vmInspektor(){
+  const el = $('#vModell .vm-insp'); if (!el) return;
+  const chips = VM_LEITUNGEN.map(l => { const z = vmLeitung(l);
+    return `<button type="button" class="vm-lk${z.belegt ? ' an' : ''}" data-ltg="${l.k}" aria-pressed="${UI_VM.wahl === l.k}"><i style="${z.belegt ? 'background:' + l.farbe : ''}"></i>${esc(l.titel)}</button>`; }).join('');
+  let karte = '';
+  const l = VM_LEITUNGEN.find(x => x.k === UI_VM.wahl);
+  if (l){
+    const { d, r, belegt } = vmLeitung(l);
+    const kv = []; let sub = '', warn = '';
+    if (!belegt) sub = 'Noch keine Daten. ' + (l.k === 'anf' ? 'Im Anforderungsbuch einen DOORS-Export einlesen.' : 'Im Schaltplan eigene C- und PaVaSt-Dateien analysieren.');
+    else if (l.k === 'anf'){
+      sub = `Lesekopie wb-anforderungsbuch-data · Stand ${vmZeit(d.updated)}`;
+      kv.push(['Stand', esc(d.stand && d.stand.name || '—') + (d.vorher ? ' <span style="color:var(--text-3)">seit ' + esc(d.vorher.name) + '</span>' : '')]);
+      kv.push(['Anforderungen', d.anzahl ?? d.reqs.length]);
+      if (d.aenderung) kv.push(['Neu · geändert · gelöscht', `${d.aenderung.neu} · ${d.aenderung.geaendert} · ${d.aenderung.geloescht}`]);
+      kv.push(['Mit Befund', d.befunde ?? '—']);
+      if (r && r.reqs && r.reqs.quelle === 'anforderungsbuch'){
+        kv.push(['Im TestcaseManager', `${r.reqs.uebernommen} von ${r.reqs.gesamt} übernommen`]);
+        if (r.reqs.ohne) warn = `${r.reqs.ohne} Anforderungen passen zu keiner Komponente der Wirkkette und fehlen im TestcaseManager.`;
+        if (r.updated && d.updated && r.updated < d.updated) warn = (warn ? warn + ' ' : '') + 'Der TestcaseManager wurde seit diesem Stand nicht geöffnet.';
+      } else kv.push(['Im TestcaseManager', r ? 'nicht übernommen' : 'noch nicht geöffnet']);
+    } else {
+      sub = `Lesekopie wb-schaltplan-data · Stand ${vmZeit(d.updated)}`;
+      const q = d.quelle || {}, a = d.anzahl || {};
+      kv.push(['Dateien', `${q.dateien ?? '—'} <span style="color:var(--text-3)">(${q.c ?? 0} C · ${q.pv ?? 0} PaVaSt)</span>`]);
+      kv.push(['Komponenten', a.komponenten ?? d.comps.length]);
+      kv.push(['Prozesse', a.prozesse ?? '—']);
+      kv.push(['Messages', a.messages ?? '—']);
+      kv.push(['Varianten', esc(q.konfiguration || '—')]);
+      if (r && r.wirkkette && r.wirkkette.quelle === 'schaltplan'){
+        kv.push(['Im TestcaseManager', `${r.wirkkette.komponenten} Komponenten in ${r.wirkkette.cluster} Clustern`]);
+        if (r.updated && d.updated && r.updated < d.updated) warn = 'Der TestcaseManager wurde seit dieser Analyse nicht geöffnet.';
+      } else kv.push(['Im TestcaseManager', r ? 'nicht übernommen' : 'noch nicht geöffnet']);
+    }
+    const nv = (PRODUKTIV.find(w => w.id === l.von) || {}).name, nz = (PRODUKTIV.find(w => w.id === l.zu) || {}).name;
+    karte = `<div class="vm-karte"><h3>${esc(l.titel)}</h3><p class="sub">${sub}</p>` +
+      (kv.length ? `<dl>${kv.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>` : '') +
+      (warn ? `<p class="sub warn" style="margin:10px 0 0">${warn}</p>` : '') +
+      `<div class="knoepfe">${vmZu(l.von) ? '' : `<button type="button" data-oeffne="${l.von}">${esc(nv)} öffnen</button>`}${vmZu(l.zu) ? '' : `<button type="button" data-oeffne="${l.zu}">${esc(nz)} öffnen</button>`}</div></div>`;
+  }
+  el.innerHTML = `<div class="vm-insp-wahl"><span>Leitungen</span>${chips}</div>${karte}`;
+  el.querySelectorAll('[data-oeffne]').forEach(b => b.addEventListener('click', () => vmOeffnen(b.dataset.oeffne, VM_SHOT[b.dataset.oeffne] || b)));
 }
 
 (function(){
