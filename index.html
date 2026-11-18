@@ -2660,11 +2660,24 @@ function kpAmpel(s){
   return { a:'rot', verzug:!!(s.start && s.start <= h) };
 }
 const kpFarbeVar = a => a === 'leer' ? '' : `--kp-c:${KP_FARBE[a]};`;
-function kpTests(){
+/* Anforderungen des Auftrags aus dem Anforderungsbuch (L2–L4, betroffene inklusive) */
+function kpAnf(iid){
+  let d = null; try { d = JSON.parse(localStorage.getItem('wb-anforderungsbuch-data') || 'null'); } catch (e) {}
+  const a = d && d.auftraege && d.auftraege[iid]; if (!a) return null;
+  const n = { 1:(a.l1 || []).length, 2:0, 3:0, 4:0 }; (a.reqs || []).forEach(r => { if (n[r.ebene] != null) n[r.ebene]++; });
+  return { n, ids:new Set([...(a.l1 || []).map(x => x.id), ...(a.reqs || []).map(r => r.id)]) };
+}
+/* Teststand je Ebene. Trägt der Auftrag Anforderungen, zählen nur Tests auf diese;
+   sonst alle Tests der Ebene (je = false). */
+function kpTests(iid){
   let d = null; try { d = JSON.parse(localStorage.getItem('wb-testcasemanager-data') || 'null'); } catch (e) {}
-  const z = { kom:{n:0,ok:0,f:0}, cl:{n:0,ok:0,f:0}, sys:{n:0,ok:0,f:0} };
-  ((d && d.tests) || []).forEach(t => { const e = z[t.ebene]; if (!e) return; e.n++; if (t.res === 'pass') e.ok++; else if (t.res === 'fail') e.f++; });
-  return d && d.tests ? z : null;
+  if (!d || !d.tests) return null;
+  const anf = iid ? kpAnf(iid) : null, je = !!(anf && anf.ids.size);
+  const z = { kom:{n:0,ok:0,f:0}, cl:{n:0,ok:0,f:0}, sys:{n:0,ok:0,f:0}, je };
+  d.tests.forEach(t => { const e = z[t.ebene]; if (!e) return;
+    if (je && !(t.reqs || []).some(r => anf.ids.has(r))) return;
+    e.n++; if (t.res === 'pass') e.ok++; else if (t.res === 'fail') e.f++; });
+  return z;
 }
 function kpMeine(d){
   const ich = d.angemeldet || '';
@@ -2715,7 +2728,7 @@ function kpAufBauen(){
 }
 
 function kpVBauen(a, ich){
-  const T = kpTests();
+  const T = kpTests(a.id), A = kpAnf(a.id);
   const mitte = s => [s.x + 6, s.y + 40];
   const lage = {}; KP_SCHRITTE.forEach(s => { lage[s.k] = s; });
   const arm = KP_SCHRITTE.map((s, i) => { const [x, y] = mitte(s); return (i ? 'L' : 'M') + x + ' ' + y; }).join(' ');
@@ -2732,7 +2745,9 @@ function kpVBauen(a, ich){
     const leute = st ? st.mitarbeiter.map(m => `<span class="${m === ich ? 'ich' : ''}" title="${esc(m)}">${esc(kpKurz(m))}</span>`).join('') : '';
     const datum = st && st.start ? `${kpDatum(st.start)}–${kpDatum(st.ende)}` : '';
     let test = '';
-    if (s.test && T) { const z = T[s.test]; test = z.n ? `<span class="t" title="${s.ebene}-Tests: ${z.ok} bestanden, ${z.f} fehlgeschlagen, ${z.n - z.ok - z.f} offen">${s.ebene}-Tests ${z.ok}/${z.n}${z.f ? ' · ' + z.f + ' ✗' : ''}</span>` : `<span class="t">${s.ebene}-Tests –</span>`; }
+    if (s.test && T) { const z = T[s.test], wo = T.je ? 'des Auftrags' : 'gesamt (Auftrag noch ohne Anforderungen)';
+      test = z.n ? `<span class="t" title="${s.ebene}-Tests ${wo}: ${z.ok} bestanden, ${z.f} fehlgeschlagen, ${z.n - z.ok - z.f} offen">${s.ebene}-Tests ${z.ok}/${z.n}${z.f ? ' · ' + z.f + ' ✗' : ''}${T.je ? '' : ' *'}</span>` : `<span class="t" title="${wo}">${s.ebene}-Tests –</span>`; }
+    if (s.k === 'SWE.1' && A) test = `<span class="t" title="Anforderungen des Auftrags im Anforderungsbuch">L2 ${A.n[2]} · L3 ${A.n[3]} · L4 ${A.n[4]}</span>`;
     let rel = '';
     if (s.k === 'SWE.6' && a.bc) rel = `<span class="r" title="Ablieferprodukt BC-Release">→ ${esc(a.bc)}${a.bcPlan ? ' · ' + esc(kpDatum(String(a.bcPlan).slice(0, 10))) : ''}</span>`;
     if (s.k === 'SWE.5' && a.fcs && a.fcs.length) rel = `<span class="r" title="Ablieferprodukt Komponente (FC-Release)">→ ${esc(a.fcs.join(', '))}</span>`;
@@ -2748,7 +2763,7 @@ function kpVBauen(a, ich){
     : `<button type="button" data-kp-kopie="${esc(link)}" title="${esc(link)}">Ordnerpfad kopieren</button>`) : '';
   const hinweis = a.imV ? '' : `<span class="sub">noch nicht im V-Durchlauf${a.cq ? ' · ClearQuest: ' + a.cq.workitems + ' Workitems, ' + KP_TEXT[kpAmpel({status:a.cq.status}).a] : ''} – im KapazitätenPlaner zuordnen</span>`;
   const legende = ['gruen', 'gelb', 'rot', 'leer'].map(k => `<span><i style="${k === 'leer' ? '--kp-c:transparent;--kp-r:var(--text-3)' : '--kp-c:' + KP_FARBE[k]}"></i>${KP_TEXT[k]}</span>`).join('') +
-    `<span>! laut Plan überfällig</span>${T ? '' : '<span>Tests: TestcaseManager noch ohne eigene Testfälle</span>'}`;
+    `<span>! laut Plan überfällig</span>${T ? (T.je ? '' : '<span>* Tests gesamt – der Auftrag hat noch keine Anforderungen</span>') : '<span>Tests: TestcaseManager noch ohne eigene Testfälle</span>'}`;
   return `<div class="kp-v-box" data-kp-v="${esc(a.id)}">
     <div class="kp-v-kopf"><h3>${esc(a.titel)}</h3><span class="sub">${esc(a.id)}${a.bc ? ' · ' + esc(a.bc) : ''}${a.lcs ? ' · ' + esc(a.lcs) : ''}${a.aufwand ? ' · ' + a.aufwand + ' h' : ''}</span>${ordner}${hinweis}</div>
     <div class="kp-legende">${legende}</div>
@@ -2758,7 +2773,7 @@ function kpVBauen(a, ich){
   </div>`;
 }
 kpAufBauen();
-window.addEventListener('storage', e => { if (!e.key || e.key === 'wb-kapazitaetenplaner-auftraege' || e.key === 'wb-testcasemanager-data') kpAufBauen(); });
+window.addEventListener('storage', e => { if (!e.key || e.key === 'wb-kapazitaetenplaner-auftraege' || e.key === 'wb-testcasemanager-data' || e.key === 'wb-anforderungsbuch-data') kpAufBauen(); });
 document.addEventListener('visibilitychange', () => { if (!document.hidden) kpAufBauen(); });
 
 /* ───────── Mein Werkzeugkasten ─────────
