@@ -889,6 +889,13 @@ html.wb-vorab .slides,html.wb-vorab .dock{visibility:hidden}
 .vm-k:focus-visible{outline:none}
 .vm-k b,.vm-k i{background:var(--void);border-radius:6px;padding:1px 5px}
 .vm-nr{font-style:normal;color:var(--amber);font-weight:700}
+.vm-k .shot{position:relative}
+.vm-ava{position:absolute;z-index:2;top:50%;transform:translateY(-50%);width:24px;height:24px;border-radius:50%;display:grid;place-items:center;
+  font:700 9.5px/1 var(--display,inherit);color:#fff;background:var(--ava);box-shadow:0 0 0 2px var(--void),var(--shadow);letter-spacing:.02em;pointer-events:auto}
+.vm-ava.li{right:calc(100% + 7px)}
+.vm-ava.re{left:calc(100% + 7px)}
+.vm-ava.rev{width:20px;height:20px;font-size:8.5px;opacity:.92;outline:1.5px dashed var(--ava);outline-offset:2px}
+.vm-ava.ich{box-shadow:0 0 0 2px var(--amber),var(--shadow)}
 .vm-feld.mit-mitte .vm-ltg-txt{opacity:0;pointer-events:none}
 @media (max-width:700px){.vm-feld.mit-mitte .vm-ltg-txt{opacity:1;pointer-events:auto}}
 .vm-teile{display:flex;flex-direction:column;gap:3px;margin-top:1px}
@@ -2773,6 +2780,7 @@ function vmObenBauen(oben){
   }
 }
 /* Gewähltes Issue auf einen Knoten des V legen */
+function vmAvaFarbe(n){ let h = 0; for (const c of String(n)) h = (h * 31 + c.charCodeAt(0)) % 360; return `hsl(${h} 55% 52%)`; }
 function vmAuftragKnoten(k, s){
   const a = vmAuftrag(); if (!a || !s.stufe) return;
   const key = s.stufe.split(' · ')[0]; if (!/^SWE\.\d$/.test(key)) return;
@@ -2787,6 +2795,18 @@ function vmAuftragKnoten(k, s){
   if (ks.test && T) { const z = T[ks.test]; zeilen.push(z.n ? `Tests ${z.ok}/${z.n}${z.f ? ' · ' + z.f + '✗' : ''}${T.je ? '' : ' *'}` : 'Tests –'); }
   if (key === 'SWE.6' && a.bc) zeilen.push('→ ' + esc(a.bc));
   if (key === 'SWE.5' && a.fcs && a.fcs.length) zeilen.push('→ ' + esc(a.fcs.join(', ')));
+  /* Avatare am Prozessschritt (seit 18.11.2026): außen der Entwickler, innen der Reviewer –
+     je der mit dem meisten Aufwand im Schritt (KapazitätenPlaner v3.5.0) */
+  const shot = $('.shot', k);
+  if (st && shot) {
+    const links = s.x < 50, ent = st.entwickler || (st.mitarbeiter || [])[0] || '', rev = st.reviewer || '';
+    const ava = (name, aussen, rolle) => { if (!name) return;
+      const v = document.createElement('span');
+      v.className = 'vm-ava ' + ((links === aussen) ? 'li' : 're') + (name === ich ? ' ich' : '') + (rolle === 'Review' ? ' rev' : '');
+      v.style.setProperty('--ava', vmAvaFarbe(name)); v.textContent = kpKurz(name); v.title = rolle + ': ' + name;
+      shot.appendChild(v); };
+    ava(ent, true, 'Entwicklung'); ava(rev, false, 'Review');
+  }
   const el = document.createElement('span'); el.className = 'vm-auf';
   el.innerHTML = zeilen.length ? zeilen.map(z => `<em>${z}</em>`).join('') : `<em>${KP_TEXT[am.a]}</em>`;
   el.title = (s.stufe || '') + ': ' + KP_TEXT[am.a] + (am.verzug ? ' – laut Plan überfällig' : '') + (st && st.rest ? ' · Rest ' + st.rest + ' h' : '');
