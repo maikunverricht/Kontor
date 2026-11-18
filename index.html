@@ -937,6 +937,58 @@ html.wb-vorab .slides,html.wb-vorab .dock{visibility:hidden}
 .vm-lk i{width:8px;height:8px;border-radius:50%;background:var(--text-3);opacity:.5}
 .vm-lk.an i{opacity:1}
 .vm-lk[aria-pressed="true"]{border-color:var(--line-hi);color:var(--text)}
+/* ───────── Meine Aufträge (Lesekopie KapazitätenPlaner, seit 18.11.2026) ───────── */
+.kp-auf{max-width:var(--max);margin:0 auto 18px;padding:0 var(--pad)}
+.kp-auf:empty{display:none}
+.kp-kopf{display:flex;align-items:center;gap:10px;width:100%;padding:11px 16px;border-radius:14px;border:1px solid var(--glass-edge);background:var(--glass);color:var(--text);font:inherit;cursor:pointer;text-align:left}
+.kp-kopf b,.kp-kopf span{font-weight:650;white-space:nowrap}
+.kp-kopf span{font-weight:400}
+.kp-kopf .kp-pfeil{transition:transform .2s;color:var(--text-3)}
+.kp-auf.kp-auf-offen .kp-kopf .kp-pfeil{transform:rotate(90deg)}
+.kp-kopf .kp-wer{margin-left:auto;font:500 11px/1.2 var(--mono);color:var(--text-3)}
+.kp-inhalt{display:none;margin-top:8px}
+.kp-auf.kp-auf-offen .kp-inhalt{display:block}
+.kp-hinweis{padding:10px 16px;color:var(--text-2);font-size:13px}
+.kp-liste{display:flex;flex-direction:column;gap:6px}
+.kp-zeile{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:12px;align-items:center;width:100%;padding:9px 14px;border-radius:12px;border:1px solid var(--line);background:var(--glass);color:var(--text);font:inherit;cursor:pointer;text-align:left}
+.kp-zeile:hover,.kp-zeile.an{border-color:var(--line-hi)}
+.kp-zeile .kp-id{font:500 10.5px/1 var(--mono);color:var(--text-3);margin-right:6px}
+.kp-zeile .kp-t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kp-zeile .kp-ende{font:500 11px/1 var(--mono);color:var(--text-2)}
+.kp-punkte{display:inline-flex;gap:4px}
+.kp-punkte i{width:9px;height:9px;border-radius:50%;background:var(--kp-c,transparent);border:1px solid var(--kp-r,var(--line));display:block}
+.kp-v-box{margin:6px 0 10px;padding:14px 16px 12px;border-radius:16px;border:1px solid var(--line-hi);background:var(--glass);overflow-x:auto}
+.kp-v-kopf{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:baseline;margin-bottom:6px}
+.kp-v-kopf h3{margin:0;font-size:15px}
+.kp-v-kopf .sub{color:var(--text-2);font-size:12px}
+.kp-v-kopf a,.kp-v-kopf button{font:500 11px/1 var(--mono);color:var(--teal);background:none;border:0;padding:0;cursor:pointer;text-decoration:none}
+.kp-legende{display:flex;flex-wrap:wrap;gap:12px;margin:2px 0 8px;font-size:11px;color:var(--text-3)}
+.kp-legende span{display:inline-flex;align-items:center;gap:5px}
+.kp-legende i{width:9px;height:9px;border-radius:50%;background:var(--kp-c);border:1px solid var(--kp-r,transparent)}
+.kp-v{position:relative;min-width:800px;height:372px}
+.kp-v svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.kp-v .kp-arm{fill:none;stroke:var(--line-hi);stroke-width:1.6;vector-effect:non-scaling-stroke}
+.kp-v .kp-paar{stroke:var(--text-3);stroke-width:1.2;stroke-dasharray:3 4;vector-effect:non-scaling-stroke}
+.kp-ebene{position:absolute;transform:translate(-50%,-50%);font:600 9.5px/1.25 var(--mono);letter-spacing:.06em;color:var(--text-2);background:var(--glass-2);padding:3px 7px;border-radius:999px;border:1px solid var(--line);white-space:nowrap;text-align:center}
+.kp-schritt{position:absolute;width:12%;min-width:92px;box-sizing:border-box;padding:6px 8px 7px;border-radius:12px;border:1px solid var(--kp-r,var(--line));border-top:4px solid var(--kp-c,var(--line));background:color-mix(in srgb,var(--kp-c,transparent) 12%,var(--glass-2));color:var(--text);font:inherit;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:3px}
+.kp-schritt.leer{border-style:dashed;border-top-style:dashed;opacity:.72}
+.kp-schritt:hover{border-color:var(--line-hi)}
+.kp-schritt .k{font:700 10.5px/1 var(--mono);display:flex;justify-content:space-between;gap:4px}
+.kp-schritt .k em{font-style:normal;color:var(--kp-c,var(--text-3))}
+.kp-schritt .n{font-size:11.5px;color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kp-schritt .p{display:flex;flex-wrap:wrap;gap:3px}
+.kp-schritt .p span{font:700 9px/1 var(--mono);padding:3px 4px;border-radius:6px;background:var(--line);color:var(--text-2)}
+.kp-schritt .p span.ich{background:color-mix(in srgb,var(--teal) 30%,transparent);color:var(--text)}
+.kp-schritt .d,.kp-schritt .t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kp-schritt .d{font:500 9.5px/1.2 var(--mono);color:var(--text-3)}
+.kp-schritt .t{font:600 9.5px/1.2 var(--mono);color:var(--text-2)}
+.kp-schritt .r{font:600 9.5px/1.25 var(--mono);color:var(--info);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kp-l1{margin-top:8px;font-size:12.5px;color:var(--text-2)}
+.kp-l1 summary{cursor:pointer;font:600 10.5px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--text-3)}
+.kp-l1 div{white-space:pre-wrap;margin-top:6px;max-height:160px;overflow:auto}
+@keyframes kpPuls{50%{box-shadow:0 0 0 3px color-mix(in srgb,#F07067 35%,transparent)}}
+.kp-schritt.verzug{animation:kpPuls 1.8s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){.kp-schritt.verzug{animation:none}}
 .vm-karte{margin-top:8px;padding:14px 16px;border-radius:16px;border:1px solid var(--line-hi);background:var(--glass)}
 .vm-karte h3{font-size:14.5px;margin:0 0 2px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .vm-karte .sub{font-size:12px;color:var(--text-3);margin:0 0 10px}
@@ -1015,6 +1067,7 @@ html.wb-vorab .slides,html.wb-vorab .dock{visibility:hidden}
           <button type="button" class="lw-knopf" data-pv="v" aria-pressed="false">V-Modell</button>
         </div>
       </section>
+      <section class="kp-auf" id="kpAuf" aria-label="Meine Aufträge aus dem KapazitätenPlaner"></section>
       <section class="grid" id="gridProd" aria-label="Produktive Werkzeuge"></section>
       <section id="vModell" aria-label="Produktive Werkzeuge im V-Modell"></section>
     </div>
@@ -2571,6 +2624,142 @@ function vmInspektor(){
   window.addEventListener('storage', nachziehen);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) nachziehen(); });
 })();
+
+/* ───────── Meine Aufträge mit V-Ampel (seit 18.11.2026) ─────────
+   Liest die Lesekopie des KapazitätenPlaners (wb-kapazitaetenplaner-auftraege).
+   Gezeigt werden nur Aufträge, an denen der dort Angemeldete beteiligt ist.
+   Ampel je Prozessschritt: grün erledigt · gelb in Bearbeitung · rot noch offen
+   (eingeplant; pulsiert, wenn der geplante Start vorbei ist) · gestrichelt
+   ohne Zuordnung. Testebenen: L4 ↔ SWE.4, L3 ↔ SWE.5 (→ FC/Komponente),
+   L2 ↔ SWE.6 (→ BC-Release), L1 ↔ Abschluss. */
+const KP_SCHRITTE = [
+  { k:'EIN',   n:'Eingang',          id:'kapazitaetenplaner', x:1,  y:12 },
+  { k:'SWE.1', n:'Anforderung',      id:'anforderungsbuch',   x:14, y:12 },
+  { k:'SWE.2', n:'Architektur',      id:'schaltplan', tab:'arch', x:22, y:136 },
+  { k:'SWE.3', n:'Feinentwurf',      id:'funktionsentwurf',   x:30, y:260 },
+  { k:'SWE.4', n:'Unit',             id:'codecompare',        x:58, y:260, test:'kom', ebene:'L4' },
+  { k:'SWE.5', n:'Integrationstest', id:'testcasemanager',    x:66, y:136, test:'cl',  ebene:'L3' },
+  { k:'SWE.6', n:'Qualifikation',    id:'testcasemanager',    x:74, y:12,  test:'sys', ebene:'L2' },
+  { k:'ABS',   n:'Abschluss',        id:'kapazitaetenplaner', x:87, y:12 }
+];
+const KP_FARBE = { gruen:'#5BD39A', gelb:'var(--amber)', rot:'#F07067', leer:'' };
+const KP_TEXT = { gruen:'erledigt', gelb:'in Bearbeitung', rot:'noch offen', leer:'nicht zugeordnet' };
+const UI_KP = { offen:false, wahl:'' };
+try { UI_KP.offen = localStorage.getItem('wb-kp-auf-offen') === '1'; UI_KP.wahl = localStorage.getItem('wb-kp-auf-wahl') || ''; } catch (e) {}
+
+const kpLesen = () => { try { const d = JSON.parse(localStorage.getItem('wb-kapazitaetenplaner-auftraege') || 'null');
+  return d && Array.isArray(d.auftraege) ? d : null; } catch (e) { return null; } };
+const kpHeute = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+const kpDatum = s => s ? s.slice(8, 10) + '.' + s.slice(5, 7) + '.' : '';
+const kpKurz = n => String(n || '').replace(/,/g, ' ').trim().split(/\s+/).filter(Boolean).map(w => w[0]).join('').toUpperCase().slice(0, 3) || '?';
+function kpAmpel(s){
+  if (!s) return { a:'leer', verzug:false };
+  if (s.status === 'closed') return { a:'gruen', verzug:false };
+  const h = kpHeute();
+  if (s.status === 'started' || s.status === 'blocked') return { a:'gelb', verzug:!!(s.ende && s.ende < h) };
+  return { a:'rot', verzug:!!(s.start && s.start <= h) };
+}
+const kpFarbeVar = a => a === 'leer' ? '' : `--kp-c:${KP_FARBE[a]};`;
+function kpTests(){
+  let d = null; try { d = JSON.parse(localStorage.getItem('wb-testcasemanager-data') || 'null'); } catch (e) {}
+  const z = { kom:{n:0,ok:0,f:0}, cl:{n:0,ok:0,f:0}, sys:{n:0,ok:0,f:0} };
+  ((d && d.tests) || []).forEach(t => { const e = z[t.ebene]; if (!e) return; e.n++; if (t.res === 'pass') e.ok++; else if (t.res === 'fail') e.f++; });
+  return d && d.tests ? z : null;
+}
+function kpMeine(d){
+  const ich = d.angemeldet || '';
+  if (!ich) return [];
+  return d.auftraege.filter(a => (a.beteiligt || []).includes(ich))
+    .sort((a, b) => (b.imV - a.imV) || String(kpEnde(a) || '9').localeCompare(String(kpEnde(b) || '9')));
+}
+const kpEnde = a => { const e = Object.values(a.schritte || {}).reduce((m, s) => s.ende && s.ende > m ? s.ende : m, '');
+  return e || (a.cq && a.cq.ende) || ''; };
+
+function kpAufBauen(){
+  const box = $('#kpAuf'); if (!box) return;
+  const d = kpLesen();
+  if (!d) { box.innerHTML = ''; box.classList.remove('kp-auf-offen'); return; }
+  const meine = kpMeine(d), ich = d.angemeldet || '';
+  box.classList.toggle('kp-auf-offen', UI_KP.offen);
+  let inhalt;
+  if (!ich) inhalt = `<p class="kp-hinweis">Im KapazitätenPlaner anmelden (Name in der Startabfrage) – dann stehen hier deine Aufträge.</p>`;
+  else if (!meine.length) inhalt = `<p class="kp-hinweis">Keine Aufträge, an denen ${esc(ich)} beteiligt ist.</p>`;
+  else {
+    if (UI_KP.wahl && !meine.some(a => a.id === UI_KP.wahl)) UI_KP.wahl = '';
+    inhalt = `<div class="kp-liste">${meine.map(a => {
+      const punkte = KP_SCHRITTE.map(s => { const am = kpAmpel(a.schritte && a.schritte[s.k]).a;
+        return `<i style="${kpFarbeVar(am)}${am === 'leer' ? '' : '--kp-r:transparent'}" title="${s.n}: ${KP_TEXT[am]}"></i>`; }).join('');
+      const ende = kpEnde(a);
+      return `<button type="button" class="kp-zeile${UI_KP.wahl === a.id ? ' an' : ''}" data-kp="${esc(a.id)}" aria-expanded="${UI_KP.wahl === a.id}">
+        <span class="kp-t"><span class="kp-id">${esc(a.id)}</span>${esc(a.titel)}</span>
+        <span class="kp-punkte" aria-hidden="true">${punkte}</span>
+        <span class="kp-ende">${ende ? 'bis ' + kpDatum(ende) : (a.imV ? '' : 'nicht im V')}</span></button>` +
+        (UI_KP.wahl === a.id ? kpVBauen(a, ich) : '');
+    }).join('')}</div>`;
+  }
+  box.innerHTML = `<button type="button" class="kp-kopf" aria-expanded="${UI_KP.offen}"><span class="kp-pfeil">▸</span>
+      <b>KapazitätenPlaner</b><span>· Meine Aufträge${ich ? ' (' + meine.length + ')' : ''}</span>
+      <span class="kp-wer">${ich ? esc(ich) : 'nicht angemeldet'}</span></button>
+    <div class="kp-inhalt">${inhalt}</div>`;
+  box.querySelector('.kp-kopf').addEventListener('click', () => {
+    UI_KP.offen = !UI_KP.offen; try { localStorage.setItem('wb-kp-auf-offen', UI_KP.offen ? '1' : '0'); } catch (e) {}
+    kpAufBauen(); });
+  box.querySelectorAll('[data-kp]').forEach(b => b.addEventListener('click', () => {
+    UI_KP.wahl = UI_KP.wahl === b.dataset.kp ? '' : b.dataset.kp;
+    try { localStorage.setItem('wb-kp-auf-wahl', UI_KP.wahl); } catch (e) {}
+    kpAufBauen(); }));
+  box.querySelectorAll('[data-kp-schritt]').forEach(b => b.addEventListener('click', () => {
+    const s = KP_SCHRITTE.find(x => x.k === b.dataset.kpSchritt); if (s) vmOeffnen(s.id, b, s.tab); }));
+  const kopie = box.querySelector('[data-kp-kopie]');
+  if (kopie) kopie.addEventListener('click', () => { try { navigator.clipboard.writeText(kopie.dataset.kpKopie); kopie.textContent = 'kopiert'; } catch (e) {} });
+}
+
+function kpVBauen(a, ich){
+  const T = kpTests();
+  const mitte = s => [s.x + 6, s.y + 40];
+  const lage = {}; KP_SCHRITTE.forEach(s => { lage[s.k] = s; });
+  const arm = KP_SCHRITTE.map((s, i) => { const [x, y] = mitte(s); return (i ? 'L' : 'M') + x + ' ' + y; }).join(' ');
+  const paar = (l, r) => { const L = lage[l], R = lage[r]; return `<line class="kp-paar" x1="${L.x + 12}" y1="${L.y + 40}" x2="${R.x}" y2="${R.y + 40}"/>`; };
+  const ebenen = [
+    ['SWE.1', 'SWE.6', 'L2 · SW-Anforderung<br>↔ Qualifikationstest'],
+    ['SWE.2', 'SWE.5', 'L3 · Cluster<br>↔ Integrationstest'],
+    ['SWE.3', 'SWE.4', 'L4 · Funktion<br>↔ Unit-Test']
+  ].map(([l, r, t]) => { const L = lage[l], R = lage[r];
+    return `<span class="kp-ebene" style="left:${(L.x + 12 + R.x) / 2}%;top:${L.y + 40}px">${t}</span>`; }).join('');
+  const l1 = `<span class="kp-ebene" style="left:50%;top:6px">L1 · Kundenanforderung ↔ Abnahme</span>`;
+  const knoten = KP_SCHRITTE.map(s => {
+    const st = a.schritte && a.schritte[s.k], am = kpAmpel(st);
+    const leute = st ? st.mitarbeiter.map(m => `<span class="${m === ich ? 'ich' : ''}" title="${esc(m)}">${esc(kpKurz(m))}</span>`).join('') : '';
+    const datum = st && st.start ? `${kpDatum(st.start)}–${kpDatum(st.ende)}` : '';
+    let test = '';
+    if (s.test && T) { const z = T[s.test]; test = z.n ? `<span class="t" title="${s.ebene}-Tests: ${z.ok} bestanden, ${z.f} fehlgeschlagen, ${z.n - z.ok - z.f} offen">${s.ebene}-Tests ${z.ok}/${z.n}${z.f ? ' · ' + z.f + ' ✗' : ''}</span>` : `<span class="t">${s.ebene}-Tests –</span>`; }
+    let rel = '';
+    if (s.k === 'SWE.6' && a.bc) rel = `<span class="r" title="Ablieferprodukt BC-Release">→ ${esc(a.bc)}${a.bcPlan ? ' · ' + esc(kpDatum(String(a.bcPlan).slice(0, 10))) : ''}</span>`;
+    if (s.k === 'SWE.5' && a.fcs && a.fcs.length) rel = `<span class="r" title="Ablieferprodukt Komponente (FC-Release)">→ ${esc(a.fcs.join(', '))}</span>`;
+    const tip = `${s.k === 'EIN' || s.k === 'ABS' ? s.n : s.k + ' · ' + s.n}: ${KP_TEXT[am.a]}${am.verzug ? ' – laut Plan überfällig' : ''}${st && st.rest ? ' · Rest ' + st.rest + ' h' : ''}${st ? ' · ' + st.mitarbeiter.join(', ') : ''}`;
+    return `<button type="button" class="kp-schritt${am.a === 'leer' ? ' leer' : ''}${am.verzug ? ' verzug' : ''}" data-kp-schritt="${s.k}" data-ampel="${am.a}"
+      style="left:${s.x}%;top:${s.y}px;${kpFarbeVar(am.a)}" title="${esc(tip)}">
+      <span class="k">${s.k === 'EIN' || s.k === 'ABS' ? s.n : s.k}<em>${am.verzug ? '!' : ''}</em></span>
+      ${s.k === 'EIN' || s.k === 'ABS' ? '' : `<span class="n">${s.n}</span>`}
+      ${leute ? `<span class="p">${leute}</span>` : ''}${datum ? `<span class="d">${datum}</span>` : ''}${test}${rel}</button>`;
+  }).join('');
+  const link = (a.ordner && a.ordner.link) || '';
+  const ordner = link ? (/^https?:\/\//i.test(link) ? `<a href="${esc(link)}" target="_blank" rel="noopener">Ordner ↗</a>`
+    : `<button type="button" data-kp-kopie="${esc(link)}" title="${esc(link)}">Ordnerpfad kopieren</button>`) : '';
+  const hinweis = a.imV ? '' : `<span class="sub">noch nicht im V-Durchlauf${a.cq ? ' · ClearQuest: ' + a.cq.workitems + ' Workitems, ' + KP_TEXT[kpAmpel({status:a.cq.status}).a] : ''} – im KapazitätenPlaner zuordnen</span>`;
+  const legende = ['gruen', 'gelb', 'rot', 'leer'].map(k => `<span><i style="${k === 'leer' ? '--kp-c:transparent;--kp-r:var(--text-3)' : '--kp-c:' + KP_FARBE[k]}"></i>${KP_TEXT[k]}</span>`).join('') +
+    `<span>! laut Plan überfällig</span>${T ? '' : '<span>Tests: TestcaseManager noch ohne eigene Testfälle</span>'}`;
+  return `<div class="kp-v-box" data-kp-v="${esc(a.id)}">
+    <div class="kp-v-kopf"><h3>${esc(a.titel)}</h3><span class="sub">${esc(a.id)}${a.bc ? ' · ' + esc(a.bc) : ''}${a.lcs ? ' · ' + esc(a.lcs) : ''}${a.aufwand ? ' · ' + a.aufwand + ' h' : ''}</span>${ordner}${hinweis}</div>
+    <div class="kp-legende">${legende}</div>
+    <div class="kp-v"><svg viewBox="0 0 100 372" preserveAspectRatio="none"><path class="kp-arm" d="${arm}"/>${paar('SWE.1', 'SWE.6')}${paar('SWE.2', 'SWE.5')}${paar('SWE.3', 'SWE.4')}</svg>
+      ${l1}${ebenen}${knoten}</div>
+    ${a.l1 && a.l1.length ? `<details class="kp-l1"><summary>L1 · Kundenanforderung</summary><div>${esc(a.l1[0].t)}</div></details>` : ''}
+  </div>`;
+}
+kpAufBauen();
+window.addEventListener('storage', e => { if (!e.key || e.key === 'wb-kapazitaetenplaner-auftraege' || e.key === 'wb-testcasemanager-data') kpAufBauen(); });
+document.addEventListener('visibilitychange', () => { if (!document.hidden) kpAufBauen(); });
 
 /* ───────── Mein Werkzeugkasten ─────────
    Seit 12.11.2026. Zeigt nur die Werkzeuge, die die Lizenz auf diesem Gerät
