@@ -942,7 +942,11 @@ html.wb-vorab .slides,html.wb-vorab .dock{visibility:hidden}
 .vm-feld svg.vm-linien{z-index:1}
 @media (prefers-reduced-motion:reduce){.vm-kp-kachel{transition:none}.vm-mitte.rein{animation:none}}
 /* Am Telefon ist zwischen den Armen kein Platz – dort genügt die Auswahl über dem V */
-@media (max-width:700px){.vm-mitte{display:none}}
+@media (max-width:700px){.vm-mitte,.vm-mitte-weg{display:none}}
+/* Auf breiten Schirmen zeigt die Kachel in der Mitte das gewählte Issue – das Feld neben dem Pfeil entfällt */
+@media (min-width:701px){.vm-kp-wahl{display:none}}
+.vm-mitte-weg{position:absolute;width:22px;height:22px;border-radius:50%;border:1px solid var(--line);background:var(--glass-2);color:var(--text-3);font-size:11px;line-height:1;cursor:pointer;z-index:4}
+.vm-mitte-weg:hover{color:var(--text);border-color:var(--line-hi)}
 .vm-kp-leer{grid-column:1/-1;font-size:13px;color:var(--text-2);margin:0;text-align:center}
 .vm-k.amp .shot{border-color:var(--kp-c,var(--line));box-shadow:0 0 0 3px color-mix(in srgb,var(--kp-c,transparent) 28%,transparent)}
 .vm-k.amp-leer .shot{opacity:.55}
@@ -2633,6 +2637,14 @@ function vmMitteBauen(feld){
   m.title = 'Gewähltes Issue – antippen öffnet die Auswahl';
   m.addEventListener('click', () => { UI_VM.kpOffen = true; vModellBauen(); });
   feld.insertBefore(m, feld.firstChild);
+  /* ✕ liegt über den Linien (die Kachel selbst bleibt im Hintergrund) */
+  const weg = document.createElement('button'); weg.type = 'button'; weg.className = 'vm-mitte-weg';
+  weg.title = 'Auftrag abwählen'; weg.setAttribute('aria-label', 'Auftrag abwählen'); weg.textContent = '✕';
+  weg.addEventListener('click', e => { e.stopPropagation(); vmAuftragWaehlen(''); });
+  feld.appendChild(weg);
+  const setzen = () => { const f = feld.getBoundingClientRect(), r = m.getBoundingClientRect();
+    weg.style.left = (r.right - f.left - 11) + 'px'; weg.style.top = (r.top - f.top - 11) + 'px'; };
+  requestAnimationFrame(setzen); setTimeout(setzen, 650);
   UI_VM.neu = false;
 }
 function vmObenBauen(oben){
