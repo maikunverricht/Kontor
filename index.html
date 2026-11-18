@@ -2514,9 +2514,11 @@ const VM_STUFEN = [
   { x:27, y:44, id:'schaltplan',  stufe:'SWE.2 · Architektur', tab:'arch',
     teile:[{ nr:'②', name:'Wirkkette', tab:'arch', titel:'Teil 1 – Wirkkettenanalyse über die Cluster: liefert die Signale an System- und Clustergrenzen' },
            { nr:'④', name:'im Cluster', tab:'fn', titel:'Teil 2 – Funktionsebene innerhalb des Clusters' }] },
-  { x:38, y:66, id:'funktionsentwurf', stufe:'SWE.3 · Feinentwurf', nr:'⑤' },
+  /* CodeCompare ist kein eigener Prozessschritt: Review des Funktionsentwurfs auf C-Code-Ebene (seit 18.11.2026) */
+  { x:38, y:66, id:'funktionsentwurf', stufe:'SWE.3 · Feinentwurf', nr:'⑤',
+    teile:[{ nr:'', id:'codecompare', name:'Review · CodeCompare', titel:'Review des Funktionsentwurfs auf C-Code-Ebene: bleibt das Verhalten gleich?' }] },
   { x:50, y:86, code:true, name:'C-Code' },
-  { x:62, y:66, id:'codecompare', stufe:'SWE.4 · Unit' },
+  { x:62, y:66, id:'testcasemanager', stufe:'SWE.4 · Unit-/Weakspottest', zweit:true, tab:'komponente' },
   { x:73, y:44, id:'testcasemanager', stufe:'SWE.5 · Integrationstest', zweit:true, tab:'cluster' },
   { x:85, y:22, id:'testcasemanager', stufe:'SWE.6 · Qualifikation', tab:'system' }
 ];
@@ -2574,7 +2576,7 @@ function vModellBauen(){
     <div class="vm-insp"></div>
     <div class="vm-baender"></div>
     <p class="vm-hinweis">Reihenfolge links: ① System-Anforderungen L1/L2 → ② Wirkkette → ③ Interfaces, L3/L4 → ④ Funktionsebene im Cluster → ⑤ Feinentwurf. Jeder Teil öffnet nur seinen Abschnitt.
-      Gestrichelt: zweite Rolle des TestcaseManagers – Integrationstest gegen die Cluster (L3) aus der Wirkkette (SWE.5).
+      Gestrichelt: weitere Rollen des TestcaseManagers – Unit-/Weakspottest gegen L4 (SWE.4) und Integrationstest gegen die Cluster (L3) aus der Wirkkette (SWE.5). CodeCompare dient dem Review des Funktionsentwurfs auf C-Code-Ebene.
       Die Systemebene (SYS.1–5) liegt außerhalb dieses V.</p>`;
   const feld = $('.vm-feld', box);
   p.forEach(s => {
@@ -2588,15 +2590,17 @@ function vModellBauen(){
     const zeichen = s.code ? '' : (w ? (w.zeichen || PLUS) : PLUS);
     k.innerHTML = `<span class="shot">${zeichen}</span><b>${esc(w ? w.name : (s.name || s.stufe.split(' · ')[1]))}</b>`
       + (s.stufe ? `<i>${s.nr ? `<em class="vm-nr">${s.nr}</em> ` : ''}${esc(w ? s.stufe : (s.stufe.split(' · ')[0] + ' · ' + s.frei))}</i>` : '')
-      + (s.teile && w && !vmZu(w.id) ? `<span class="vm-teile">${s.teile.map((t, i) => `<span role="button" tabindex="0" class="vm-teil" data-teil="${i}" title="${esc(t.titel)}"><em class="vm-nr">${t.nr}</em> ${esc(t.name)}</span>`).join('')}</span>` : '');
+      + (s.teile && w && !vmZu(w.id) ? `<span class="vm-teile">${s.teile.map((t, i) => t.id && (!vmApp(t.id) || vmZu(t.id)) ? '' : `<span role="button" tabindex="0" class="vm-teil" data-teil="${i}" title="${esc(t.titel)}">${t.nr ? `<em class="vm-nr">${t.nr}</em> ` : ''}${esc(t.name)}</span>`).join('')}</span>` : '');
     const shot = $('.shot', k);
     if (w && !s.zweit) VM_SHOT[w.id] = shot;
     if (w && !zu) {
       if (w.zahl && !s.zweit) vmZahl(w.zahl, shot);
+      /* Ein Teil kann auch ein anderes Werkzeug öffnen (Funktionsentwurf → Review mit CodeCompare) */
+      const teilAuf = t => vmOeffnen(t.id || w.id, t.id ? (VM_SHOT[t.id] || shot) : shot, t.tab);
       k.addEventListener('click', e => { const teil = e.target.closest && e.target.closest('[data-teil]');
-        vmOeffnen(w.id, shot, teil ? s.teile[+teil.dataset.teil].tab : s.tab); });
+        if (teil) teilAuf(s.teile[+teil.dataset.teil]); else vmOeffnen(w.id, shot, s.tab); });
       k.addEventListener('keydown', e => { const teil = e.target.closest && e.target.closest('[data-teil]');
-        if (teil && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); e.stopPropagation(); vmOeffnen(w.id, shot, s.teile[+teil.dataset.teil].tab); } });
+        if (teil && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); e.stopPropagation(); teilAuf(s.teile[+teil.dataset.teil]); } });
     }
     try { vmAuftragKnoten(k, s); } catch (e) {}
     feld.appendChild(k);
@@ -2915,7 +2919,7 @@ const KP_SCHRITTE = [
   { k:'SWE.1', n:'Anforderung',      id:'anforderungsbuch',   x:14, y:12 },
   { k:'SWE.2', n:'Architektur',      id:'schaltplan', tab:'arch', x:22, y:136 },
   { k:'SWE.3', n:'Feinentwurf',      id:'funktionsentwurf',   x:30, y:260 },
-  { k:'SWE.4', n:'Unit',             id:'codecompare',        x:58, y:260, test:'kom', ebene:'L4' },
+  { k:'SWE.4', n:'Unit-/Weakspottest', id:'testcasemanager', tab:'komponente', x:58, y:260, test:'kom', ebene:'L4' },
   { k:'SWE.5', n:'Integrationstest', id:'testcasemanager', tab:'cluster', x:66, y:136, test:'cl',  ebene:'L3' },
   { k:'SWE.6', n:'Qualifikation',    id:'testcasemanager', tab:'system',  x:74, y:12,  test:'sys', ebene:'L2' },
   { k:'ABS',   n:'Abschluss',        id:'kapazitaetenplaner', x:87, y:12 }
@@ -3021,7 +3025,7 @@ function kpVBauen(a, ich){
   const ebenen = [
     ['SWE.1', 'SWE.6', 'L2 · SW-Anforderung<br>↔ Qualifikationstest'],
     ['SWE.2', 'SWE.5', 'L3 · Cluster<br>↔ Integrationstest'],
-    ['SWE.3', 'SWE.4', 'L4 · Funktion<br>↔ Unit-Test']
+    ['SWE.3', 'SWE.4', 'L4 · Funktion<br>↔ Unit-/Weakspottest']
   ].map(([l, r, t]) => { const L = lage[l], R = lage[r];
     return `<span class="kp-ebene" style="left:${(L.x + 12 + R.x) / 2}%;top:${L.y + 40}px">${t}</span>`; }).join('');
   const l1 = `<span class="kp-ebene" style="left:50%;top:6px">L1 · Kundenanforderung ↔ Abnahme</span>`;
