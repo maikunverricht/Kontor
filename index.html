@@ -2436,8 +2436,8 @@ const VM_STUFEN = [
   { x:38, y:66, id:'funktionsentwurf', stufe:'SWE.3 · Feinentwurf' },
   { x:50, y:86, code:true, name:'C-Code' },
   { x:62, y:66, id:'codecompare', stufe:'SWE.4 · Unit' },
-  { x:73, y:44, id:'testcasemanager', stufe:'SWE.5 · Integrationstest', zweit:true },
-  { x:85, y:22, id:'testcasemanager', stufe:'SWE.6 · Qualifikation' }
+  { x:73, y:44, id:'testcasemanager', stufe:'SWE.5 · Integrationstest', zweit:true, tab:'cluster' },
+  { x:85, y:22, id:'testcasemanager', stufe:'SWE.6 · Qualifikation', tab:'system' }
 ];
 const VM_VORHER = { x:15, y:3, id:'ideahub', stufe:'Konzept · Idee' };
 const VM_BAENDER = [
@@ -2459,7 +2459,11 @@ const vmZahl = (fn, shot) => {
 /* tab: Reiter im Werkzeug (Schaltplan: arch, if, fn). Vor dem ersten Laden über ap-tab,
    danach direkt im Rahmen – dieselbe Herkunft. */
 const vmOeffnen = (id, shot, tab) => { const t = byId[id]; if (!t || current) return; t.vShot = shot;
-  if (tab) { try { localStorage.setItem('ap-tab', tab); } catch (e) {}
+  /* TestcaseManager: Ebene direkt öffnen (SWE.5 Cluster/Integration, SWE.6 System/Qualifikation) */
+  if (tab && id === 'testcasemanager') { const k = ['system','cluster','komponente','matrix'].indexOf(tab);
+    if (k >= 0) { try { localStorage.setItem('wb-wirkkette-ebene', String(k)); } catch (e) {}
+      const f = t.loaded && t.vp && t.vp.querySelector('iframe'); if (f) { try { f.contentWindow.tcmEbene(k); } catch (e) {} } } }
+  else if (tab) { try { localStorage.setItem('ap-tab', tab); } catch (e) {}
     const f = t.loaded && t.vp && t.vp.querySelector('iframe');
     if (f) { try { f.contentWindow.openTab(tab); } catch (e) {} } }
   open(id); };
@@ -2638,8 +2642,8 @@ const KP_SCHRITTE = [
   { k:'SWE.2', n:'Architektur',      id:'schaltplan', tab:'arch', x:22, y:136 },
   { k:'SWE.3', n:'Feinentwurf',      id:'funktionsentwurf',   x:30, y:260 },
   { k:'SWE.4', n:'Unit',             id:'codecompare',        x:58, y:260, test:'kom', ebene:'L4' },
-  { k:'SWE.5', n:'Integrationstest', id:'testcasemanager',    x:66, y:136, test:'cl',  ebene:'L3' },
-  { k:'SWE.6', n:'Qualifikation',    id:'testcasemanager',    x:74, y:12,  test:'sys', ebene:'L2' },
+  { k:'SWE.5', n:'Integrationstest', id:'testcasemanager', tab:'cluster', x:66, y:136, test:'cl',  ebene:'L3' },
+  { k:'SWE.6', n:'Qualifikation',    id:'testcasemanager', tab:'system',  x:74, y:12,  test:'sys', ebene:'L2' },
   { k:'ABS',   n:'Abschluss',        id:'kapazitaetenplaner', x:87, y:12 }
 ];
 const KP_FARBE = { gruen:'#5BD39A', gelb:'var(--amber)', rot:'#F07067', leer:'' };
@@ -2712,7 +2716,7 @@ function kpAufBauen(){
   }
   box.innerHTML = `<button type="button" class="kp-kopf" aria-expanded="${UI_KP.offen}"><span class="kp-pfeil">▸</span>
       <b>KapazitätenPlaner</b><span>· Meine Aufträge${ich ? ' (' + meine.length + ')' : ''}</span>
-      <span class="kp-wer">${ich ? esc(ich) : 'nicht angemeldet'}</span></button>
+      <span class="kp-wer">${(() => { let a = null; try { a = JSON.parse(localStorage.getItem('wb-aktiver-auftrag') || 'null'); } catch (e) {} return a && a.id ? '● ' + esc(a.id) + ' · ' : ''; })()}${ich ? esc(ich) : 'nicht angemeldet'}</span></button>
     <div class="kp-inhalt">${inhalt}</div>`;
   box.querySelector('.kp-kopf').addEventListener('click', () => {
     UI_KP.offen = !UI_KP.offen; try { localStorage.setItem('wb-kp-auf-offen', UI_KP.offen ? '1' : '0'); } catch (e) {}
@@ -2723,6 +2727,12 @@ function kpAufBauen(){
     kpAufBauen(); }));
   box.querySelectorAll('[data-kp-schritt]').forEach(b => b.addEventListener('click', () => {
     const s = KP_SCHRITTE.find(x => x.k === b.dataset.kpSchritt); if (s) vmOeffnen(s.id, b, s.tab); }));
+  box.querySelectorAll('[data-kp-aktiv]').forEach(b => b.addEventListener('click', () => {
+    const d = kpLesen(), a = d && d.auftraege.find(x => x.id === b.dataset.kpAktiv); if (!a) return;
+    let akt = null; try { akt = JSON.parse(localStorage.getItem('wb-aktiver-auftrag') || 'null'); } catch (e) {}
+    try { if (akt && akt.id === a.id) localStorage.removeItem('wb-aktiver-auftrag');
+      else localStorage.setItem('wb-aktiver-auftrag', JSON.stringify({ id:a.id, titel:a.titel, bc:a.bc || '', ordner:a.ordner && a.ordner.name ? a.ordner : null, von:'kontor', gesetzt:new Date().toISOString() })); } catch (e) {}
+    kpAufBauen(); }));
   const kopie = box.querySelector('[data-kp-kopie]');
   if (kopie) kopie.addEventListener('click', () => { try { navigator.clipboard.writeText(kopie.dataset.kpKopie); kopie.textContent = 'kopiert'; } catch (e) {} });
 }
@@ -2761,11 +2771,13 @@ function kpVBauen(a, ich){
   const link = (a.ordner && a.ordner.link) || '';
   const ordner = link ? (/^https?:\/\//i.test(link) ? `<a href="${esc(link)}" target="_blank" rel="noopener">Ordner ↗</a>`
     : `<button type="button" data-kp-kopie="${esc(link)}" title="${esc(link)}">Ordnerpfad kopieren</button>`) : '';
+  let akt = null; try { akt = JSON.parse(localStorage.getItem('wb-aktiver-auftrag') || 'null'); } catch (e) {}
+  const aktiv = `<button type="button" data-kp-aktiv="${esc(a.id)}" title="Alle Werkzeuge arbeiten für diesen Auftrag (Anzeige, Ablage in den Auftragsordner)">${akt && akt.id === a.id ? '● aktiver Auftrag' : 'als aktiv setzen'}</button>`;
   const hinweis = a.imV ? '' : `<span class="sub">noch nicht im V-Durchlauf${a.cq ? ' · ClearQuest: ' + a.cq.workitems + ' Workitems, ' + KP_TEXT[kpAmpel({status:a.cq.status}).a] : ''} – im KapazitätenPlaner zuordnen</span>`;
   const legende = ['gruen', 'gelb', 'rot', 'leer'].map(k => `<span><i style="${k === 'leer' ? '--kp-c:transparent;--kp-r:var(--text-3)' : '--kp-c:' + KP_FARBE[k]}"></i>${KP_TEXT[k]}</span>`).join('') +
     `<span>! laut Plan überfällig</span>${T ? (T.je ? '' : '<span>* Tests gesamt – der Auftrag hat noch keine Anforderungen</span>') : '<span>Tests: TestcaseManager noch ohne eigene Testfälle</span>'}`;
   return `<div class="kp-v-box" data-kp-v="${esc(a.id)}">
-    <div class="kp-v-kopf"><h3>${esc(a.titel)}</h3><span class="sub">${esc(a.id)}${a.bc ? ' · ' + esc(a.bc) : ''}${a.lcs ? ' · ' + esc(a.lcs) : ''}${a.aufwand ? ' · ' + a.aufwand + ' h' : ''}</span>${ordner}${hinweis}</div>
+    <div class="kp-v-kopf"><h3>${esc(a.titel)}</h3><span class="sub">${esc(a.id)}${a.bc ? ' · ' + esc(a.bc) : ''}${a.lcs ? ' · ' + esc(a.lcs) : ''}${a.aufwand ? ' · ' + a.aufwand + ' h' : ''}</span>${ordner}${aktiv}${hinweis}</div>
     <div class="kp-legende">${legende}</div>
     <div class="kp-v"><svg viewBox="0 0 100 372" preserveAspectRatio="none"><path class="kp-arm" d="${arm}"/>${paar('SWE.1', 'SWE.6')}${paar('SWE.2', 'SWE.5')}${paar('SWE.3', 'SWE.4')}</svg>
       ${l1}${ebenen}${knoten}</div>
@@ -2773,7 +2785,7 @@ function kpVBauen(a, ich){
   </div>`;
 }
 kpAufBauen();
-window.addEventListener('storage', e => { if (!e.key || e.key === 'wb-kapazitaetenplaner-auftraege' || e.key === 'wb-testcasemanager-data' || e.key === 'wb-anforderungsbuch-data') kpAufBauen(); });
+window.addEventListener('storage', e => { if (!e.key || e.key === 'wb-kapazitaetenplaner-auftraege' || e.key === 'wb-testcasemanager-data' || e.key === 'wb-anforderungsbuch-data' || e.key === 'wb-aktiver-auftrag') kpAufBauen(); });
 document.addEventListener('visibilitychange', () => { if (!document.hidden) kpAufBauen(); });
 
 /* ───────── Mein Werkzeugkasten ─────────
