@@ -3499,6 +3499,8 @@ const KOMBI = [
     aktion(){ lizenzSeite(); } },
   { id:'x-ust', name:'Umsatzsteuer', tag:'laufendes Quartal', braucht:['rechnungsbuch'], ziel:'rechnungsbuch',
     farbe:'var(--geld)', zeichen:SVG('<path d="M18.5 5.5l-13 13"/><circle cx="7" cy="7" r="2.5"/><circle cx="17" cy="17" r="2.5"/>') },
+  { id:'x-sprint', name:'Sprint', tag:'Team · KapazitätenPlaner', braucht:['kapazitaetenplaner'], ziel:'kapazitaetenplaner',
+    farbe:'var(--teal)', zeichen:SVG('<path d="M4 17c3-6 6-9 9-9h7"/><path d="M17 5l3 3-3 3"/><path d="M4 21h16"/>') },
   { id:'x-woche', name:'Wochenbilanz', tag:'Stunden gegen Ziel', braucht:['stempeluhr'], ziel:'stempeluhr',
     farbe:'var(--teal)', zeichen:SVG('<rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 9.5h17M8 3v4M16 3v4M8 14l2.5 2.5L16 12"/>') }
 ].map(w => Object.assign(w, { bereich:'ueberblick', kombi:true, url: w.ziel ? KOMBI_ZIEL(w.ziel) : null }));
@@ -3687,6 +3689,20 @@ Object.assign(LIVE, {
     return { gross:nfE.format(fakt), sub:'USt auf Rechnungen · Q' + (q + 1) + ' ' + jetzt.getFullYear(),
       extra:'<div class="lw-s">davon vereinnahmt: ' + nfE.format(verein) + '</div>'
         + '<span class="lw-fuss">ohne Vorsteuer – Schätzung, keine Voranmeldung</span>' };
+  }},
+  /* Sprint (seit 18.11.2026): Lesekopie des KapazitätenPlaners ab v3.6.0 */
+  'x-sprint': { w(){
+    const d = lsJson('wb-kapazitaetenplaner-sprint'); if (!d || !d.sprint) return null;
+    const s = d.sprint, heute = new Date().toISOString().slice(0, 10), tg = iso => iso ? iso.slice(8, 10) + '.' + iso.slice(5, 7) + '.' : '';
+    const tage = iso => Math.round((Date.parse(iso + 'T00:00:00') - Date.parse(heute + 'T00:00:00')) / 864e5);
+    const p = d.kap ? d.geplant / d.kap * 100 : 0;
+    const zeit = s.start <= heute ? 'läuft bis ' + tg(s.ende) + ' · noch ' + Math.max(0, tage(s.ende) + 1) + ' Tage' : 'beginnt ' + tg(s.start) + ' · in ' + tage(s.start) + ' Tagen';
+    const hinweise = [];
+    if (d.melden) hinweise.push(d.melden + ' Workitem' + (d.melden > 1 ? 's melden' : ' meldet') + ' sich zum Umplanen');
+    if (d.ueber) hinweise.push(d.ueber + (d.ueber > 1 ? ' Personen' : ' Person') + ' über Kapazität');
+    return { gross:nf1.format(d.geplant) + ' / ' + nf1.format(d.kap) + ' h', sub:'Sprint ' + s.nr + ' · ' + zeit, rot:p > 100 || d.ueber > 0,
+      extra:'<div class="lw-pb">' + balkenZeile(d.n + ' Workitems' + (d.erledigt ? ' · ' + d.erledigt + ' erledigt' : ''), Math.round(p) + ' %', Math.min(100, p), p > 100 ? 'warn' : '') + '</div>'
+        + hinweise.map(h => '<div class="lw-s">' + esc(h) + '</div>').join('') };
   }},
   'x-woche': { w(){
     const roh = lsJson('stempeluhr_entries_v2'), ent = Array.isArray(roh) ? roh : [];
