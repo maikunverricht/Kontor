@@ -2746,8 +2746,8 @@ function kpVBauen(a, ich){
     const datum = st && st.start ? `${kpDatum(st.start)}–${kpDatum(st.ende)}` : '';
     let test = '';
     if (s.test && T) { const z = T[s.test], wo = T.je ? 'des Auftrags' : 'gesamt (Auftrag noch ohne Anforderungen)';
-      test = z.n ? `<span class="t" title="${s.ebene}-Tests ${wo}: ${z.ok} bestanden, ${z.f} fehlgeschlagen, ${z.n - z.ok - z.f} offen">${s.ebene}-Tests ${z.ok}/${z.n}${z.f ? ' · ' + z.f + ' ✗' : ''}${T.je ? '' : ' *'}</span>` : `<span class="t" title="${wo}">${s.ebene}-Tests –</span>`; }
-    if (s.k === 'SWE.1' && A) test = `<span class="t" title="Anforderungen des Auftrags im Anforderungsbuch">L2 ${A.n[2]} · L3 ${A.n[3]} · L4 ${A.n[4]}</span>`;
+      test = z.n ? `<span class="t" title="${s.ebene}-Tests ${wo}: ${z.ok} bestanden, ${z.f} fehlgeschlagen, ${z.n - z.ok - z.f} offen">Tests ${z.ok}/${z.n}${z.f ? ' · ' + z.f + '✗' : ''}${T.je ? '' : ' *'}</span>` : `<span class="t" title="${s.ebene}-Tests ${wo}">Tests –</span>`; }
+    if (s.k === 'SWE.1' && A) test = `<span class="t" title="Anforderungen des Auftrags im Anforderungsbuch">L2 ${A.n[2]}·L3 ${A.n[3]}·L4 ${A.n[4]}</span>`;
     let rel = '';
     if (s.k === 'SWE.6' && a.bc) rel = `<span class="r" title="Ablieferprodukt BC-Release">→ ${esc(a.bc)}${a.bcPlan ? ' · ' + esc(kpDatum(String(a.bcPlan).slice(0, 10))) : ''}</span>`;
     if (s.k === 'SWE.5' && a.fcs && a.fcs.length) rel = `<span class="r" title="Ablieferprodukt Komponente (FC-Release)">→ ${esc(a.fcs.join(', '))}</span>`;
