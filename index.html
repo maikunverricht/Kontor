@@ -933,6 +933,8 @@ html.wb-vorab .slides,html.wb-vorab .dock{visibility:hidden}
 .vm-kp-kachel dd{margin:0;font-size:11px;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .vm-ord-l{color:var(--teal);text-decoration:underline;text-decoration-color:color-mix(in srgb,var(--teal) 40%,transparent);text-underline-offset:2px;cursor:pointer;font-family:var(--mono);font-size:10px}
 .vm-ord-l:hover{text-decoration-color:var(--teal)}
+.vm-ord.fehlt .vm-ord-l{color:var(--text-3);text-decoration:line-through}
+.vm-ord.fehlt dd.d{color:var(--red-ink,#E8697D);font-weight:700}
 .vm-kp-kachel dd.d{font:500 10px/1.4 var(--mono);color:var(--text-2);text-align:right}
 .vm-kp-kachel .pk{display:inline-flex;gap:3px;flex:none}
 .vm-kp-kachel .pk .vm-pkt{width:7px;height:7px}
@@ -2631,13 +2633,14 @@ function vmOrdner(x){
   const link = String(o.link || '').trim();
   const web = /^https?:\/\//i.test(link);
   const text = link ? (web ? (() => { const t = link.replace(/^https?:\/\//i, ''); try { return decodeURIComponent(t); } catch (e) { return t; } })() : link) : (wurzel ? wurzel + '/' : '') + o.name;
-  return { text, link, web };
+  return { text, link, web, fehlt:!!o.fehlt };
 }
 function vmToast(t){ let el = document.getElementById('vmToast'); if (!el) { el = document.createElement('div'); el.id = 'vmToast'; el.setAttribute('role', 'status');
   el.style.cssText = 'position:fixed;left:50%;bottom:96px;transform:translateX(-50%);z-index:60;padding:8px 14px;border-radius:12px;border:1px solid var(--line);background:var(--glass-2);color:var(--text);font-size:12.5px;box-shadow:var(--shadow);max-width:90vw;overflow-wrap:anywhere;transition:opacity .25s';
   document.body.appendChild(el); } el.textContent = t; el.style.opacity = 1; clearTimeout(vmToast.z); vmToast.z = setTimeout(() => el.style.opacity = 0, 2600); }
 function vmOrdnerOeffnen(id){
   const d = kpLesen(), x = d && (d.auftraege || []).find(a => a.id === id), o = vmOrdner(x); if (!o) return;
+  if (o.fehlt) { vmToast('Ordner fehlt in der Ablage – im KapazitätenPlaner neu anlegen'); return; }
   if (o.web) { window.open(o.link, '_blank', 'noopener,noreferrer'); return; }
   /* Netzlaufwerk/lokaler Pfad: öffnet der Browser nicht – Pfad kopieren */
   const t = o.link || o.text;
@@ -2657,7 +2660,7 @@ function vmKachelHtml(x, tag, an){
       ${zeile('BC', x.bc ? esc(x.bc) : '–', x.bcPlan, x.bc)}
       ${fcs.length ? fcs.map(f => zeile('FC', esc(f.name), f.plan, f.name)).join('') : zeile('FC', '–', '')}
       ${zeile('Status', esc(schritt), kpEnde(x), schritt + ' · Plan-Ende')}
-      ${(() => { const o = vmOrdner(x); return o ? `<div class="vm-ord"><dt>Ordner</dt><dd><span class="vm-ord-l" role="link" tabindex="0" data-v-ordner="${esc(x.id)}" title="${esc(o.web ? 'Ordner öffnen: ' + o.link : 'Pfad kopieren: ' + (o.link || o.text))}">${esc(o.text)}</span></dd><dd class="d">${o.web ? '↗' : '⧉'}</dd></div>` : ''; })()}
+      ${(() => { const o = vmOrdner(x); return o ? `<div class="vm-ord${o.fehlt ? ' fehlt' : ''}"><dt>Ordner</dt><dd><span class="vm-ord-l" role="link" tabindex="0" data-v-ordner="${esc(x.id)}" title="${esc(o.fehlt ? 'Ordner fehlt in der Ablage: ' + o.text : o.web ? 'Ordner öffnen: ' + o.link : 'Pfad kopieren: ' + (o.link || o.text))}">${esc(o.text)}</span></dd><dd class="d">${o.fehlt ? '⚠ fehlt' : o.web ? '↗' : '⧉'}</dd></div>` : ''; })()}
     </dl></${tag}>`;
 }
 /* Gewähltes Issue: die Kachel schiebt sich in die Mitte des V und bleibt im Hintergrund */
@@ -2698,7 +2701,7 @@ function vmObenBauen(oben){
       <button type="button" class="vm-kp-pfeil" aria-expanded="${UI_VM.kpOffen}" title="${ich ? 'Issues wählen, an denen ' + esc(ich) + ' beteiligt ist' : 'Issues wählen'}" data-v-kp-pfeil>▾</button>
       ${a ? `<span class="vm-kp-wahl"><span class="id">${esc(a.id)}</span>${esc(a.titel)}
         <span class="ee" title="Eingang · Abschluss">${punkt(a.schritte && a.schritte.EIN)}${punkt(a.schritte && a.schritte.ABS)}</span>
-        ${vmOrdner(a) ? `<button type="button" data-v-ordner="${esc(a.id)}" title="Auftragsordner öffnen" aria-label="Auftragsordner öffnen">📁</button>` : ''}
+        ${vmOrdner(a) ? `<button type="button" data-v-ordner="${esc(a.id)}" title="${vmOrdner(a).fehlt ? 'Ordner fehlt in der Ablage' : 'Auftragsordner öffnen'}" aria-label="Auftragsordner öffnen">${vmOrdner(a).fehlt ? '⚠' : '📁'}</button>` : ''}
         <button type="button" data-v-auftrag-weg title="Auftrag abwählen">✕</button></span>` : ''}
     </div>
     <div class="vm-kp-ring"${UI_VM.kpOffen ? '' : ' hidden'}>
