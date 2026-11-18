@@ -888,6 +888,12 @@ html.wb-vorab .slides,html.wb-vorab .dock{visibility:hidden}
 .vm-k:hover .shot,.vm-k:focus-visible .shot{transform:translateY(-2px);border-color:var(--teal)}
 .vm-k:focus-visible{outline:none}
 .vm-k b,.vm-k i{background:var(--void);border-radius:6px;padding:1px 5px}
+.vm-nr{font-style:normal;color:var(--amber);font-weight:700}
+.vm-feld.mit-mitte .vm-ltg-txt{opacity:0;pointer-events:none}
+@media (max-width:700px){.vm-feld.mit-mitte .vm-ltg-txt{opacity:1;pointer-events:auto}}
+.vm-teile{display:flex;flex-direction:column;gap:3px;margin-top:1px}
+.vm-teil{font:500 10px/1.3 var(--display,inherit);white-space:nowrap;padding:2px 7px;border-radius:999px;border:1px solid var(--line);background:var(--glass-2);color:var(--text-2);cursor:pointer}
+.vm-teil:hover,.vm-teil:focus-visible{border-color:var(--amber);color:var(--text);outline:none}
 .vm-k b{font-size:12.5px;font-weight:600;line-height:1.15}
 .vm-k i{font:500 9px/1.25 var(--mono);font-style:normal;color:var(--text-3);letter-spacing:.03em}
 .vm-k.zweit .shot{background:var(--void);border-style:dashed;box-shadow:none}
@@ -1775,7 +1781,8 @@ function ensureLoaded(t){
       } catch (e) { /* fremde Herkunft: dann eben nicht nachsehen */ }
     }, 700);
   }, { once:true });
-  f.src = t.app.url;
+  /* Sprungziel (z. B. Anforderungsbuch #auftraege/system) beim ersten Laden mitgeben */
+  f.src = t.app.url + (t.startHash ? '#' + t.startHash : ''); t.startHash = null;
   t.vp.appendChild(f);
   t.iframe = f;
 }
@@ -2492,9 +2499,15 @@ ansichtBauen(PRIVAT, $('#gridPrivat'));
    Ein Werkzeug darf zweimal stehen (TestcaseManager: Integrationstest SWE.5, Qualifikation SWE.6);
    die zweite Rolle ist gestrichelt. Geöffnet wird wie aus der Kachel. */
 const VM_STUFEN = [
-  { x:15, y:22, id:'anforderungsbuch', stufe:'SWE.1 · Anforderung' },
-  { x:27, y:44, id:'schaltplan',  stufe:'SWE.2 · Architektur', tab:'arch' },
-  { x:38, y:66, id:'funktionsentwurf', stufe:'SWE.3 · Feinentwurf' },
+  /* Reihenfolge links (seit 18.11.2026): ① L1/L2 → ② Wirkkette → ③ Interfaces, L3/L4 → ④ Funktionsebene → ⑤ Feinentwurf.
+     Je Teil öffnet das Werkzeug nur den betroffenen Abschnitt – klare Informationsgrenzen. */
+  { x:15, y:22, id:'anforderungsbuch', stufe:'SWE.1 · Anforderung', tab:'auftraege',
+    teile:[{ nr:'①', name:'System L1·L2', tab:'auftraege/system', titel:'Teil 1 – vor der Wirkkettenanalyse: Kundenanforderung (L1) und Systemanforderung (L2)' },
+           { nr:'③', name:'Interfaces·L3·L4', tab:'auftraege/software', titel:'Teil 2 – nach der Wirkkettenanalyse: Interfaces an System- und Clustergrenzen, Cluster- (L3) und Funktionsanforderungen (L4)' }] },
+  { x:27, y:44, id:'schaltplan',  stufe:'SWE.2 · Architektur', tab:'arch',
+    teile:[{ nr:'②', name:'Wirkkette', tab:'arch', titel:'Teil 1 – Wirkkettenanalyse über die Cluster: liefert die Signale an System- und Clustergrenzen' },
+           { nr:'④', name:'im Cluster', tab:'fn', titel:'Teil 2 – Funktionsebene innerhalb des Clusters' }] },
+  { x:38, y:66, id:'funktionsentwurf', stufe:'SWE.3 · Feinentwurf', nr:'⑤' },
   { x:50, y:86, code:true, name:'C-Code' },
   { x:62, y:66, id:'codecompare', stufe:'SWE.4 · Unit' },
   { x:73, y:44, id:'testcasemanager', stufe:'SWE.5 · Integrationstest', zweit:true, tab:'cluster' },
@@ -2523,6 +2536,8 @@ const vmOeffnen = (id, shot, tab) => { const t = byId[id]; if (!t || current) re
   if (tab && id === 'testcasemanager') { const k = ['system','cluster','komponente','matrix'].indexOf(tab);
     if (k >= 0) { try { localStorage.setItem('wb-wirkkette-ebene', String(k)); } catch (e) {}
       const f = t.loaded && t.vp && t.vp.querySelector('iframe'); if (f) { try { f.contentWindow.tcmEbene(k); } catch (e) {} } } }
+  else if (tab && id === 'anforderungsbuch') { t.startHash = tab;
+    const f = t.loaded && t.vp && t.vp.querySelector('iframe'); if (f) { try { f.contentWindow.location.hash = tab; } catch (e) {} } }
   else if (tab) { try { localStorage.setItem('ap-tab', tab); } catch (e) {}
     const f = t.loaded && t.vp && t.vp.querySelector('iframe');
     if (f) { try { f.contentWindow.openTab(tab); } catch (e) {} } }
@@ -2551,7 +2566,8 @@ function vModellBauen(){
     </div>
     <div class="vm-insp"></div>
     <div class="vm-baender"></div>
-    <p class="vm-hinweis">Gestrichelt: zweite Rolle des TestcaseManagers – Integrationstest gegen die Cluster (L3) aus der Wirkkette (SWE.5).
+    <p class="vm-hinweis">Reihenfolge links: ① System-Anforderungen L1/L2 → ② Wirkkette → ③ Interfaces, L3/L4 → ④ Funktionsebene im Cluster → ⑤ Feinentwurf. Jeder Teil öffnet nur seinen Abschnitt.
+      Gestrichelt: zweite Rolle des TestcaseManagers – Integrationstest gegen die Cluster (L3) aus der Wirkkette (SWE.5).
       Die Systemebene (SYS.1–5) liegt außerhalb dieses V.</p>`;
   const feld = $('.vm-feld', box);
   p.forEach(s => {
@@ -2564,12 +2580,16 @@ function vModellBauen(){
     else if (w) { k.type = 'button'; k.setAttribute('aria-label', w.name + ' öffnen – ' + s.stufe); }
     const zeichen = s.code ? '' : (w ? (w.zeichen || PLUS) : PLUS);
     k.innerHTML = `<span class="shot">${zeichen}</span><b>${esc(w ? w.name : (s.name || s.stufe.split(' · ')[1]))}</b>`
-      + (s.stufe ? `<i>${esc(w ? s.stufe : (s.stufe.split(' · ')[0] + ' · ' + s.frei))}</i>` : '');
+      + (s.stufe ? `<i>${s.nr ? `<em class="vm-nr">${s.nr}</em> ` : ''}${esc(w ? s.stufe : (s.stufe.split(' · ')[0] + ' · ' + s.frei))}</i>` : '')
+      + (s.teile && w && !vmZu(w.id) ? `<span class="vm-teile">${s.teile.map((t, i) => `<span role="button" tabindex="0" class="vm-teil" data-teil="${i}" title="${esc(t.titel)}"><em class="vm-nr">${t.nr}</em> ${esc(t.name)}</span>`).join('')}</span>` : '');
     const shot = $('.shot', k);
     if (w && !s.zweit) VM_SHOT[w.id] = shot;
     if (w && !zu) {
       if (w.zahl && !s.zweit) vmZahl(w.zahl, shot);
-      k.addEventListener('click', () => vmOeffnen(w.id, shot, s.tab));
+      k.addEventListener('click', e => { const teil = e.target.closest && e.target.closest('[data-teil]');
+        vmOeffnen(w.id, shot, teil ? s.teile[+teil.dataset.teil].tab : s.tab); });
+      k.addEventListener('keydown', e => { const teil = e.target.closest && e.target.closest('[data-teil]');
+        if (teil && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); e.stopPropagation(); vmOeffnen(w.id, shot, s.teile[+teil.dataset.teil].tab); } });
     }
     try { vmAuftragKnoten(k, s); } catch (e) {}
     feld.appendChild(k);
@@ -2673,6 +2693,8 @@ function vmMitteBauen(feld){
   m.title = 'Gewähltes Issue – antippen öffnet die Auswahl';
   m.addEventListener('click', () => { UI_VM.kpOffen = true; vModellBauen(); });
   feld.insertBefore(m, feld.firstChild);
+  /* Beschriftungen der Leitungen würden über der Kachel liegen – solange ein Issue in der Mitte steht, nur die Linien zeigen */
+  feld.classList.add('mit-mitte');
   /* ✕ liegt über den Linien (die Kachel selbst bleibt im Hintergrund) */
   const weg = document.createElement('button'); weg.type = 'button'; weg.className = 'vm-mitte-weg';
   weg.title = 'Auftrag abwählen'; weg.setAttribute('aria-label', 'Auftrag abwählen'); weg.textContent = '✕';
