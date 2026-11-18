@@ -903,13 +903,35 @@ html.wb-vorab .slides,html.wb-vorab .dock{visibility:hidden}
 .vm-k.code{cursor:default}
 .vm-k.code:hover .shot{transform:none}
 .vm-baender{max-width:880px;margin:10px auto 0;display:grid;gap:10px}
-.vm-oben{max-width:880px;margin:0 auto 6px;position:relative}
+.vm-oben{max-width:880px;margin:0 auto 4px;position:relative;z-index:3}
 .vm-oben:empty{display:none}
-/* Seit IdeaHub unten steht, ist der obere Rand des V-Felds leer – das V rückt an das Band heran. */
-.vm-oben:not(:empty) + .vm-feld{margin-top:clamp(-62px,-6vw,-46px)}
-.vm-band.oben{border-color:var(--line-hi);background:color-mix(in srgb,var(--amber) 7%,var(--glass))}
-.vm-band.oben::after{content:"";position:absolute;left:50%;bottom:-14px;height:12px;border-left:1.5px dashed var(--line-hi)}
-.vm-oben-hinweis{flex-basis:100%;font-size:11.5px;color:var(--text-3)}
+.vm-kp{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap}
+.vm-kp-pfeil{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:var(--glass);color:var(--text);cursor:pointer;font-size:14px;line-height:1;transition:transform .2s}
+.vm-kp-pfeil[aria-expanded="true"]{transform:rotate(180deg);border-color:var(--line-hi)}
+.vm-kp-wahl{display:inline-flex;align-items:center;gap:8px;height:34px;padding:0 6px 0 12px;border-radius:100px;border:1px solid var(--line-hi);background:var(--glass);font-size:13px;max-width:100%}
+.vm-kp-wahl .id,.vm-kp-kachel .id{font:600 10.5px/1 var(--mono);color:var(--text-3)}
+.vm-kp-wahl button{border:0;background:none;color:var(--text-3);cursor:pointer;font-size:12px;padding:4px 6px}
+.vm-kp-wahl .ee{display:inline-flex;gap:3px}
+.vm-pkt{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--kp-c,transparent);border:1px solid var(--kp-c,var(--text-3))}
+.vm-kp-liste{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin:10px 0 4px}
+.vm-kp-liste[hidden]{display:none}
+.vm-kp-kachel{display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:10px 12px;border-radius:14px;border:1px solid var(--line);background:var(--glass);color:var(--text);font:inherit;text-align:left;cursor:pointer}
+.vm-kp-kachel:hover,.vm-kp-kachel.an{border-color:var(--line-hi)}
+.vm-kp-kachel.an{background:color-mix(in srgb,var(--amber) 9%,var(--glass))}
+.vm-kp-kachel b{font-size:13px;font-weight:600;line-height:1.25;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.vm-kp-kachel .pk{display:inline-flex;gap:3px}
+.vm-kp-kachel small{font:500 10.5px/1.2 var(--mono);color:var(--text-3)}
+.vm-kp-leer{grid-column:1/-1;font-size:13px;color:var(--text-2);margin:0;text-align:center}
+.vm-k.amp .shot{border-color:var(--kp-c,var(--line));box-shadow:0 0 0 3px color-mix(in srgb,var(--kp-c,transparent) 28%,transparent)}
+.vm-k.amp-leer .shot{opacity:.55}
+.vm-k.verzug .shot{animation:kpPuls 1.8s ease-in-out infinite}
+.vm-auf{display:flex;flex-direction:column;align-items:center;gap:2px}
+.vm-auf em{font:500 9px/1.25 var(--mono);font-style:normal;color:var(--text-2);background:var(--void);border-radius:6px;padding:1px 5px;white-space:nowrap;max-width:130px;overflow:hidden;text-overflow:ellipsis}
+.vm-auf em span{display:inline-block;padding:0 3px;margin-right:2px;border-radius:4px;background:var(--line);font-weight:700}
+.vm-auf em span.ich{background:color-mix(in srgb,var(--teal) 30%,transparent);color:var(--text)}
+@media (prefers-reduced-motion:reduce){.vm-k.verzug .shot{animation:none}}
+#s-produktiv.v-an #kpAuf{display:none}
+.vm-oben:not(:empty) + .vm-feld{margin-top:clamp(-56px,-5vw,-40px)}
 .vm-band{display:flex;align-items:center;flex-wrap:wrap;gap:8px 10px;padding:10px 12px;border:1px solid var(--line);border-radius:15px;background:var(--glass)}
 .vm-band>span{font:600 9.5px/1.3 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);min-width:118px}
 .vm-chip{display:inline-flex;align-items:center;gap:8px;height:34px;padding:0 12px 0 5px;border-radius:100px;border:1px solid var(--line);
@@ -2446,10 +2468,6 @@ const VM_STUFEN = [
   { x:73, y:44, id:'testcasemanager', stufe:'SWE.5 · Integrationstest', zweit:true, tab:'cluster' },
   { x:85, y:22, id:'testcasemanager', stufe:'SWE.6 · Qualifikation', tab:'system' }
 ];
-/* Über dem V (seit 18.11.2026): der KapazitätenPlaner liest den Auftragseingang
-   und plant – jeder Auftrag durchläuft das V darunter einmal. */
-const VM_OBEN = { titel:'Über dem V · je Auftrag', werkzeuge:[['kapazitaetenplaner','Auftragseingang · Plan · Forecast']],
-  hinweis:'Jeder Auftrag durchläuft das V einmal – vom Eingang bis zum Abschluss.' };
 const VM_BAENDER = [
   { titel:'Projektführung', werkzeuge:[['auswertung','Ist']] },
   { titel:'Begleitet alles', werkzeuge:[['notizbuch','Wissen'], ['ideahub','Ideen']] }
@@ -2521,11 +2539,12 @@ function vModellBauen(){
       if (w.zahl && !s.zweit) vmZahl(w.zahl, shot);
       k.addEventListener('click', () => vmOeffnen(w.id, shot, s.tab));
     }
+    try { vmAuftragKnoten(k, s); } catch (e) {}
     feld.appendChild(k);
   });
   const baender = $('.vm-baender', box);
   const oben = $('.vm-oben', box);
-  [VM_OBEN, ...VM_BAENDER].forEach(b => {
+  VM_BAENDER.forEach(b => {
     const z = document.createElement('div'); z.className = 'vm-band';
     z.innerHTML = `<span>${esc(b.titel)}</span>`;
     b.werkzeuge.forEach(([id, rolle]) => {
@@ -2537,12 +2556,9 @@ function vModellBauen(){
       c.addEventListener('click', () => vmOeffnen(id, shot));
       z.appendChild(c);
     });
-    if (b === VM_OBEN) { z.classList.add('oben');
-      if (b.hinweis) { const h = document.createElement('small'); h.className = 'vm-oben-hinweis'; h.textContent = b.hinweis; z.appendChild(h); }
-      if (z.querySelector('.vm-chip')) oben.appendChild(z);
-      return; }
     if (z.children.length > 1) baender.appendChild(z);
   });
+  try { vmObenBauen(oben); } catch (e) {}
   vmInspektor();
   box.querySelectorAll('[data-ltg]').forEach(el => el.addEventListener('click', () => { UI_VM.wahl = UI_VM.wahl === el.dataset.ltg ? null : el.dataset.ltg; vModellBauen(); }));
 }
@@ -2552,7 +2568,68 @@ function vModellBauen(){
    was fehlt, steht blass gestrichelt. Gelesen werden die Lesekopien der
    führenden Werkzeuge und die Rückmeldung des TestcaseManagers. Geschrieben
    wird nichts. */
-const UI_VM = { wahl:null };
+const UI_VM = { wahl:null, kpOffen:false, auftrag:'' };
+try { UI_VM.auftrag = localStorage.getItem('wb-v-auftrag') || ''; } catch (e) {}
+/* ───────── Über dem V: KapazitätenPlaner mit Auftragswahl (seit 18.11.2026) ─────────
+   Pfeil an der Kachel klappt die Issues auf, an denen der im Planer Angemeldete
+   mit Workitems beteiligt ist. Ein gewähltes Issue legt sich über das V: Ampel je
+   Schritt, Mitarbeiter, Plandaten, Teststand und Ablieferprodukt. */
+function vmAuftrag(){
+  if (!UI_VM.auftrag) return null;
+  const d = kpLesen(); const a = d && d.auftraege.find(x => x.id === UI_VM.auftrag);
+  return a || null;
+}
+function vmAuftragWaehlen(id){
+  UI_VM.auftrag = id || ''; UI_VM.kpOffen = false;
+  try { id ? localStorage.setItem('wb-v-auftrag', id) : localStorage.removeItem('wb-v-auftrag'); } catch (e) {}
+  vModellBauen();
+}
+function vmObenBauen(oben){
+  const kp = vmApp('kapazitaetenplaner'); if (!kp || vmZu('kapazitaetenplaner')) { oben.innerHTML = ''; return; }
+  const d = kpLesen(), ich = d ? d.angemeldet || '' : '', meine = d ? kpMeine(d) : [], a = vmAuftrag();
+  const punkt = st => { const am = kpAmpel(st); return `<i class="vm-pkt" style="${kpFarbeVar(am.a)}" title="${KP_TEXT[am.a]}"></i>`; };
+  const kacheln = !d ? '<p class="vm-kp-leer">Noch keine Aufträge – im KapazitätenPlaner die Austausch-Excel einlesen.</p>'
+    : !ich ? '<p class="vm-kp-leer">Im KapazitätenPlaner anmelden (Name in der Startabfrage) – dann stehen hier deine Issues.</p>'
+    : !meine.length ? `<p class="vm-kp-leer">Keine Issues, an denen ${esc(ich)} mit Workitems beteiligt ist.</p>`
+    : meine.map(x => `<button type="button" class="vm-kp-kachel${a && a.id === x.id ? ' an' : ''}" data-v-auftrag="${esc(x.id)}">
+        <span class="id">${esc(x.id)}</span><b>${esc(x.titel)}</b>
+        <span class="pk">${KP_SCHRITTE.map(sx => punkt(x.schritte && x.schritte[sx.k])).join('')}</span>
+        <small>${x.bc ? esc(x.bc) : ''}${kpEnde(x) ? (x.bc ? ' · ' : '') + 'bis ' + kpDatum(kpEnde(x)) : ''}</small></button>`).join('');
+  oben.innerHTML = `<div class="vm-kp">
+      <button type="button" class="vm-chip" data-v-kp-oeffnen><span class="shot">${kp.zeichen || PLUS}</span>${esc(kp.name)} <em>Auftragseingang · Plan · Forecast</em></button>
+      <button type="button" class="vm-kp-pfeil" aria-expanded="${UI_VM.kpOffen}" title="${ich ? 'Issues wählen, an denen ' + esc(ich) + ' beteiligt ist' : 'Issues wählen'}" data-v-kp-pfeil>▾</button>
+      ${a ? `<span class="vm-kp-wahl"><span class="id">${esc(a.id)}</span>${esc(a.titel)}
+        <span class="ee" title="Eingang · Abschluss">${punkt(a.schritte && a.schritte.EIN)}${punkt(a.schritte && a.schritte.ABS)}</span>
+        <button type="button" data-v-auftrag-weg title="Auftrag abwählen">✕</button></span>` : ''}
+    </div>
+    <div class="vm-kp-liste"${UI_VM.kpOffen ? '' : ' hidden'}>${kacheln}</div>`;
+  const shot = $('.shot', oben); VM_SHOT.kapazitaetenplaner = shot;
+  if (kp.zahl) vmZahl(kp.zahl, shot);
+  $('[data-v-kp-oeffnen]', oben).addEventListener('click', () => vmOeffnen('kapazitaetenplaner', shot));
+  $('[data-v-kp-pfeil]', oben).addEventListener('click', () => { UI_VM.kpOffen = !UI_VM.kpOffen; vModellBauen(); });
+  const weg = $('[data-v-auftrag-weg]', oben); if (weg) weg.addEventListener('click', () => vmAuftragWaehlen(''));
+  oben.querySelectorAll('[data-v-auftrag]').forEach(b => b.addEventListener('click', () => vmAuftragWaehlen(UI_VM.auftrag === b.dataset.vAuftrag ? '' : b.dataset.vAuftrag)));
+}
+/* Gewähltes Issue auf einen Knoten des V legen */
+function vmAuftragKnoten(k, s){
+  const a = vmAuftrag(); if (!a || !s.stufe) return;
+  const key = s.stufe.split(' · ')[0]; if (!/^SWE\.\d$/.test(key)) return;
+  const st = a.schritte && a.schritte[key], am = kpAmpel(st);
+  k.classList.add('amp', 'amp-' + am.a); if (am.verzug) k.classList.add('verzug');
+  if (am.a !== 'leer') k.style.setProperty('--kp-c', KP_FARBE[am.a]);
+  const ich = (kpLesen() || {}).angemeldet || '';
+  const T = kpTests(a.id), A = kpAnf(a.id), ks = KP_SCHRITTE.find(x => x.k === key) || {};
+  const zeilen = [];
+  if (st) zeilen.push(st.mitarbeiter.map(m => `<span class="${m === ich ? 'ich' : ''}">${esc(kpKurz(m))}</span>`).join('') + (st.start ? ` ${kpDatum(st.start)}–${kpDatum(st.ende)}` : ''));
+  if (key === 'SWE.1' && A) zeilen.push(`L2 ${A.n[2]}·L3 ${A.n[3]}·L4 ${A.n[4]}`);
+  if (ks.test && T) { const z = T[ks.test]; zeilen.push(z.n ? `Tests ${z.ok}/${z.n}${z.f ? ' · ' + z.f + '✗' : ''}${T.je ? '' : ' *'}` : 'Tests –'); }
+  if (key === 'SWE.6' && a.bc) zeilen.push('→ ' + esc(a.bc));
+  if (key === 'SWE.5' && a.fcs && a.fcs.length) zeilen.push('→ ' + esc(a.fcs.join(', ')));
+  const el = document.createElement('span'); el.className = 'vm-auf';
+  el.innerHTML = zeilen.length ? zeilen.map(z => `<em>${z}</em>`).join('') : `<em>${KP_TEXT[am.a]}</em>`;
+  el.title = (s.stufe || '') + ': ' + KP_TEXT[am.a] + (am.verzug ? ' – laut Plan überfällig' : '') + (st && st.rest ? ' · Rest ' + st.rest + ' h' : '');
+  k.appendChild(el);
+}
 const VM_SHOT = {};
 const VM_LEITUNGEN = [
   { k:'anf', titel:'Anforderungen → TestcaseManager', kurz:'Anforderungen', von:'anforderungsbuch', zu:'testcasemanager',
@@ -2800,6 +2877,9 @@ function kpVBauen(a, ich){
   </div>`;
 }
 kpAufBauen();
+/* Das V ist beim ersten Bauen vor diesem Block gezeichnet – jetzt mit Auftragswahl neu */
+try { if ($('#s-produktiv').classList.contains('v-an')) vModellBauen(); } catch (e) {}
+window.addEventListener('storage', e => { if (e.key === 'wb-kapazitaetenplaner-auftraege' || e.key === 'wb-testcasemanager-data' || e.key === 'wb-anforderungsbuch-data') { try { if ($('#s-produktiv').classList.contains('v-an') && !current) vModellBauen(); } catch (x) {} } });
 window.addEventListener('storage', e => { if (!e.key || e.key === 'wb-kapazitaetenplaner-auftraege' || e.key === 'wb-testcasemanager-data' || e.key === 'wb-anforderungsbuch-data' || e.key === 'wb-aktiver-auftrag') kpAufBauen(); });
 document.addEventListener('visibilitychange', () => { if (!document.hidden) kpAufBauen(); });
 
