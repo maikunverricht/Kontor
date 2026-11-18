@@ -903,6 +903,11 @@ html.wb-vorab .slides,html.wb-vorab .dock{visibility:hidden}
 .vm-k.code{cursor:default}
 .vm-k.code:hover .shot{transform:none}
 .vm-baender{max-width:880px;margin:10px auto 0;display:grid;gap:10px}
+.vm-oben{max-width:880px;margin:0 auto 6px;position:relative}
+.vm-oben:empty{display:none}
+.vm-band.oben{border-color:var(--line-hi);background:color-mix(in srgb,var(--amber) 7%,var(--glass))}
+.vm-band.oben::after{content:"";position:absolute;left:50%;bottom:-14px;height:12px;border-left:1.5px dashed var(--line-hi)}
+.vm-oben-hinweis{flex-basis:100%;font-size:11.5px;color:var(--text-3)}
 .vm-band{display:flex;align-items:center;flex-wrap:wrap;gap:8px 10px;padding:10px 12px;border:1px solid var(--line);border-radius:15px;background:var(--glass)}
 .vm-band>span{font:600 9.5px/1.3 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);min-width:118px}
 .vm-chip{display:inline-flex;align-items:center;gap:8px;height:34px;padding:0 12px 0 5px;border-radius:100px;border:1px solid var(--line);
@@ -2440,8 +2445,12 @@ const VM_STUFEN = [
   { x:85, y:22, id:'testcasemanager', stufe:'SWE.6 · Qualifikation', tab:'system' }
 ];
 const VM_VORHER = { x:15, y:3, id:'ideahub', stufe:'Konzept · Idee' };
+/* Über dem V (seit 18.11.2026): der KapazitätenPlaner liest den Auftragseingang
+   und plant – jeder Auftrag durchläuft das V darunter einmal. */
+const VM_OBEN = { titel:'Über dem V · je Auftrag', werkzeuge:[['kapazitaetenplaner','Auftragseingang · Plan · Forecast']],
+  hinweis:'Jeder Auftrag durchläuft das V einmal – vom Eingang bis zum Abschluss.' };
 const VM_BAENDER = [
-  { titel:'Projektführung', werkzeuge:[['kapazitaetenplaner','Plan · Forecast'], ['auswertung','Ist']] },
+  { titel:'Projektführung', werkzeuge:[['auswertung','Ist']] },
   { titel:'Begleitet alles', werkzeuge:[['notizbuch','Wissen']] }
 ];
 const vmApp = id => PRODUKTIV.find(w => w.id === id);
@@ -2478,6 +2487,7 @@ function vModellBauen(){
     return `<path class="vm-ltg ${z.belegt ? 'an' : 'leer'}${UI_VM.wahl === l.k ? ' gewaehlt' : ''}" style="stroke:${l.farbe}" d="${l.d(p)}"/>` +
            `<path class="vm-hit" data-ltg="${l.k}" d="${l.d(p)}"><title>${esc(l.titel)}</title></path>`; }).join('');
   box.innerHTML = `
+    <div class="vm-oben"></div>
     <div class="vm-feld">
       <svg class="vm-linien" viewBox="0 0 100 100" preserveAspectRatio="none">
         <path class="vm-arm" d="${pfad}"/>${paare}${ltg}
@@ -2514,7 +2524,8 @@ function vModellBauen(){
     feld.appendChild(k);
   });
   const baender = $('.vm-baender', box);
-  VM_BAENDER.forEach(b => {
+  const oben = $('.vm-oben', box);
+  [VM_OBEN, ...VM_BAENDER].forEach(b => {
     const z = document.createElement('div'); z.className = 'vm-band';
     z.innerHTML = `<span>${esc(b.titel)}</span>`;
     b.werkzeuge.forEach(([id, rolle]) => {
@@ -2526,6 +2537,10 @@ function vModellBauen(){
       c.addEventListener('click', () => vmOeffnen(id, shot));
       z.appendChild(c);
     });
+    if (b === VM_OBEN) { z.classList.add('oben');
+      if (b.hinweis) { const h = document.createElement('small'); h.className = 'vm-oben-hinweis'; h.textContent = b.hinweis; z.appendChild(h); }
+      if (z.querySelector('.vm-chip')) oben.appendChild(z);
+      return; }
     if (z.children.length > 1) baender.appendChild(z);
   });
   vmInspektor();
