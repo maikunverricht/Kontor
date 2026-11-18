@@ -931,6 +931,8 @@ html.wb-vorab .slides,html.wb-vorab .dock{visibility:hidden}
 .vm-kp-kachel dl div{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:6px;align-items:baseline}
 .vm-kp-kachel dt{font:600 8.5px/1.4 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--text-3)}
 .vm-kp-kachel dd{margin:0;font-size:11px;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vm-ord-l{color:var(--teal);text-decoration:underline;text-decoration-color:color-mix(in srgb,var(--teal) 40%,transparent);text-underline-offset:2px;cursor:pointer;font-family:var(--mono);font-size:10px}
+.vm-ord-l:hover{text-decoration-color:var(--teal)}
 .vm-kp-kachel dd.d{font:500 10px/1.4 var(--mono);color:var(--text-2);text-align:right}
 .vm-kp-kachel .pk{display:inline-flex;gap:3px;flex:none}
 .vm-kp-kachel .pk .vm-pkt{width:7px;height:7px}
@@ -942,9 +944,11 @@ html.wb-vorab .slides,html.wb-vorab .dock{visibility:hidden}
 .vm-feld svg.vm-linien{z-index:1}
 @media (prefers-reduced-motion:reduce){.vm-kp-kachel{transition:none}.vm-mitte.rein{animation:none}}
 /* Am Telefon ist zwischen den Armen kein Platz – dort genügt die Auswahl über dem V */
-@media (max-width:700px){.vm-mitte,.vm-mitte-weg{display:none}}
+@media (max-width:700px){.vm-mitte,.vm-mitte-weg,.vm-mitte-ord{display:none}}
 /* Auf breiten Schirmen zeigt die Kachel in der Mitte das gewählte Issue – das Feld neben dem Pfeil entfällt */
 @media (min-width:701px){.vm-kp-wahl{display:none}}
+.vm-mitte-ord{position:absolute;z-index:4;cursor:pointer;border-radius:6px}
+.vm-mitte-ord:hover,.vm-mitte-ord:focus-visible{background:color-mix(in srgb,var(--teal) 10%,transparent);outline:none}
 .vm-mitte-weg{position:absolute;width:22px;height:22px;border-radius:50%;border:1px solid var(--line);background:var(--glass-2);color:var(--text-3);font-size:11px;line-height:1;cursor:pointer;z-index:4}
 .vm-mitte-weg:hover{color:var(--text);border-color:var(--line-hi)}
 .vm-kp-leer{grid-column:1/-1;font-size:13px;color:var(--text-2);margin:0;text-align:center}
@@ -2620,6 +2624,25 @@ function vmAuftragWaehlen(id){
   vModellBauen();
 }
 /* Eine Issue-Kachel: im Ring als Knopf, in der Mitte des V als Hintergrund */
+/* Auftragsordner aus der Lesekopie: Link (SharePoint/Netzlaufwerk) oder Wurzel/Ordnername */
+function vmOrdner(x){
+  const o = x && x.ordner; if (!o || (!o.link && !o.name)) return null;
+  let wurzel = ''; try { wurzel = (JSON.parse(localStorage.getItem('wb-ablage-cfg') || 'null') || {}).name || ''; } catch (e) {}
+  const link = String(o.link || '').trim();
+  const web = /^https?:\/\//i.test(link);
+  const text = link ? (web ? (() => { const t = link.replace(/^https?:\/\//i, ''); try { return decodeURIComponent(t); } catch (e) { return t; } })() : link) : (wurzel ? wurzel + '/' : '') + o.name;
+  return { text, link, web };
+}
+function vmToast(t){ let el = document.getElementById('vmToast'); if (!el) { el = document.createElement('div'); el.id = 'vmToast'; el.setAttribute('role', 'status');
+  el.style.cssText = 'position:fixed;left:50%;bottom:96px;transform:translateX(-50%);z-index:60;padding:8px 14px;border-radius:12px;border:1px solid var(--line);background:var(--glass-2);color:var(--text);font-size:12.5px;box-shadow:var(--shadow);max-width:90vw;overflow-wrap:anywhere;transition:opacity .25s';
+  document.body.appendChild(el); } el.textContent = t; el.style.opacity = 1; clearTimeout(vmToast.z); vmToast.z = setTimeout(() => el.style.opacity = 0, 2600); }
+function vmOrdnerOeffnen(id){
+  const d = kpLesen(), x = d && (d.auftraege || []).find(a => a.id === id), o = vmOrdner(x); if (!o) return;
+  if (o.web) { window.open(o.link, '_blank', 'noopener,noreferrer'); return; }
+  /* Netzlaufwerk/lokaler Pfad: öffnet der Browser nicht – Pfad kopieren */
+  const t = o.link || o.text;
+  try { navigator.clipboard.writeText(t).then(() => vmToast('Pfad kopiert – im Explorer einfügen'), () => vmToast(t)); } catch (e) { vmToast(t); }
+}
 function vmKachelHtml(x, tag, an){
   const punkt = st => { const am = kpAmpel(st); return `<i class="vm-pkt" style="${kpFarbeVar(am.a)}" title="${KP_TEXT[am.a]}"></i>`; };
   const fcs = Array.isArray(x.fcPlan) && x.fcPlan.length ? x.fcPlan : (x.fcs || []).map(n => ({ name:n, plan:'' }));
@@ -2634,9 +2657,12 @@ function vmKachelHtml(x, tag, an){
       ${zeile('BC', x.bc ? esc(x.bc) : '–', x.bcPlan, x.bc)}
       ${fcs.length ? fcs.map(f => zeile('FC', esc(f.name), f.plan, f.name)).join('') : zeile('FC', '–', '')}
       ${zeile('Status', esc(schritt), kpEnde(x), schritt + ' · Plan-Ende')}
+      ${(() => { const o = vmOrdner(x); return o ? `<div class="vm-ord"><dt>Ordner</dt><dd><span class="vm-ord-l" role="link" tabindex="0" data-v-ordner="${esc(x.id)}" title="${esc(o.web ? 'Ordner öffnen: ' + o.link : 'Pfad kopieren: ' + (o.link || o.text))}">${esc(o.text)}</span></dd><dd class="d">${o.web ? '↗' : '⧉'}</dd></div>` : ''; })()}
     </dl></${tag}>`;
 }
 /* Gewähltes Issue: die Kachel schiebt sich in die Mitte des V und bleibt im Hintergrund */
+document.addEventListener('click', e => { const l = e.target.closest && e.target.closest('[data-v-ordner]'); if (!l) return; e.preventDefault(); e.stopPropagation(); vmOrdnerOeffnen(l.dataset.vOrdner); }, true);
+document.addEventListener('keydown', e => { if (e.key !== 'Enter') return; const l = e.target.closest && e.target.closest('[data-v-ordner]'); if (l) { e.preventDefault(); e.stopPropagation(); vmOrdnerOeffnen(l.dataset.vOrdner); } }, true);
 function vmMitteBauen(feld){
   const a = vmAuftrag(); if (!a) return;
   const m = document.createElement('div'); m.className = 'vm-mitte' + (UI_VM.neu ? ' rein' : '');
@@ -2649,8 +2675,13 @@ function vmMitteBauen(feld){
   weg.title = 'Auftrag abwählen'; weg.setAttribute('aria-label', 'Auftrag abwählen'); weg.textContent = '✕';
   weg.addEventListener('click', e => { e.stopPropagation(); vmAuftragWaehlen(''); });
   feld.appendChild(weg);
+  /* Ordner-Link liegt wie das ✕ über den Linien, genau auf der Ordner-Zeile */
+  const ol = m.querySelector('[data-v-ordner]'); let ov = null;
+  if (ol) { ov = document.createElement('span'); ov.className = 'vm-mitte-ord'; ov.dataset.vOrdner = ol.dataset.vOrdner; ov.title = ol.title;
+    ov.setAttribute('role', 'link'); ov.tabIndex = 0; ov.setAttribute('aria-label', ol.title); feld.appendChild(ov); }
   const setzen = () => { const f = feld.getBoundingClientRect(), r = m.getBoundingClientRect();
-    weg.style.left = (r.right - f.left - 11) + 'px'; weg.style.top = (r.top - f.top - 11) + 'px'; };
+    weg.style.left = (r.right - f.left - 11) + 'px'; weg.style.top = (r.top - f.top - 11) + 'px';
+    if (ov) { const z = ol.closest('div').getBoundingClientRect(); Object.assign(ov.style, { left:(z.left - f.left) + 'px', top:(z.top - f.top) + 'px', width:z.width + 'px', height:z.height + 'px' }); } };
   requestAnimationFrame(setzen); setTimeout(setzen, 650);
   UI_VM.neu = false;
 }
@@ -2667,6 +2698,7 @@ function vmObenBauen(oben){
       <button type="button" class="vm-kp-pfeil" aria-expanded="${UI_VM.kpOffen}" title="${ich ? 'Issues wählen, an denen ' + esc(ich) + ' beteiligt ist' : 'Issues wählen'}" data-v-kp-pfeil>▾</button>
       ${a ? `<span class="vm-kp-wahl"><span class="id">${esc(a.id)}</span>${esc(a.titel)}
         <span class="ee" title="Eingang · Abschluss">${punkt(a.schritte && a.schritte.EIN)}${punkt(a.schritte && a.schritte.ABS)}</span>
+        ${vmOrdner(a) ? `<button type="button" data-v-ordner="${esc(a.id)}" title="Auftragsordner öffnen" aria-label="Auftragsordner öffnen">📁</button>` : ''}
         <button type="button" data-v-auftrag-weg title="Auftrag abwählen">✕</button></span>` : ''}
     </div>
     <div class="vm-kp-ring"${UI_VM.kpOffen ? '' : ' hidden'}>
