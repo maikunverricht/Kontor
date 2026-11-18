@@ -2596,7 +2596,8 @@ function vModellBauen(){
    führenden Werkzeuge und die Rückmeldung des TestcaseManagers. Geschrieben
    wird nichts. */
 const UI_VM = { wahl:null, kpOffen:false, auftrag:'', ringIdx:null };
-try { UI_VM.auftrag = localStorage.getItem('wb-v-auftrag') || ''; } catch (e) {}
+/* Gewählt ist, was als aktiver Auftrag für alle Werkzeuge gilt (wb-aktiver-auftrag) */
+try { const ak = JSON.parse(localStorage.getItem('wb-aktiver-auftrag') || 'null'); UI_VM.auftrag = (ak && ak.id) || localStorage.getItem('wb-v-auftrag') || ''; } catch (e) {}
 /* ───────── Über dem V: KapazitätenPlaner mit Auftragswahl (seit 18.11.2026) ─────────
    Pfeil an der Kachel klappt die Issues auf, an denen der im Planer Angemeldete
    mit Workitems beteiligt ist. Ein gewähltes Issue legt sich über das V: Ampel je
@@ -2610,6 +2611,12 @@ const vmDatum = iso => { const t = String(iso || '').slice(0, 10); return /^\d{4
 function vmAuftragWaehlen(id){
   UI_VM.auftrag = id || ''; UI_VM.kpOffen = false; UI_VM.neu = !!id;
   try { id ? localStorage.setItem('wb-v-auftrag', id) : localStorage.removeItem('wb-v-auftrag'); } catch (e) {}
+  /* Die Wahl im Kontor ist der aktive Auftrag – Anforderungsbuch, Funktionsentwurf und TestcaseManager folgen */
+  try {
+    if (!id) localStorage.removeItem('wb-aktiver-auftrag');
+    else { const d = kpLesen(), a = d && d.auftraege.find(x => x.id === id);
+      localStorage.setItem('wb-aktiver-auftrag', JSON.stringify({ id, titel:a ? a.titel : '', bc:a ? a.bc || '' : '', ordner:a && a.ordner && a.ordner.name ? a.ordner : null, von:'kontor', gesetzt:new Date().toISOString() })); }
+  } catch (e) {}
   vModellBauen();
 }
 /* Eine Issue-Kachel: im Ring als Knopf, in der Mitte des V als Hintergrund */
@@ -2914,6 +2921,7 @@ function kpAufBauen(){
   box.querySelectorAll('[data-kp]').forEach(b => b.addEventListener('click', () => {
     UI_KP.wahl = UI_KP.wahl === b.dataset.kp ? '' : b.dataset.kp;
     try { localStorage.setItem('wb-kp-auf-wahl', UI_KP.wahl); } catch (e) {}
+    if (UI_KP.wahl) { try { vmAuftragWaehlen(UI_KP.wahl); } catch (e) {} }
     kpAufBauen(); }));
   box.querySelectorAll('[data-kp-schritt]').forEach(b => b.addEventListener('click', () => {
     const s = KP_SCHRITTE.find(x => x.k === b.dataset.kpSchritt); if (s) vmOeffnen(s.id, b, s.tab); }));
@@ -2977,7 +2985,9 @@ function kpVBauen(a, ich){
 kpAufBauen();
 /* Das V ist beim ersten Bauen vor diesem Block gezeichnet – jetzt mit Auftragswahl neu */
 try { if ($('#s-produktiv').classList.contains('v-an')) vModellBauen(); } catch (e) {}
-window.addEventListener('storage', e => { if (e.key === 'wb-kapazitaetenplaner-auftraege' || e.key === 'wb-testcasemanager-data' || e.key === 'wb-anforderungsbuch-data') { try { if ($('#s-produktiv').classList.contains('v-an') && !current) vModellBauen(); } catch (x) {} } });
+window.addEventListener('storage', e => {
+  if (e.key === 'wb-aktiver-auftrag') { try { const ak = JSON.parse(e.newValue || 'null'); UI_VM.auftrag = (ak && ak.id) || ''; } catch (x) { UI_VM.auftrag = ''; } }
+  if (e.key === 'wb-kapazitaetenplaner-auftraege' || e.key === 'wb-testcasemanager-data' || e.key === 'wb-anforderungsbuch-data' || e.key === 'wb-aktiver-auftrag') { try { if ($('#s-produktiv').classList.contains('v-an') && !current) vModellBauen(); } catch (x) {} } });
 window.addEventListener('storage', e => { if (!e.key || e.key === 'wb-kapazitaetenplaner-auftraege' || e.key === 'wb-testcasemanager-data' || e.key === 'wb-anforderungsbuch-data' || e.key === 'wb-aktiver-auftrag') kpAufBauen(); });
 document.addEventListener('visibilitychange', () => { if (!document.hidden) kpAufBauen(); });
 
