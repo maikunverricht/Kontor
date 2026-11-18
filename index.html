@@ -905,6 +905,8 @@ html.wb-vorab .slides,html.wb-vorab .dock{visibility:hidden}
 .vm-baender{max-width:880px;margin:10px auto 0;display:grid;gap:10px}
 .vm-oben{max-width:880px;margin:0 auto 6px;position:relative}
 .vm-oben:empty{display:none}
+/* Seit IdeaHub unten steht, ist der obere Rand des V-Felds leer – das V rückt an das Band heran. */
+.vm-oben:not(:empty) + .vm-feld{margin-top:clamp(-62px,-6vw,-46px)}
 .vm-band.oben{border-color:var(--line-hi);background:color-mix(in srgb,var(--amber) 7%,var(--glass))}
 .vm-band.oben::after{content:"";position:absolute;left:50%;bottom:-14px;height:12px;border-left:1.5px dashed var(--line-hi)}
 .vm-oben-hinweis{flex-basis:100%;font-size:11.5px;color:var(--text-3)}
@@ -2444,14 +2446,13 @@ const VM_STUFEN = [
   { x:73, y:44, id:'testcasemanager', stufe:'SWE.5 · Integrationstest', zweit:true, tab:'cluster' },
   { x:85, y:22, id:'testcasemanager', stufe:'SWE.6 · Qualifikation', tab:'system' }
 ];
-const VM_VORHER = { x:15, y:3, id:'ideahub', stufe:'Konzept · Idee' };
 /* Über dem V (seit 18.11.2026): der KapazitätenPlaner liest den Auftragseingang
    und plant – jeder Auftrag durchläuft das V darunter einmal. */
 const VM_OBEN = { titel:'Über dem V · je Auftrag', werkzeuge:[['kapazitaetenplaner','Auftragseingang · Plan · Forecast']],
   hinweis:'Jeder Auftrag durchläuft das V einmal – vom Eingang bis zum Abschluss.' };
 const VM_BAENDER = [
   { titel:'Projektführung', werkzeuge:[['auswertung','Ist']] },
-  { titel:'Begleitet alles', werkzeuge:[['notizbuch','Wissen']] }
+  { titel:'Begleitet alles', werkzeuge:[['notizbuch','Wissen'], ['ideahub','Ideen']] }
 ];
 const vmApp = id => PRODUKTIV.find(w => w.id === id);
 /* Ohne Lizenz verschwindet die Kachel; im V bleibt die Stufe stehen, blass und ohne Klick. */
@@ -2492,7 +2493,6 @@ function vModellBauen(){
       <svg class="vm-linien" viewBox="0 0 100 100" preserveAspectRatio="none">
         <path class="vm-arm" d="${pfad}"/>${paare}${ltg}
         ${VM_AUSSEN.map(e => `<line class="vm-pfeil vm-ext-ltg" x1="9" y1="${p[e.ziel].y}" x2="${p[e.ziel].x - 6}" y2="${p[e.ziel].y}"/>`).join('')}
-        <line class="vm-pfeil" x1="${VM_VORHER.x}" y1="${VM_VORHER.y + 9}" x2="${p[0].x}" y2="${p[0].y - 6}"/>
       </svg>
       <span class="vm-seite" style="left:2%;top:58%">festlegen ↓</span>
       <span class="vm-seite" style="right:2%;top:58%;text-align:right">↑ prüfen</span>
@@ -2504,7 +2504,7 @@ function vModellBauen(){
     <p class="vm-hinweis">Gestrichelt: zweite Rolle des TestcaseManagers – Integrationstest gegen die Cluster (L3) aus der Wirkkette (SWE.5).
       Die Systemebene (SYS.1–5) liegt außerhalb dieses V.</p>`;
   const feld = $('.vm-feld', box);
-  [VM_VORHER, ...p].forEach(s => {
+  p.forEach(s => {
     const w = s.id ? vmApp(s.id) : null;
     const k = document.createElement(w && !vmZu(w.id) ? 'button' : 'div');
     k.className = 'vm-k' + (s.code ? ' code' : '') + (s.zweit ? ' zweit' : '') + (!w && !s.code ? ' frei' : '');
