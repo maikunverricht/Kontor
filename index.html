@@ -934,7 +934,15 @@ html.wb-vorab .slides,html.wb-vorab .dock{visibility:hidden}
 .vm-kp-kachel dd.d{font:500 10px/1.4 var(--mono);color:var(--text-2);text-align:right}
 .vm-kp-kachel .pk{display:inline-flex;gap:3px;flex:none}
 .vm-kp-kachel .pk .vm-pkt{width:7px;height:7px}
-@media (prefers-reduced-motion:reduce){.vm-kp-kachel{transition:none}}
+.vm-mitte{position:absolute;left:50%;top:33%;width:min(280px,42%);transform:translate(-50%,-50%);z-index:0;cursor:pointer}
+.vm-mitte .vm-kp-kachel{position:static;width:100%;transform:none;opacity:.88;border-color:var(--line-hi);background:color-mix(in srgb,var(--amber) 6%,var(--glass-2));box-shadow:var(--shadow);transition:opacity .2s}
+.vm-mitte:hover .vm-kp-kachel{opacity:1}
+.vm-mitte.rein{animation:vmRein .6s cubic-bezier(.2,.8,.2,1)}
+@keyframes vmRein{from{transform:translate(-50%,-50%) translateY(-42vh) scale(.92);opacity:.2}to{transform:translate(-50%,-50%);opacity:1}}
+.vm-feld svg.vm-linien{z-index:1}
+@media (prefers-reduced-motion:reduce){.vm-kp-kachel{transition:none}.vm-mitte.rein{animation:none}}
+/* Am Telefon ist zwischen den Armen kein Platz – dort genügt die Auswahl über dem V */
+@media (max-width:700px){.vm-mitte{display:none}}
 .vm-kp-leer{grid-column:1/-1;font-size:13px;color:var(--text-2);margin:0;text-align:center}
 .vm-k.amp .shot{border-color:var(--kp-c,var(--line));box-shadow:0 0 0 3px color-mix(in srgb,var(--kp-c,transparent) 28%,transparent)}
 .vm-k.amp-leer .shot{opacity:.55}
@@ -2573,6 +2581,7 @@ function vModellBauen(){
     if (z.children.length > 1) baender.appendChild(z);
   });
   try { vmObenBauen(oben); } catch (e) {}
+  try { vmMitteBauen(feld); } catch (e) {}
   vmInspektor();
   box.querySelectorAll('[data-ltg]').forEach(el => el.addEventListener('click', () => { UI_VM.wahl = UI_VM.wahl === el.dataset.ltg ? null : el.dataset.ltg; vModellBauen(); }));
 }
@@ -2595,9 +2604,36 @@ function vmAuftrag(){
 }
 const vmDatum = iso => { const t = String(iso || '').slice(0, 10); return /^\d{4}-\d{2}-\d{2}$/.test(t) ? t.slice(8, 10) + '.' + t.slice(5, 7) + '.' + t.slice(2, 4) : String(iso || ''); };
 function vmAuftragWaehlen(id){
-  UI_VM.auftrag = id || ''; UI_VM.kpOffen = false;
+  UI_VM.auftrag = id || ''; UI_VM.kpOffen = false; UI_VM.neu = !!id;
   try { id ? localStorage.setItem('wb-v-auftrag', id) : localStorage.removeItem('wb-v-auftrag'); } catch (e) {}
   vModellBauen();
+}
+/* Eine Issue-Kachel: im Ring als Knopf, in der Mitte des V als Hintergrund */
+function vmKachelHtml(x, tag, an){
+  const punkt = st => { const am = kpAmpel(st); return `<i class="vm-pkt" style="${kpFarbeVar(am.a)}" title="${KP_TEXT[am.a]}"></i>`; };
+  const fcs = Array.isArray(x.fcPlan) && x.fcPlan.length ? x.fcPlan : (x.fcs || []).map(n => ({ name:n, plan:'' }));
+  const offen = KP_SCHRITTE.find(sx => { const am = kpAmpel(x.schritte && x.schritte[sx.k]).a; return am === 'rot' || am === 'gelb'; });
+  const alleGruen = x.imV && KP_SCHRITTE.every(sx => { const am = kpAmpel(x.schritte && x.schritte[sx.k]).a; return am === 'gruen' || am === 'leer'; });
+  const schritt = !x.imV ? 'nicht im V' : offen ? (offen.k === 'EIN' || offen.k === 'ABS' ? offen.n : offen.k + ' · ' + offen.n) : alleGruen ? 'abgeschlossen' : '–';
+  const zeile = (k, v, d, tip) => `<div><dt>${k}</dt><dd title="${esc(tip || v)}">${v}</dd><dd class="d">${d ? vmDatum(d) : '–'}</dd></div>`;
+  return `<${tag}${tag === 'button' ? ' type="button"' : ''} class="vm-kp-kachel${an ? ' an' : ''}" data-v-auftrag="${esc(x.id)}">
+    <span class="kopf"><span class="id">${esc(x.id)}</span><span class="pk" title="Eingang · SWE.1–6 · Abschluss">${KP_SCHRITTE.map(sx => punkt(x.schritte && x.schritte[sx.k])).join('')}</span>${x.lcs ? `<span class="lcs">${esc(x.lcs)}</span>` : ''}</span>
+    <b title="${esc(x.titel)}">${esc(x.titel)}</b>
+    <dl>
+      ${zeile('BC', x.bc ? esc(x.bc) : '–', x.bcPlan, x.bc)}
+      ${fcs.length ? fcs.map(f => zeile('FC', esc(f.name), f.plan, f.name)).join('') : zeile('FC', '–', '')}
+      ${zeile('Status', esc(schritt), kpEnde(x), schritt + ' · Plan-Ende')}
+    </dl></${tag}>`;
+}
+/* Gewähltes Issue: die Kachel schiebt sich in die Mitte des V und bleibt im Hintergrund */
+function vmMitteBauen(feld){
+  const a = vmAuftrag(); if (!a) return;
+  const m = document.createElement('div'); m.className = 'vm-mitte' + (UI_VM.neu ? ' rein' : '');
+  m.innerHTML = vmKachelHtml(a, 'div', true);
+  m.title = 'Gewähltes Issue – antippen öffnet die Auswahl';
+  m.addEventListener('click', () => { UI_VM.kpOffen = true; vModellBauen(); });
+  feld.insertBefore(m, feld.firstChild);
+  UI_VM.neu = false;
 }
 function vmObenBauen(oben){
   const kp = vmApp('kapazitaetenplaner'); if (!kp || vmZu('kapazitaetenplaner')) { oben.innerHTML = ''; return; }
@@ -2606,20 +2642,7 @@ function vmObenBauen(oben){
   const kacheln = !d ? '<p class="vm-kp-leer">Noch keine Aufträge – im KapazitätenPlaner die Austausch-Excel einlesen.</p>'
     : !ich ? '<p class="vm-kp-leer">Im KapazitätenPlaner anmelden (Name in der Startabfrage) – dann stehen hier deine Issues.</p>'
     : !meine.length ? `<p class="vm-kp-leer">Keine Issues, an denen ${esc(ich)} mit Workitems beteiligt ist.</p>`
-    : meine.map(x => {
-        const fcs = Array.isArray(x.fcPlan) && x.fcPlan.length ? x.fcPlan : (x.fcs || []).map(n => ({ name:n, plan:'' }));
-        const offen = KP_SCHRITTE.find(sx => { const am = kpAmpel(x.schritte && x.schritte[sx.k]).a; return am === 'rot' || am === 'gelb'; });
-        const alleGruen = x.imV && KP_SCHRITTE.every(sx => { const am = kpAmpel(x.schritte && x.schritte[sx.k]).a; return am === 'gruen' || am === 'leer'; });
-        const schritt = !x.imV ? 'nicht im V' : offen ? (offen.k === 'EIN' || offen.k === 'ABS' ? offen.n : offen.k + ' · ' + offen.n) : alleGruen ? 'abgeschlossen' : '–';
-        const zeile = (k, v, d, tip) => `<div><dt>${k}</dt><dd title="${esc(tip || v)}">${v}</dd><dd class="d">${d ? vmDatum(d) : '–'}</dd></div>`;
-        return `<button type="button" class="vm-kp-kachel${a && a.id === x.id ? ' an' : ''}" data-v-auftrag="${esc(x.id)}">
-          <span class="kopf"><span class="id">${esc(x.id)}</span><span class="pk" title="Eingang · SWE.1–6 · Abschluss">${KP_SCHRITTE.map(sx => punkt(x.schritte && x.schritte[sx.k])).join('')}</span>${x.lcs ? `<span class="lcs">${esc(x.lcs)}</span>` : ''}</span>
-          <b title="${esc(x.titel)}">${esc(x.titel)}</b>
-          <dl>
-            ${zeile('BC', x.bc ? esc(x.bc) : '–', x.bcPlan, x.bc)}
-            ${fcs.length ? fcs.map(f => zeile('FC', esc(f.name), f.plan, f.name)).join('') : zeile('FC', '–', '')}
-            ${zeile('Status', esc(schritt), kpEnde(x), schritt + ' · Plan-Ende')}
-          </dl></button>`; }).join('');
+    : meine.map(x => vmKachelHtml(x, 'button', a && a.id === x.id)).join('');
   oben.innerHTML = `<div class="vm-kp">
       <button type="button" class="vm-chip" data-v-kp-oeffnen><span class="shot">${kp.zeichen || PLUS}</span>${esc(kp.name)} <em>Auftragseingang · Plan · Forecast</em></button>
       <button type="button" class="vm-kp-pfeil" aria-expanded="${UI_VM.kpOffen}" title="${ich ? 'Issues wählen, an denen ' + esc(ich) + ' beteiligt ist' : 'Issues wählen'}" data-v-kp-pfeil>▾</button>
