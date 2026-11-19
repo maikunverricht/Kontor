@@ -3810,7 +3810,9 @@ function kachelNeu(t){
       + (d ? '<span class="lw-kz' + (d.rot ? ' rot' : '') + (d.mono ? ' mono' : '') + '">' + esc(d.gross) + '</span>'
            + (d.punkt ? '<span class="lw-p ' + d.punkt + '"></span>' : '') : '');
   if (html !== t.html) { t.html = html; t.inner.innerHTML = html; }
-  t.el.setAttribute('aria-label', w.name + (d ? ': ' + d.gross + ', ' + (d.sub || '') : '') + ' – öffnen');
+  /* Design-Check 19.11.2026: vorgelesener Name = sichtbarer Text + „öffnen“; mit eigenen Knöpfen innen keine Knopf-Rolle (nicht verschachteln) */
+  t.el.setAttribute('aria-label', (t.inner.textContent || w.name).replace(/\s+/g, ' ').trim() + ' – öffnen');
+  t.el.setAttribute('role', t.inner.querySelector('button, a[href], input, select, textarea') ? 'group' : 'button');
 }
 function groesseSetzen(t, schritt){
   const o = groessen(), id = basisId(t);
@@ -3843,7 +3845,7 @@ function kastenBauen(liste, g){
     if (titel) { const kopf = document.createElement('p'); kopf.className = 'lw-gr'; kopf.textContent = titel; g.appendChild(kopf); }
     const box = document.createElement('div'); box.className = 'lw-grid'; g.appendChild(box);
     ws.slice().sort((a, b) => rang(a) - rang(b)).forEach(w => {
-      const el = document.createElement('article');
+      const el = document.createElement('div');
       el.className = 'lw';
       el.tabIndex = 0; el.setAttribute('role', 'button');
       el.style.setProperty('--c', w.farbe || 'var(--teal)');
