@@ -2550,6 +2550,20 @@ const vmZahl = (fn, shot) => {
 };
 /* tab: Reiter im Werkzeug (Schaltplan: arch, if, fn). Vor dem ersten Laden über ap-tab,
    danach direkt im Rahmen – dieselbe Herkunft. */
+/* Seit 19.11.2026: die Prozessmarke in den Werkzeugen ("weiter: …") bittet den Kontor, das nächste Werkzeug samt Reiter zu öffnen. */
+window.addEventListener('message', e => {
+  if (e.origin !== location.origin) return;
+  const d = e.data; if (!d || d.typ !== 'wb-oeffnen' || !byId[d.id] || byId[d.id].gesperrt) return;
+  vmReiter(d.id, d.tab || ''); open(d.id);
+});
+const vmReiter = (id, tab) => { const t = byId[id]; if (!t || !tab) return;
+  if (id === 'testcasemanager') { const k = ['system','cluster','komponente','matrix'].indexOf(tab);
+    if (k >= 0) { try { localStorage.setItem('wb-wirkkette-ebene', String(k)); } catch (e) {}
+      const f = t.loaded && t.vp && t.vp.querySelector('iframe'); if (f) { try { f.contentWindow.tcmEbene(k); } catch (e) {} } } }
+  else if (id === 'anforderungsbuch') { t.startHash = tab;
+    const f = t.loaded && t.vp && t.vp.querySelector('iframe'); if (f) { try { f.contentWindow.location.hash = tab; } catch (e) {} } }
+  else { try { localStorage.setItem('ap-tab', tab); } catch (e) {}
+    const f = t.loaded && t.vp && t.vp.querySelector('iframe'); if (f) { try { f.contentWindow.openTab(tab); } catch (e) {} } } };
 const vmOeffnen = (id, shot, tab) => { const t = byId[id]; if (!t || current) return; t.vShot = shot;
   /* TestcaseManager: Ebene direkt öffnen (SWE.5 Cluster/Integration, SWE.6 System/Qualifikation) */
   if (tab && id === 'testcasemanager') { const k = ['system','cluster','komponente','matrix'].indexOf(tab);
