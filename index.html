@@ -2442,6 +2442,10 @@ const PRODUKTIV = [
   { id:'auswertung', name:'Auswertung', tag:'Aufwand', url:'https://maikunverricht.github.io/Auswertung/',
     desc:'Issues, Workitems und gebuchten Aufwand aus Excel auswerten – Plan/Ist je Monat, Anteile und Durchlaufzeiten.',
     zeichen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20h18"/><path d="M6 16v-5M10 16V7M14 16v-3M18 16V9"/><path d="M5 6.5l4-2.5 4 3 6-4"/></svg>' },
+  /* Seit 19.11.2026: Suche über die Datenstände aller Produktiv-Werkzeuge, liegt im Kontor-Repo unter /suche/. */
+  { id:'suche', name:'Suche', tag:'Alle Werkzeuge', url:'https://maikunverricht.github.io/Kontor/suche/',
+    desc:'Eine ID, FC, ein Signal, Testfall oder Stichwort in allen Werkzeugen auf einmal suchen.',
+    zeichen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></svg>' },
   /* Seit 19.11.2026: Verlauf aller Produktiv-Werkzeuge (wb-verlauf), liegt im Kontor-Repo unter /verlauf/. */
   { id:'verlauf', name:'Verlauf', tag:'History', url:'https://maikunverricht.github.io/Kontor/verlauf/',
     desc:'Was in den Werkzeugen passiert ist – Dateien geladen, exportiert, Stände aktualisiert, Auftrag gewechselt.',
@@ -3125,10 +3129,10 @@ const LIZ_PUB = 'MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAESwn5vJH6rMd87uKAXdmC4qXnI47
    `belegbuch` schaltet nur noch das Belegbuch der Firma frei. */
 /* Seit 19.11.2026: die Zeiterfassung ist aus dem KapazitätenPlaner ausgegliedert und läuft mit dessen Lizenz. */
 /* Seit 19.11.2026: der Contribution Dialog (Büro) liest Kennzahlen aus KapazitätenPlaner und Auswertung – eine der beiden Lizenzen schaltet ihn frei. */
-/* Seit 19.11.2026: der Verlauf kommt mit jedem Produktiv-Werkzeug. */
-const LIZ_KACHEL = { noteos:['notizbuch'], kapazitaetenplaner:['kapazitaetenplaner','zeiterfassung','contribution','verlauf'], auswertung:['auswertung','contribution','verlauf'],
-  anforderungsbuch:['anforderungsbuch','verlauf'], funktionsentwurf:['funktionsentwurf','verlauf'], schaltplan:['schaltplan','verlauf'],
-  codecompare:['codecompare','verlauf'], testcasemanager:['testcasemanager','verlauf'] };
+/* Seit 19.11.2026: Verlauf und Suche kommen mit jedem Produktiv-Werkzeug. */
+const LIZ_KACHEL = { noteos:['notizbuch'], kapazitaetenplaner:['kapazitaetenplaner','zeiterfassung','contribution','verlauf','suche'], auswertung:['auswertung','contribution','verlauf','suche'],
+  anforderungsbuch:['anforderungsbuch','verlauf','suche'], funktionsentwurf:['funktionsentwurf','verlauf','suche'], schaltplan:['schaltplan','verlauf','suche'],
+  codecompare:['codecompare','verlauf','suche'], testcasemanager:['testcasemanager','verlauf','suche'] };
 const KATALOG = [].concat(
   APPS.map(a => Object.assign({}, a, { zeichen:ZEICHEN[a.id], farbe:SYMFARBE[a.id], bereich:'firma' })),
   PRODUKTIV.map(a => Object.assign({}, a, { bereich:'produktiv' })),
