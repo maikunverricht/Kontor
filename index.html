@@ -2427,6 +2427,11 @@ const PRODUKTIV = [
     zahl:() => { const d = WB.lesen('wb-kapa-stand'); const f = d && d.forecast; const n = f ? +f.ueberlastet || 0 : 0;
       return n ? { n, rot:true, titel:n + (n === 1 ? ' Person' : ' Personen') + ' über Wochenkapazität · ' + (+f.offen || 0) + ' offene Workitems' } : null; },
     zeichen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>' },
+  /* Seit 19.11.2026 eigenes Werkzeug: dieselbe Datei wie der KapazitätenPlaner, nur mit dem Modul Zeit.
+     Bucht auf Workitems und Abrechnungsnummern – nicht zu verwechseln mit der Stempeluhr der Firma. */
+  { id:'zeiterfassung', name:'Zeiterfassung', tag:'Workitem-Zeiten', url:'https://maikunverricht.github.io/KapazitaetenPlaner/?variante=zeit',
+    desc:'Zeit auf Workitems und Abrechnungsnummern buchen – Timer, Nachbuchen, Soll/Ist und Monatsauswertung.',
+    zeichen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M10 2h4"/></svg>' },
   { id:'auswertung', name:'Auswertung', tag:'Aufwand', url:'https://maikunverricht.github.io/Auswertung/',
     desc:'Issues, Workitems und gebuchten Aufwand aus Excel auswerten – Plan/Ist je Monat, Anteile und Durchlaufzeiten.',
     zeichen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20h18"/><path d="M6 16v-5M10 16V7M14 16v-3M18 16V9"/><path d="M5 6.5l4-2.5 4 3 6-4"/></svg>' },
@@ -3082,7 +3087,8 @@ const LIZ_PUB = 'MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAESwn5vJH6rMd87uKAXdmC4qXnI47
 /* Kennung in der Lizenz → Kacheln. Das Notizbuch heißt in der Lizenz noch `noteos`.
    Seit 15.11.2026 hat das private Belegbuch eine eigene Kennung `belegbuch-privat`:
    `belegbuch` schaltet nur noch das Belegbuch der Firma frei. */
-const LIZ_KACHEL = { noteos:['notizbuch'] };
+/* Seit 19.11.2026: die Zeiterfassung ist aus dem KapazitätenPlaner ausgegliedert und läuft mit dessen Lizenz. */
+const LIZ_KACHEL = { noteos:['notizbuch'], kapazitaetenplaner:['kapazitaetenplaner','zeiterfassung'] };
 const KATALOG = [].concat(
   APPS.map(a => Object.assign({}, a, { zeichen:ZEICHEN[a.id], farbe:SYMFARBE[a.id], bereich:'firma' })),
   PRODUKTIV.map(a => Object.assign({}, a, { bereich:'produktiv' })),
