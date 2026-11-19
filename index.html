@@ -2442,6 +2442,13 @@ const PRODUKTIV = [
   { id:'auswertung', name:'Auswertung', tag:'Aufwand', url:'https://maikunverricht.github.io/Auswertung/',
     desc:'Issues, Workitems und gebuchten Aufwand aus Excel auswerten – Plan/Ist je Monat, Anteile und Durchlaufzeiten.',
     zeichen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20h18"/><path d="M6 16v-5M10 16V7M14 16v-3M18 16V9"/><path d="M5 6.5l4-2.5 4 3 6-4"/></svg>' },
+  /* Seit 19.11.2026: Verlauf aller Produktiv-Werkzeuge (wb-verlauf), liegt im Kontor-Repo unter /verlauf/. */
+  { id:'verlauf', name:'Verlauf', tag:'History', url:'https://maikunverricht.github.io/Kontor/verlauf/',
+    desc:'Was in den Werkzeugen passiert ist – Dateien geladen, exportiert, Stände aktualisiert, Auftrag gewechselt.',
+    zahl:() => { const a = WB.lesen('wb-verlauf'); if (!Array.isArray(a)) return null; const h = new Date(); h.setHours(0,0,0,0);
+      const n = a.filter(e => e && e.t >= h.getTime() && e.a !== 'geoeffnet').length;
+      return n ? { n, titel:n + (n === 1 ? ' Eintrag' : ' Einträge') + ' heute' } : null; },
+    zeichen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12a8.5 8.5 0 1 0 2.5-6"/><path d="M3 4v4h4"/><path d="M12 8v4.5l3 2"/></svg>' },
   { id:'ideahub', name:'IdeaHub', tag:'Ideen', url:'https://maikunverricht.github.io/IdeaHub/',
     desc:'Ideen sammeln und ordnen – als Karte oder als Baum.',
     zeichen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1 2V16h5.2v-.2c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/></svg>' },
@@ -3115,7 +3122,10 @@ const LIZ_PUB = 'MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAESwn5vJH6rMd87uKAXdmC4qXnI47
    `belegbuch` schaltet nur noch das Belegbuch der Firma frei. */
 /* Seit 19.11.2026: die Zeiterfassung ist aus dem KapazitätenPlaner ausgegliedert und läuft mit dessen Lizenz. */
 /* Seit 19.11.2026: der Contribution Dialog (Büro) liest Kennzahlen aus KapazitätenPlaner und Auswertung – eine der beiden Lizenzen schaltet ihn frei. */
-const LIZ_KACHEL = { noteos:['notizbuch'], kapazitaetenplaner:['kapazitaetenplaner','zeiterfassung','contribution'], auswertung:['auswertung','contribution'] };
+/* Seit 19.11.2026: der Verlauf kommt mit jedem Produktiv-Werkzeug. */
+const LIZ_KACHEL = { noteos:['notizbuch'], kapazitaetenplaner:['kapazitaetenplaner','zeiterfassung','contribution','verlauf'], auswertung:['auswertung','contribution','verlauf'],
+  anforderungsbuch:['anforderungsbuch','verlauf'], funktionsentwurf:['funktionsentwurf','verlauf'], schaltplan:['schaltplan','verlauf'],
+  codecompare:['codecompare','verlauf'], testcasemanager:['testcasemanager','verlauf'] };
 const KATALOG = [].concat(
   APPS.map(a => Object.assign({}, a, { zeichen:ZEICHEN[a.id], farbe:SYMFARBE[a.id], bereich:'firma' })),
   PRODUKTIV.map(a => Object.assign({}, a, { bereich:'produktiv' })),
