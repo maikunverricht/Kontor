@@ -2460,7 +2460,7 @@ const BUERO = [
   { id:'contribution', name:'Contribution Dialog', tag:'Gespräch', url:'https://maikunverricht.github.io/Kontor/contribution/',
     desc:'Gespräch vorbereiten: was wir können, machen, tun sollten – mit Bugstatistik, BC-Deliveries und Pünktlichkeit.',
     zahl:() => { const d = WB.lesen('wb-contribution-stand'); const n = d ? +d.offen || 0 : 0;
-      return n ? { n, titel:n + (n === 1 ? ' offener Punkt' : ' offene Punkte') } : null; },
+      return n ? { n, titel:n + ' offen bei „Was fehlt mir“' } : null; },
     zeichen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h11v8H9l-4 3v-3H4z"/><path d="M15 9h5v8h-1v3l-3-3h-5v-2"/></svg>' },
   { name:'Frei', tag:'folgt' }
 ];

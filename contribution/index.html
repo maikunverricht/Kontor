@@ -133,8 +133,6 @@ table.t th{font-size:11px;color:var(--text-3);font-weight:700;text-transform:upp
     <section class="karte glass"><h2><span class="nr">07</span>Was finde ich schade?</h2><textarea data-feld="schade"></textarea></section>
     <section class="karte glass"><h2><span class="nr">08</span>Was gefällt mir?</h2><textarea data-feld="gefaellt"></textarea></section>
 
-    <section class="karte glass breit"><h2><span class="nr">09</span>Offene Punkte</h2><p class="hint">Fragen und Themen, die noch zu klären oder umzusetzen sind</p><div class="liste" data-liste="offen"></div>
-      <div class="neu"><input type="text" data-neu="offen" placeholder="Offenen Punkt hinzufügen …"><button class="pill sm" type="button" data-neu-b="offen">+</button></div></section>
   </div>
   <p class="quelle" style="margin-top:18px">Alles bleibt auf diesem Gerät (Browser-Speicher). Kennzahlen werden nur gelesen, nie verändert.</p>
 </div>
@@ -158,16 +156,12 @@ function vorlage(){
       schade:'Verantwortung wird nur weitergegeben, nicht mitgetragen.',
       gefaellt:'Klasse Team, das der gleichen Idee des Arbeitens folgt.'},
     fehlt:[{t:'Klare Definition meiner Aufgaben – will ich vielleicht gar nicht wissen.',ok:false}],
-    offen:[
-      {t:'Wie ist der Arbeitsablauf mit den Produktiv-Tools definiert?',ok:false},
-      {t:'Gibt es Konflikte oder Hindernisse im Ablauf?',ok:false},
-      {t:'Design Check',ok:false},
-      {t:'Test als Arbeitsschritt',ok:false},
-      {t:'XDI-Tool: Compare und Anlegen von Elementen',ok:false}],
     kz:null};
 }
 var S=lesen(LS);
 if(!S||!Array.isArray(S.gespraeche)||!S.gespraeche.length){S={gespraeche:[vorlage()],akt:null};}
+/* 19.11.2026: "Offene Punkte" gehören nicht zum Contribution Dialog (stehen im Workflow-Dokument) */
+S.gespraeche.forEach(function(g){delete g.offen;});
 if(!S.akt||!S.gespraeche.some(function(g){return g.id===S.akt;}))S.akt=S.gespraeche[0].id;
 function akt(){return S.gespraeche.filter(function(g){return g.id===S.akt;})[0];}
 
@@ -175,7 +169,7 @@ var tmr=null;
 function speichern(sofort){
   clearTimeout(tmr);
   var f=function(){try{localStorage.setItem(LS,JSON.stringify(S));
-    var a=akt(),o=0;S.gespraeche.forEach(function(g){(g.offen||[]).concat(g.fehlt||[]).forEach(function(p){if(!p.ok)o++;});});
+    var a=akt(),o=0;S.gespraeche.forEach(function(g){(g.fehlt||[]).forEach(function(p){if(!p.ok)o++;});});
     localStorage.setItem(STAND,JSON.stringify({quelle:'contribution',updated:new Date().toISOString(),gespraeche:S.gespraeche.length,offen:o,letztes:a?a.datum:''}));
   }catch(e){toast('Speichern nicht möglich');}};
   if(sofort)f();else tmr=setTimeout(f,300);
@@ -230,7 +224,7 @@ function zeigen(){
   var sel=$('#selG');sel.innerHTML=S.gespraeche.slice().sort(function(a,b){return String(b.datum).localeCompare(String(a.datum));}).map(function(g){return '<option value="'+g.id+'"'+(g.id===S.akt?' selected':'')+'>'+tag(g.datum)+' · '+esc(g.titel||'Gespräch')+'</option>';}).join('');
   var g=akt();$('#inDatum').value=g.datum||'';$('#inTitel').value=g.titel||'';
   $$('[data-feld]').forEach(function(t){t.value=(g.felder||{})[t.dataset.feld]||'';hoehe(t);});
-  listeZeigen('fehlt');listeZeigen('offen');kzZeigen();
+  listeZeigen('fehlt');kzZeigen();
 }
 function hoehe(t){t.style.height='auto';t.style.height=(t.dataset.txt?t.scrollHeight:Math.max(96,t.scrollHeight+4))+'px';}
 
@@ -255,9 +249,8 @@ document.addEventListener('click',function(e){
   else if(b.id==='bNeu'){
     /* Neues Gespräch: offene Punkte und "Was fehlt" wandern mit, Texte bleiben leer */
     var n=vorlage();n.felder={koennen:'',machen:'',sollten:'',koennten:'',kennzahlen_notiz:'',schade:'',gefaellt:''};
-    n.offen=(g.offen||[]).filter(function(p){return !p.ok;}).map(function(p){return {t:p.t,ok:false};});
     n.fehlt=(g.fehlt||[]).filter(function(p){return !p.ok;}).map(function(p){return {t:p.t,ok:false};});
-    S.gespraeche.push(n);S.akt=n.id;speichern(true);zeigen();toast('Neues Gespräch – offene Punkte übernommen');}
+    S.gespraeche.push(n);S.akt=n.id;speichern(true);zeigen();toast('Neues Gespräch – „Was fehlt mir“ übernommen');}
   else if(b.id==='bWeg'){if(S.gespraeche.length<2){toast('Das letzte Gespräch bleibt stehen');return;}
     if(!confirm('Gespräch vom '+tag(g.datum)+' löschen?'))return;
     S.gespraeche=S.gespraeche.filter(function(x){return x.id!==g.id;});S.akt=S.gespraeche[0].id;speichern(true);zeigen();}
@@ -279,7 +272,6 @@ function markdown(){
   L.push('## Was könnten wir tun?','',f.koennten||'–','');
   L.push('## Was fehlt mir?','');(g.fehlt||[]).forEach(function(p){L.push('- ['+(p.ok?'x':' ')+'] '+p.t);});L.push('');
   L.push('## Was finde ich schade?','',f.schade||'–','','## Was gefällt mir?','',f.gefaellt||'–','');
-  L.push('## Offene Punkte','');(g.offen||[]).forEach(function(p){L.push('- ['+(p.ok?'x':' ')+'] '+p.t);});
   var blob=new Blob([L.join('\n')+'\n'],{type:'text/markdown'}),a=document.createElement('a');
   a.href=URL.createObjectURL(blob);a.download='contribution-dialog-'+(g.datum||heute())+'.md';document.body.appendChild(a);a.click();
   setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},500);
