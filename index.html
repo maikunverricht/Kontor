@@ -3704,7 +3704,7 @@ Object.assign(LIVE, {
     const hinweise = [];
     if (d.melden) hinweise.push(d.melden + ' Workitem' + (d.melden > 1 ? 's melden' : ' meldet') + ' sich zum Umplanen');
     if (d.ueber) hinweise.push(d.ueber + (d.ueber > 1 ? ' Personen' : ' Person') + ' über Kapazität');
-    return { gross:nf1.format(d.geplant) + ' / ' + nf1.format(d.kap) + ' h', sub:'Sprint ' + s.nr + ' · ' + zeit, rot:p > 100 || d.ueber > 0,
+    return { gross:nf1.format(d.geplant) + ' / ' + nf1.format(d.kap) + ' h', sub:'Sprint ' + s.nr + (d.team ? ' · ' + d.team : '') + ' · ' + zeit, rot:p > 100 || d.ueber > 0,
       extra:'<div class="lw-pb">' + balkenZeile(d.n + ' Workitems' + (d.erledigt ? ' · ' + d.erledigt + ' erledigt' : ''), Math.round(p) + ' %', Math.min(100, p), p > 100 ? 'warn' : '') + '</div>'
         + hinweise.map(h => '<div class="lw-s">' + esc(h) + '</div>').join('') };
   }},
