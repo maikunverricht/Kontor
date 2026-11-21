@@ -1092,6 +1092,195 @@ html.wb-vorab .slides,html.wb-vorab .dock{visibility:hidden}
   .vm-k i{font-size:12px}
   .vm-band>span{min-width:0;width:100%}
 }
+
+/* ═══ Meine Firma: Ablauf (seit 21.11.2026) ═══
+   Oben die Bühne „Heute“: was ansteht und die Stempeluhr als Ring.
+   Darunter der Ablauf als Bento-Kacheln mit Inhalt. Das Schaltbild
+   bleibt als zweite Ansicht (Umschalter, gemerkt in wb-firma-ansicht). */
+#s-kontor .grid{display:none}
+#s-kontor .offen{display:none}
+#s-kontor.schaltbild .grid{display:grid}
+#s-kontor.schaltbild .fa-bento,#s-kontor.schaltbild .fa-aus{display:none}
+.fa-buehne{display:grid;grid-template-columns:1.2fr 1fr;gap:28px;align-items:center;padding:calc(92px + env(safe-area-inset-top)) 0 8px}
+.fa-lead{font-size:clamp(26px,3.1vw,40px);font-weight:600;font-variation-settings:'wdth' 112;letter-spacing:-.025em;line-height:1.12;
+  color:var(--text-2);max-width:18ch;margin:18px 0 24px}
+.fa-lead b{color:var(--text);font-weight:800}
+.fa-chips{display:flex;flex-wrap:wrap;gap:8px}
+.fa-chip{--c:var(--amber);display:inline-flex;align-items:center;gap:9px;min-height:36px;padding:5px 14px 5px 11px;border-radius:999px;font-size:14px;
+  text-align:left;cursor:pointer;color:var(--text);background:color-mix(in srgb,var(--c) 13%,transparent);border:1px solid color-mix(in srgb,var(--c) 40%,transparent);
+  transition:background var(--t-s),transform var(--t-s) var(--kurve)}
+.fa-chip:hover{background:color-mix(in srgb,var(--c) 22%,transparent);transform:translateY(-1px)}
+.fa-chip i{width:8px;height:8px;flex:none;border-radius:50%;background:var(--c);box-shadow:0 0 0 4px color-mix(in srgb,var(--c) 22%,transparent)}
+.fa-chip.rot{--c:var(--red-ink)}.fa-chip.rot i{animation:faPuls 1.8s var(--kurve) infinite}
+.fa-chip.blau{--c:var(--info)}.fa-chip.tuerkis{--c:var(--teal)}
+.fa-chip b{font-weight:700}
+@keyframes faPuls{50%{box-shadow:0 0 0 9px color-mix(in srgb,var(--c) 0%,transparent)}}
+
+/* Uhr als Ring */
+.fa-orb-wrap{position:relative;display:grid;place-items:center}
+.fa-orb{--p:0;position:relative;width:min(340px,76vw);aspect-ratio:1;border-radius:50%;display:grid;place-items:center;cursor:pointer}
+.fa-orb::before{content:"";position:absolute;inset:-12%;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--amber) 30%,transparent),transparent 62%);
+  filter:blur(26px);opacity:.55;transition:opacity .6s}
+.fa-orb.laeuft::before{opacity:1;animation:faAtem 5s ease-in-out infinite}
+@keyframes faAtem{50%{opacity:.55;transform:scale(.94)}}
+.fa-ring{position:absolute;inset:0;border-radius:50%;
+  background:conic-gradient(from 0deg,var(--amber) 0deg,var(--em-2) calc(var(--p)*300deg),var(--teal) calc(var(--p)*360deg),color-mix(in srgb,var(--text-3) 18%,transparent) calc(var(--p)*360deg + .5deg));
+  -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 12px),#000 calc(100% - 11px));mask:radial-gradient(farthest-side,transparent calc(100% - 12px),#000 calc(100% - 11px))}
+.fa-skala{position:absolute;inset:21px;border-radius:50%;background:repeating-conic-gradient(var(--line) 0 .6deg,transparent .6deg 7.5deg);
+  -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 8px),#000 calc(100% - 7px));mask:radial-gradient(farthest-side,transparent calc(100% - 8px),#000 calc(100% - 7px))}
+.fa-kopf{position:absolute;inset:0;transform:rotate(calc(var(--p)*360deg));transition:transform 1s var(--kurve)}
+.fa-kopf i{position:absolute;left:50%;top:-3px;width:18px;height:18px;margin-left:-9px;border-radius:50%;background:#fff;
+  box-shadow:0 0 0 5px color-mix(in srgb,var(--teal) 45%,transparent),0 0 24px 6px var(--teal)}
+.fa-orb:not(.laeuft) .fa-kopf i{box-shadow:0 0 0 5px color-mix(in srgb,var(--text-3) 35%,transparent)}
+.fa-scheibe{position:absolute;inset:32px;border-radius:50%;background:var(--glass);border:1px solid var(--glass-edge);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:inset 0 1px 0 rgba(255,255,255,.12),var(--shadow-lg)}
+.fa-scheibe::after{content:"";position:absolute;inset:0;border-radius:50%;background:linear-gradient(160deg,rgba(255,255,255,.13),transparent 42%);pointer-events:none}
+.fa-orb-in{position:relative;z-index:1;text-align:center;padding:0 40px}
+.fa-zustand{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--text-3)}
+.fa-zustand i{width:7px;height:7px;border-radius:50%;background:var(--text-3)}
+.fa-orb.laeuft .fa-zustand{color:var(--teal)}
+.fa-orb.laeuft .fa-zustand i{background:var(--red-ink);box-shadow:0 0 12px var(--red-ink);animation:faBlink 1.2s steps(2) infinite}
+.fa-orb.pause .fa-zustand{color:var(--amber)}.fa-orb.pause .fa-zustand i{background:var(--amber)}
+@keyframes faBlink{50%{opacity:.25}}
+.fa-zeit{font-family:var(--mono);font-size:clamp(38px,4.8vw,54px);font-weight:500;letter-spacing:-.03em;line-height:1.1;margin:6px 0 2px;font-variant-numeric:tabular-nums}
+.fa-zeit small{font-size:.46em;color:var(--text-2)}
+.fa-seit{font-size:13px;color:var(--text-2);margin:0 0 14px}
+.fa-orb-knopf{height:44px;padding:0 20px;border-radius:999px;border:0;font-weight:600;font-size:15px;display:inline-flex;align-items:center;gap:8px;
+  background:var(--amber);color:var(--ink,#12171F);box-shadow:0 10px 28px -8px color-mix(in srgb,var(--amber) 70%,transparent);transition:transform var(--t-s) var(--kurve)}
+.fa-orb-knopf:hover{transform:translateY(-2px) scale(1.03)}
+.fa-soll{position:absolute;right:0;bottom:2%;font-family:var(--mono);font-size:12px;color:var(--text-3);text-align:right}
+.fa-soll b{display:block;font-size:20px;font-weight:500;color:var(--text)}
+
+/* Leiste über dem Ablauf */
+.fa-leiste{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:30px auto 14px}
+.fa-leiste .eyebrow::before{background:var(--text-3)}
+.fa-leiste .pv-wahl{margin:0}
+
+/* Bento */
+.fa-bento{position:relative;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));grid-auto-rows:minmax(118px,auto);gap:16px;padding-bottom:8px}
+.fa-fluss{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:visible}
+.fa-k{--c:var(--amber);--mx:50%;--my:50%;position:relative;z-index:1;grid-row:span 2;border-radius:24px;padding:20px 20px 18px;display:flex;flex-direction:column;
+  background:var(--glass);border:1px solid var(--glass-edge);overflow:hidden;cursor:pointer;text-align:left;
+  backdrop-filter:blur(24px) saturate(1.35);-webkit-backdrop-filter:blur(24px) saturate(1.35);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07),var(--shadow);
+  transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translateY(var(--ty,0px));
+  transition:transform .5s var(--kurve),border-color var(--t-s),box-shadow .4s;
+  }
+.fa-bento.erst .fa-k{animation:faRein .9s var(--kurve) both;animation-delay:calc(var(--i,0)*90ms + 120ms)}
+@keyframes faRein{from{opacity:0;transform:translateY(24px) scale(.97);filter:blur(8px)}to{opacity:1;filter:none}}
+.fa-k::before{content:"";position:absolute;width:300px;height:300px;right:-110px;top:-130px;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,color-mix(in srgb,var(--c) 34%,transparent),transparent 66%);opacity:.7;transition:opacity .4s}
+.fa-k::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity var(--t-s);
+  background:radial-gradient(380px circle at var(--mx) var(--my),rgba(255,255,255,.09),transparent 45%)}
+.fa-k:hover{--ty:-4px;border-color:color-mix(in srgb,var(--c) 50%,transparent);box-shadow:inset 0 1px 0 rgba(255,255,255,.09),0 34px 70px -30px color-mix(in srgb,var(--c) 40%,rgba(0,0,0,.7))}
+.fa-k:hover::after,.fa-k:hover::before{opacity:1}
+.fa-k:focus-visible{outline:2px solid var(--c);outline-offset:3px}
+.fa-k.w7{grid-column:span 7}.fa-k.w5{grid-column:span 5}.fa-k.w4{grid-column:span 4}.fa-k.w3{grid-column:span 3}
+.fa-kk{position:relative;display:flex;align-items:center;gap:12px}
+.fa-ic{position:relative;width:46px;height:46px;flex:none;border-radius:14px;display:grid;place-items:center;color:#fff;
+  background:linear-gradient(145deg,color-mix(in srgb,var(--c) 68%,#fff) 0%,var(--c) 45%,color-mix(in srgb,var(--c) 62%,#000) 100%);
+  box-shadow:inset 0 1px 1px rgba(255,255,255,.55),inset 0 -6px 12px rgba(0,0,0,.18),0 10px 22px -8px color-mix(in srgb,var(--c) 80%,transparent)}
+.fa-ic svg{width:23px;height:23px;stroke-width:2;filter:drop-shadow(0 1px 1px rgba(0,0,0,.25))}
+.fa-zahl{position:absolute;top:-8px;right:-10px;min-width:22px;height:22px;padding:0 6px;border-radius:999px;border:2px solid var(--void);
+  background:var(--amber);color:var(--ink,#12171F);font-family:var(--mono);font-size:11px;font-weight:700;display:grid;place-items:center}
+.fa-zahl.rot{background:var(--red-ink);color:#fff}
+.fa-nm{min-width:0}
+.fa-nm small{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-3);white-space:nowrap}
+.fa-nm b{display:block;font-size:17px;font-weight:700;font-variation-settings:'wdth' 108;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fa-pfeil{margin-left:auto;width:34px;height:34px;flex:none;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;color:var(--text-2);
+  transition:transform .35s var(--kurve),background var(--t-s),color var(--t-s)}
+.fa-k:hover .fa-pfeil{transform:rotate(-45deg);background:var(--c);color:var(--ink,#12171F);border-color:transparent}
+.fa-gross{position:relative;margin-top:auto;padding-top:16px;font-size:clamp(32px,3.3vw,44px);font-weight:800;font-variation-settings:'wdth' 118;letter-spacing:-.03em;line-height:1}
+.fa-gross span{font-size:15px;font-weight:500;font-variation-settings:'wdth' 100;letter-spacing:0;color:var(--text-2);margin-left:6px}
+.fa-unter{position:relative;font-size:13px;color:var(--text-2);margin-top:6px}
+.fa-leer{position:relative;margin-top:auto;padding-top:14px;font-size:14px;color:var(--text-3)}
+
+/* Aufträge */
+.fa-spr{margin-left:auto;display:flex;gap:6px;position:relative}
+.fa-sp{height:34px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:var(--film);font-size:13px;color:var(--text-2);
+  display:inline-flex;align-items:center;gap:6px;cursor:pointer;transition:background var(--t-s),color var(--t-s),border-color var(--t-s)}
+.fa-sp:hover{background:var(--c);color:var(--ink,#12171F);border-color:transparent}
+.fa-liste{position:relative;display:flex;flex-direction:column;margin-top:14px}
+.fa-z{display:grid;grid-template-columns:40px minmax(0,1.3fr) minmax(0,1fr) minmax(0,.9fr);gap:14px;align-items:center;min-height:56px;padding:6px 8px;margin:0 -8px;border-radius:16px;transition:background var(--t-s)}
+.fa-z+.fa-z{background-image:linear-gradient(var(--line),var(--line));background-size:calc(100% - 16px) 1px;background-position:8px 0;background-repeat:no-repeat}
+.fa-z:hover{background-color:var(--film)}
+.fa-av{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;font-size:12px;font-weight:700;color:#fff;
+  background:linear-gradient(140deg,var(--x),color-mix(in srgb,var(--x) 55%,#000));box-shadow:inset 0 1px 1px rgba(255,255,255,.4)}
+.fa-an{min-width:0;line-height:1.25}.fa-an b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fa-an small{display:block;font-size:12px;color:var(--text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fa-schritt{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.fa-schritt i{width:18px;height:6px;border-radius:4px;background:color-mix(in srgb,var(--text-3) 25%,transparent)}
+.fa-schritt i.ok{background:var(--teal)}
+.fa-schritt i.jetzt{background:var(--amber);box-shadow:0 0 10px var(--amber)}
+.fa-schritt i.pause{background:var(--text-3)}
+.fa-schritt em{flex-basis:100%;font-style:normal;font-family:var(--mono);font-size:11px;color:var(--text-2);margin-top:3px}
+.fa-bud{min-width:0}
+.fa-bud b{display:block;text-align:right;font-family:var(--mono);font-size:12px;font-weight:500;margin-bottom:5px}
+.fa-bud b.ohne{color:var(--text-3);font-weight:400}
+.fa-spur{display:block;height:8px;border-radius:9px;background:color-mix(in srgb,var(--text-3) 18%,transparent);overflow:hidden}
+.fa-spur i{display:block;height:100%;border-radius:inherit;background:var(--teal);transition:width 1.2s var(--kurve)}
+.fa-spur.warn i{background:linear-gradient(90deg,var(--amber),var(--em-2))}
+.fa-spur.rot i{background:linear-gradient(90deg,var(--amber),var(--red-ink));box-shadow:0 0 14px var(--red-ink)}
+.fa-mehr{position:relative;font-family:var(--mono);font-size:12px;color:var(--text-3);margin-top:8px}
+
+/* Stempeluhr-Woche */
+.fa-balken{position:relative;display:flex;align-items:flex-end;gap:10px;height:110px;margin-top:18px}
+.fa-balken div{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:7px;height:100%}
+.fa-balken b{width:100%;border-radius:9px 9px 4px 4px;background:color-mix(in srgb,var(--teal) 26%,transparent);transition:height 1.1s var(--kurve)}
+.fa-balken div.heute b{background:linear-gradient(180deg,var(--teal),color-mix(in srgb,var(--teal) 40%,transparent));box-shadow:0 0 22px -2px var(--teal)}
+.fa-balken small{font-family:var(--mono);font-size:11px;color:var(--text-3)}
+.fa-balken div.heute small{color:var(--teal)}
+
+/* Termine */
+.fa-zs{position:relative;margin-top:16px;display:flex;flex-direction:column}
+.fa-zs div{display:grid;grid-template-columns:72px 14px minmax(0,1fr);gap:12px;align-items:center;min-height:46px}
+.fa-zs .t{font-family:var(--mono);font-size:12px;color:var(--text-2);line-height:1.2}
+.fa-zs .t b{display:block;font-size:15px;color:var(--text);font-weight:500}
+.fa-zs .p{position:relative;width:12px;height:12px;border-radius:50%;border:2px solid var(--info)}
+.fa-zs div:first-child .p{background:var(--info);box-shadow:0 0 14px var(--info)}
+.fa-zs div:not(:last-child) .p::after{content:"";position:absolute;left:3px;top:12px;width:2px;height:36px;background:linear-gradient(var(--info),transparent)}
+.fa-zs .w{min-width:0;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fa-zs .w small{display:block;font-size:12px;color:var(--text-3)}
+.fa-zs .rot .p{border-color:var(--red-ink)}
+
+/* Rechnungen und Belege */
+.fa-stapel{position:relative;display:flex;gap:3px;height:12px;border-radius:9px;overflow:hidden;margin-top:16px;background:color-mix(in srgb,var(--text-3) 18%,transparent)}
+.fa-stapel i{height:100%;border-radius:4px;transition:width 1.2s var(--kurve)}
+.fa-leg{position:relative;display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:10px;font-size:12px;color:var(--text-2)}
+.fa-leg span::before{content:"";display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:6px;background:var(--l)}
+.fa-belege{position:relative;height:92px;margin-top:12px}
+.fa-belege i{position:absolute;left:50%;bottom:0;width:70px;height:86px;margin-left:-35px;border-radius:8px;background:var(--film);border:1px solid var(--line);
+  transform-origin:50% 120%;transition:transform .6s var(--kurve)}
+.fa-belege i::before{content:"";position:absolute;left:12px;right:12px;top:16px;height:40px;background:repeating-linear-gradient(var(--text-3) 0 2px,transparent 2px 10px);opacity:.35}
+.fa-belege i:nth-child(1){transform:rotate(-14deg) translateX(-14px)}
+.fa-belege i:nth-child(2){transform:rotate(-4deg)}
+.fa-belege i:nth-child(3){transform:rotate(9deg) translateX(14px);border-color:color-mix(in srgb,var(--geld) 60%,transparent)}
+.fa-k:hover .fa-belege i:nth-child(1){transform:rotate(-22deg) translateX(-30px)}
+.fa-k:hover .fa-belege i:nth-child(3){transform:rotate(17deg) translateX(30px)}
+.fa-aus{display:flex;align-items:center;justify-content:flex-end;gap:12px;margin:14px auto 0;padding:0 4px;font-family:var(--mono);font-size:12px;color:var(--text-3)}
+.fa-aus i{flex:1;max-width:240px;height:1px;background:linear-gradient(90deg,transparent,var(--geld))}
+
+@media (max-width:900px){
+  .fa-buehne{grid-template-columns:1fr;gap:6px;padding-top:calc(80px + env(safe-area-inset-top))}
+  .fa-orb-wrap{order:-1}
+  .fa-soll{position:static;text-align:center;margin-top:6px}.fa-soll b{display:inline;margin-left:6px}
+  .fa-bento{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .fa-k.w7,.fa-k.w5{grid-column:span 2}.fa-k.w4,.fa-k.w3{grid-column:span 1}
+  .fa-k{padding:16px;border-radius:22px}
+  .fa-fluss{display:none}
+}
+@media (max-width:560px){
+  .fa-k.w4,.fa-k.w3{grid-column:span 2}
+  .fa-z{grid-template-columns:40px minmax(0,1fr) 92px;gap:10px}.fa-z .fa-schritt{display:none}
+  .fa-auftraege .fa-kk{flex-wrap:wrap}.fa-spr{flex-basis:100%;margin:12px 0 0}.fa-sp{flex:1;justify-content:center}
+  .fa-belege{position:absolute;right:18px;bottom:14px;width:110px;height:80px;margin:0}
+  .fa-belege i{width:54px;height:68px;margin-left:-27px}
+  .fa-leiste{flex-wrap:wrap}
+}
+@media (prefers-reduced-motion:reduce){
+  .fa-k,.fa-orb::before,.fa-chip i,.fa-zustand i{animation:none!important}
+  .fa-k{transform:none!important}
+}
 </style>
 </head>
 <body>
@@ -1132,10 +1321,34 @@ html.wb-vorab .slides,html.wb-vorab .dock{visibility:hidden}
 <main>
   <div class="slides" id="slides">
     <div class="slide" id="s-kontor" aria-label="Meine Firma">
-      <section class="hero">
-        <h1><span>Meine</span> <em>Firma.</em></h1>
-        <p class="mein-info">Der ganze Ablauf an einem Ort – vom Auftrag bis zum Geldeingang.</p>
+      <section class="fa-buehne" aria-label="Heute">
+        <div>
+          <div class="eyebrow" id="faDatum"></div>
+          <p class="fa-lead" id="faLead"></p>
+          <div class="fa-chips" id="faChips"></div>
+        </div>
+        <div class="fa-orb-wrap">
+          <div class="fa-orb" id="faOrb" role="button" tabindex="0" aria-label="Stempeluhr öffnen">
+            <div class="fa-ring"></div><div class="fa-skala"></div><div class="fa-kopf"><i></i></div><div class="fa-scheibe"></div>
+            <div class="fa-orb-in">
+              <div class="fa-zustand"><i></i><span id="faZustand">Uhr steht</span></div>
+              <div class="fa-zeit" id="faZeit">0:00</div>
+              <p class="fa-seit" id="faSeit"></p>
+              <button type="button" class="fa-orb-knopf" id="faOrbKnopf">Zur Stempeluhr</button>
+            </div>
+          </div>
+          <div class="fa-soll" id="faSoll"></div>
+        </div>
       </section>
+      <div class="fa-leiste">
+        <span class="eyebrow">Vom Auftrag zum Geld</span>
+        <div class="pv-wahl" role="group" aria-label="Ansicht">
+          <button type="button" class="lw-knopf an" data-fa="ablauf" aria-pressed="true">Ablauf</button>
+          <button type="button" class="lw-knopf" data-fa="schaltbild" aria-pressed="false">Schaltbild</button>
+        </div>
+      </div>
+      <section class="fa-bento" id="faBento" aria-label="Werkzeuge im Ablauf"></section>
+      <div class="fa-aus" id="faAus"><i></i>Ausgang · Druck · Factur-X · Steuerbüro</div>
       <section class="grid" id="grid" aria-label="Werkzeuge">
         <div class="offen" id="offen" aria-live="polite"></div>
       </section>
@@ -1627,6 +1840,8 @@ function offeneWelt(){
   if (bk && bk.ueber) p.push({ zu:'belegbuch', spaet:true, rot:true,
     text:'<b>' + bk.ueber + '</b> ' + (bk.ueber === 1 ? 'Eingangsrechnung' : 'Eingangsrechnungen') + ' überfällig' });
 
+  window.FA_POSTEN = p;
+  if (window.FA_BEREIT) { try { faBauen(); } catch (e) {} }
   const el = document.getElementById('offen');
   if (!el) return;
   el.innerHTML = p.filter(x => byId[x.zu] && !byId[x.zu].gesperrt).map(x =>
@@ -3898,6 +4113,290 @@ function kastenBauen(liste, g){
 /* Nachziehen, sobald ein Werkzeug etwas spiegelt – und die Uhr im Sekundentakt. */
 let kastenT = null;
 function kastenFrisch(){ clearTimeout(kastenT); kastenT = setTimeout(() => meinTiles.forEach(kachelNeu), 120); }
+/* ───────── Meine Firma: Ablauf ─────────
+   Seit 21.11.2026. Die Bühne „Heute“ zählt, was ansteht (dieselben Posten
+   wie „Was offen ist“, dazu Budget und der nächste Termin), und zeigt die
+   Stempeluhr als Ring gegen einen Tag von FA_SOLL Stunden. Darunter der
+   Ablauf als Kacheln mit Inhalt; Auftragsbuch und Auftragsstatus teilen
+   sich eine Kachel. Gelesen wird nur aus den Lesekopien – geschrieben nie. */
+const FA_SOLL = 8;
+const FA_LS = 'wb-firma-ansicht';
+const FA_SCHRITTE = ['geplant','aktiv','abgeschlossen','abgerechnet'];
+const FA_FARBEN = ['#F2B33D','#2FA894','#3F6FCB','#9C7BE0','#D9A86C','#E2725B','#5AA9C9'];
+const FA_ZAHLWORT = ['Nichts','Eine Sache','Zwei Dinge','Drei Dinge','Vier Dinge','Fünf Dinge','Sechs Dinge','Sieben Dinge','Acht Dinge','Neun Dinge','Zehn Dinge'];
+const faDa = id => !!(byId[id] && !byId[id].gesperrt);
+const faNfDatum = new Intl.DateTimeFormat('de-DE', { weekday:'long', day:'numeric', month:'long' });
+function faKw(d){ const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())); const n = t.getUTCDay() || 7;
+  t.setUTCDate(t.getUTCDate() + 4 - n); const j = new Date(Date.UTC(t.getUTCFullYear(), 0, 1)); return Math.ceil(((t - j) / 864e5 + 1) / 7); }
+function faKuerzel(name){ const w = String(name || '?').replace(/[^\p{L}\p{N} ]/gu, ' ').trim().split(/\s+/);
+  return ((w[0] || '?')[0] + (w.length > 1 ? w[1][0] : (w[0][1] || ''))).toUpperCase(); }
+function faTag(iso){ const h = isoTag(Date.now()); if (iso === h) return 'Heute'; if (iso === isoTag(Date.now() + 864e5)) return 'Morgen';
+  const d = new Date(iso + 'T12:00:00'); return ['So','Mo','Di','Mi','Do','Fr','Sa'][d.getDay()] + ' ' + pad2(d.getDate()) + '.' + pad2(d.getMonth() + 1) + '.'; }
+function faFarbe(id){ let h = 0; String(id || '').split('').forEach(c => { h = (h * 31 + c.charCodeAt(0)) >>> 0; }); return FA_FARBEN[h % FA_FARBEN.length]; }
+
+/* Was die Stempeluhr gerade tut und was heute und diese Woche gebucht ist. */
+function faUhr(){
+  const run = lsJson('stempeluhr_run_v1'), roh = lsJson('stempeluhr_entries_v2');
+  const ent = Array.isArray(roh) ? roh : [];
+  const laeuft = !!(run && run.running), pause = laeuft && !!run.paused;
+  const lauf = laeuft ? (+run.accumSec || 0) + (run.segStart && !run.paused ? (Date.now() - run.segStart) / 1000 : 0) : 0;
+  const mo = wocheStart();
+  const tage = [0,1,2,3,4,5,6].map(i => { const a = mo + i * 864e5, b = a + 864e5;
+    return ent.reduce((s, e) => s + (e && e.start >= a && e.start < b ? (+e.dur || 0) : 0), 0); });
+  const hi = (new Date().getDay() + 6) % 7;
+  return { laeuft, pause, lauf, seit: laeuft ? run.bookingStart : null, tage, hi, daten: ent.length > 0 || laeuft,
+           heute: tage[hi] + lauf, woche: tage.reduce((a, b) => a + b, 0) + lauf };
+}
+
+function faAuftraege(){
+  const ab = lsJson(WB_AB_LS) || {}, st = lsJson(WB_STATUS_LS) || {}, z = lsJson(WB_ZEIT_LS) || {};
+  const ueber = st.status && typeof st.status === 'object' ? st.status : {};
+  const eigen = Array.isArray(ab.auftraege) ? ab.auftraege.filter(Boolean) : [];
+  const dazu = (Array.isArray(st.auftraege) ? st.auftraege : []).filter(a => a && a.id && !eigen.some(b => b.id === a.id));
+  const agb = {}; (Array.isArray(ab.auftraggeber) ? ab.auftraggeber : []).forEach(x => { if (x && x.id) agb[x.id] = x; });
+  const je = z.jeAuftrag || {};
+  const zeilen = eigen.concat(dazu).map(a => ({ a, s: ueber[a.id] || a.status })).filter(x => OFFEN_ST.has(x.s)).map(x => {
+    const j = je[x.a.id] || {};
+    const ph = +x.a.budgetStunden > 0 ? (+j.sec || 0) / 36 / (+x.a.budgetStunden) : null;
+    const pe = +x.a.budgetEuro > 0 ? (+j.eur || 0) * 100 / (+x.a.budgetEuro) : null;
+    return Object.assign(x, { k: agb[x.a.auftraggeberId] || null, p: ph == null && pe == null ? null : Math.max(ph || 0, pe || 0) });
+  }).sort((x, y) => (y.p == null ? -1 : y.p) - (x.p == null ? -1 : x.p));
+  return { zeilen, nAgb: Object.values(agb).filter(x => x.aktiv !== false).length, daten: !!(ab.auftraggeber || ab.auftraege || st.auftraege) };
+}
+
+function faTermine(){
+  const d = lsJson(WB_TERMIN_LS);
+  if (!d || !Array.isArray(d.termine)) return null;
+  const heute = isoTag(Date.now());
+  const offen = d.termine.filter(t => t && t.datum && !t.erledigt);
+  const spaet = offen.filter(t => t.datum < heute).sort((a, b) => b.datum.localeCompare(a.datum));
+  const kommend = offen.filter(t => t.datum >= heute).sort((a, b) => (a.datum + (a.von || '00:00')).localeCompare(b.datum + (b.von || '00:00')));
+  return { spaet, kommend, liste: spaet.slice(0, 1).map(t => Object.assign({ rot:true }, t)).concat(kommend).slice(0, 3) };
+}
+
+function faRechnungen(){
+  const d = lsJson(WB_RECH_LS), z = lsJson(WB_ZEIT_LS);
+  const heute = isoTag(Date.now()), jahr = heute.slice(0, 4);
+  let bezahlt = 0, offen = 0, spaet = 0, nSpaet = 0;
+  (d && Array.isArray(d.rechnungen) ? d.rechnungen : []).forEach(x => {
+    if (!x || !x.festgeschrieben || x.storniert || x.stornoVon) return;
+    const s = rechSumme(x);
+    if (String(x.datum || '').slice(0, 4) === jahr) bezahlt = cent(bezahlt + s.brutto - Math.max(0, s.rest));
+    if (s.rest <= 0.005) return;
+    const ziel = new Date((x.datum || heute) + 'T12:00:00'); ziel.setDate(ziel.getDate() + (parseInt(x.ziel, 10) || 0));
+    if (isoTag(ziel) < heute) { spaet = cent(spaet + s.rest); nSpaet++; } else offen = cent(offen + s.rest);
+  });
+  const unber = z && z.offen ? (+z.offen.eur || 0) : null;
+  return { bezahlt, offen, spaet, nSpaet, unber, daten: !!(d && Array.isArray(d.rechnungen) && d.rechnungen.length) || unber != null };
+}
+
+/* Die Posten oben: was offen ist (aus offeneWelt), Budget, nächster Termin. */
+function faPosten(au, te){
+  const p = (window.FA_POSTEN || []).filter(x => faDa(x.zu)).map(x => ({ zu:x.zu, text:x.text, art: x.rot || x.spaet ? 'rot' : '' }));
+  const knapp = au.zeilen.filter(x => x.p != null && x.p >= 80).length;
+  if (knapp && (faDa('auftragsstatus') || faDa('auftragsbuch')))
+    p.push({ zu: faDa('auftragsstatus') ? 'auftragsstatus' : 'auftragsbuch', art:'',
+             text:'<b>' + knapp + '</b> ' + (knapp === 1 ? 'Auftrag' : 'Aufträge') + ' über 80 % Budget' });
+  p.sort((a, b) => (b.art === 'rot') - (a.art === 'rot'));
+  const t = te && te.kommend[0];
+  if (t && faDa('terminbuch') && t.datum <= isoTag(Date.now() + 2 * 864e5))
+    p.push({ zu:'terminbuch', art:'blau', info:true, text: esc(faTag(t.datum)) + (t.von ? ' ' + esc(t.von) : '') + ' · ' + esc(t.titel || 'Termin') });
+  return p;
+}
+
+const FA_ZEICHEN = {
+  auftraege: '<path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11M9 8h6"/>',
+  stempeluhr: '<circle cx="12" cy="13.6" r="7"/><path d="M12 10v3.6l2.5 1.7M9.6 3.3h4.8M12 3.3v3.3"/>',
+  terminbuch: '<rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M9 3v4M15 3v4"/>',
+  rechnungsbuch: '<path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 12h5M10 16h5"/>',
+  belegbuch: '<path d="M6 3.4h12V21l-2.4-1.5L13.2 21l-2.4-1.5L8.4 21 6 19.5z"/><path d="M9 8h6M9 11.4h6"/>'
+};
+const faSvg = k => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + FA_ZEICHEN[k] + '</svg>';
+const faPfeil = '<span class="fa-pfeil" aria-hidden="true">→</span>';
+function faKopf(k, nr, tag, name, zahl, rechts){
+  return '<div class="fa-kk"><span class="fa-ic">' + (zahl ? '<span class="fa-zahl' + (zahl.rot ? ' rot' : '') + '">' + zahl.n + '</span>' : '') + faSvg(k) + '</span>'
+    + '<span class="fa-nm"><small>' + pad2(nr) + ' · ' + tag + '</small><b>' + name + '</b></span>' + (rechts || faPfeil) + '</div>';
+}
+
+let faErst = true;
+function faBauen(){
+  const bento = document.getElementById('faBento');
+  if (!bento) return;
+  const u = faUhr(), au = faAuftraege(), te = faTermine(), re = faRechnungen(), be = belegStand('kontor');
+  const posten = faPosten(au, te);
+
+  /* Bühne */
+  const d = new Date();
+  $('#faDatum').textContent = faNfDatum.format(d).replace(',', ' ·') + ' · KW ' + faKw(d);
+  const n = posten.filter(x => !x.info).length;
+  const leer = !au.daten && !u.daten && !re.daten && !be && !te;
+  $('#faLead').innerHTML = leer ? '<b>Noch ist alles leer</b> – leg im Auftragsbuch den ersten Auftrag an.'
+    : n ? '<b>' + (FA_ZAHLWORT[n] || n + ' Dinge') + '</b> ' + (n === 1 ? 'wartet' : 'warten') + ' heute auf dich – der Rest läuft.'
+    : '<b>Alles im Lot.</b> Heute wartet nichts auf dich.';
+  const chips = $('#faChips');
+  chips.innerHTML = posten.slice(0, 5).map(x => '<button type="button" class="fa-chip ' + x.art + '" data-zu="' + x.zu + '"><i></i><span>' + x.text + '</span></button>').join('');
+  chips.querySelectorAll('[data-zu]').forEach(b => b.addEventListener('click', () => faOeffnen(b.dataset.zu, b)));
+  faUhrZeigen(u);
+
+  /* Kacheln */
+  const k = [];
+  if (faDa('auftragsbuch') || faDa('auftragsstatus')) {
+    const knapp = au.zeilen.filter(x => x.p != null && x.p >= 80).length;
+    const spr = '<span class="fa-spr">' + (faDa('auftragsbuch') ? '<button type="button" class="fa-sp" data-zu="auftragsbuch">Kunden ↗</button>' : '')
+      + (faDa('auftragsstatus') ? '<button type="button" class="fa-sp" data-zu="auftragsstatus">Status ↗</button>' : '') + '</span>';
+    const titel = au.zeilen.length ? au.zeilen.length + ' aktiv · ' + au.nAgb + ' ' + (au.nAgb === 1 ? 'Auftraggeber' : 'Auftraggeber') : 'Aufträge';
+    const zeilen = au.zeilen.slice(0, 5).map(x => {
+      const i = x.s === 'geplant' ? 0 : 1;
+      const dots = FA_SCHRITTE.map((s, j) => '<i class="' + (j < i ? 'ok' : j === i ? (x.s === 'pausiert' ? 'pause' : 'jetzt') : '') + '"></i>').join('');
+      const kl = x.p == null ? '' : x.p > 100 ? 'rot' : x.p >= 80 ? 'warn' : '';
+      return '<div class="fa-z"><span class="fa-av" style="--x:' + faFarbe(x.k ? x.k.id : x.a.id) + '">' + esc(faKuerzel(x.k ? x.k.name : x.a.name)) + '</span>'
+        + '<span class="fa-an"><b>' + esc(x.a.name || 'Auftrag') + '</b><small>' + esc(x.k ? x.k.name : 'ohne Auftraggeber') + '</small></span>'
+        + '<span class="fa-schritt" title="' + esc(x.s) + '">' + dots + '<em>' + esc(x.s.charAt(0).toUpperCase() + x.s.slice(1)) + '</em></span>'
+        + '<span class="fa-bud">' + (x.p == null ? '<b class="ohne">ohne Budget</b><span class="fa-spur"></span>'
+          : '<b>' + Math.round(x.p) + ' %</b><span class="fa-spur ' + kl + '"><i style="width:' + Math.min(100, x.p) + '%"></i></span>') + '</span></div>';
+    }).join('');
+    k.push({ id: faDa('auftragsstatus') ? 'auftragsstatus' : 'auftragsbuch', w:'w7', c:'var(--amber)', cls:'fa-auftraege',
+      html: faKopf('auftraege', 0, 'Aufträge', esc(titel), knapp ? { n:knapp } : null, spr)
+        + (zeilen ? '<div class="fa-liste">' + zeilen + '</div>' + (au.zeilen.length > 5 ? '<div class="fa-mehr">+ ' + (au.zeilen.length - 5) + ' weitere</div>' : '')
+                  : '<p class="fa-leer">Keine offenen Aufträge. Im Auftragsbuch legst du einen an.</p>') });
+  }
+  if (faDa('stempeluhr')) {
+    const max = Math.max(FA_SOLL * 3600, ...u.tage);
+    const bars = ['Mo','Di','Mi','Do','Fr','Sa','So'].map((t, i) => {
+      const s = u.tage[i] + (i === u.hi ? u.lauf : 0);
+      return '<div class="' + (i === u.hi ? 'heute' : '') + '"><b style="height:' + Math.max(4, Math.round(s / max * 86)) + 'px"></b><small>' + t + '</small></div>'; }).join('');
+    k.push({ id:'stempeluhr', w:'w5', c:'var(--teal)', html: faKopf('stempeluhr', 0, 'Zeiterfassung', 'Stempeluhr', null)
+      + (u.daten ? '<div class="fa-balken">' + bars + '</div><div class="fa-gross" data-zahl="' + (u.woche / 3600).toFixed(1) + '">' + nf1.format(u.woche / 3600) + '<span>h diese Woche</span></div>'
+                 : '<p class="fa-leer">Noch keine Buchungen. Tippe, um die Uhr zu starten.</p>') });
+  }
+  if (faDa('terminbuch')) {
+    const zs = te && te.liste.length ? '<div class="fa-zs">' + te.liste.map(t => '<div' + (t.rot ? ' class="rot"' : '') + '><span class="t">' + esc(faTag(t.datum))
+      + '<b>' + esc(t.von || (t.rot ? 'fällig' : '—')) + '</b></span><span class="p"></span><span class="w">' + esc(t.titel || 'Termin')
+      + '<small>' + esc({ erinnerung:'Wiedervorlage', frist:'Frist', meilenstein:'Meilenstein' }[t.art] || 'Termin') + '</small></span></div>').join('') + '</div>'
+      : '<p class="fa-leer">Keine Termine in Sicht.</p>';
+    k.push({ id:'terminbuch', w:'w5', c:'var(--info)', html: faKopf('terminbuch', 0, 'Termine', 'Terminbuch', te && te.spaet.length ? { n:te.spaet.length, rot:true } : null) + zs });
+  }
+  if (faDa('rechnungsbuch')) {
+    const ges = re.bezahlt + re.offen + re.spaet;
+    const gross = nfE.format(re.unber != null ? re.unber : re.offen + re.spaet);
+    const unter = (re.unber != null ? 'nicht abgerechnet' : 'offen') + (re.nSpaet ? ' · ' + re.nSpaet + ' überfällig' : '');
+    k.push({ id:'rechnungsbuch', w:'w4', c:'var(--geld)', html: faKopf('rechnungsbuch', 0, 'Abrechnung', 'Rechnungsbuch', re.nSpaet ? { n:re.nSpaet, rot:true } : null)
+      + (re.daten ? '<div class="fa-gross">' + gross + '</div><div class="fa-unter">' + unter + '</div>'
+        + (ges > 0 ? '<div class="fa-stapel"><i style="width:' + (re.bezahlt / ges * 100) + '%;background:var(--teal)"></i><i style="width:' + (re.offen / ges * 100) + '%;background:var(--amber)"></i><i style="width:' + (re.spaet / ges * 100) + '%;background:var(--red-ink)"></i></div>'
+          + '<div class="fa-leg"><span style="--l:var(--teal)">bezahlt ' + new Date().getFullYear() + '</span><span style="--l:var(--amber)">offen</span><span style="--l:var(--red-ink)">überfällig</span></div>' : '')
+        : '<p class="fa-leer">Noch keine Rechnung geschrieben.</p>') });
+  }
+  if (faDa('belegbuch')) {
+    k.push({ id:'belegbuch', w:'w3', c:'var(--geld)', html: faKopf('belegbuch', 0, 'Belege', 'Belegbuch', be && be.ueber ? { n:be.ueber, rot:true } : be && be.eingang ? { n:be.eingang } : null)
+      + '<div class="fa-belege" aria-hidden="true"><i></i><i></i><i></i></div>'
+      + (be ? '<div class="fa-gross">' + be.eingang + '<span>im Eingang</span></div><div class="fa-unter">' + be.offen + (be.offen === 1 ? ' Rechnung' : ' Rechnungen') + ' offen' + (be.ueber ? ' · ' + be.ueber + ' überfällig' : '') + '</div>'
+            : '<p class="fa-leer">Noch keine Belege.</p>') });
+  }
+  if (k.length && k.length < 5) k.forEach((x, i) => { x.w = (k.length % 2 && i === k.length - 1) ? 'w12' : 'w6'; });
+  bento.classList.toggle('erst', faErst);
+  bento.innerHTML = '<svg class="fa-fluss" id="faFluss" aria-hidden="true"></svg>' + k.map((x, i) =>
+    '<div class="fa-k ' + x.w + ' ' + (x.cls || '') + '" role="link" tabindex="0" data-zu="' + x.id + '" style="--c:' + x.c + ';--i:' + i + '">'
+    + x.html.replace('<small>00 · ', '<small>' + pad2(i + 1) + ' · ') + '</div>').join('');
+  $('#faAus').hidden = !faDa('rechnungsbuch');
+  bento.querySelectorAll('.fa-k').forEach(el => {
+    const ic = el.querySelector('.fa-ic');
+    if (byId[el.dataset.zu]) byId[el.dataset.zu].vShot = ic;
+    el.addEventListener('click', () => faOeffnen(el.dataset.zu, ic));
+    el.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target === el) { e.preventDefault(); faOeffnen(el.dataset.zu, ic); } });
+  });
+  bento.querySelectorAll('.fa-sp').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); faOeffnen(b.dataset.zu, b.closest('.fa-k').querySelector('.fa-ic')); }));
+  if (faErst && !reduce) faZaehlen(bento);
+  faErst = false;
+  requestAnimationFrame(faFluss);
+}
+
+function faOeffnen(id, von){
+  const t = byId[id]; if (!t || t.gesperrt) return;
+  if (von) t.vShot = von;
+  open(id);
+}
+
+/* Zahlen zählen beim ersten Aufbau hoch. */
+function faZaehlen(root){
+  root.querySelectorAll('.fa-gross').forEach(z => {
+    const n = z.firstChild; if (!n || n.nodeType !== 3) return;
+    const ziel = n.textContent.trim(), euro = /€/.test(ziel), dez = /,/.test(ziel) && !euro;
+    const num = parseFloat(ziel.replace(/[^\d,]/g, '').replace(',', '.')); if (!(num > 0)) return;
+    const t0 = performance.now();
+    (function f(t){ const k = Math.min((t - t0) / 1300, 1), v = num * (1 - Math.pow(1 - k, 4));
+      n.textContent = euro ? nfE.format(Math.round(v)) : dez ? nf1.format(v) : String(Math.round(v));
+      if (k < 1) requestAnimationFrame(f); else n.textContent = ziel; })(t0);
+  });
+}
+
+/* Der Ring: läuft die Uhr, zählt er mit; sonst zeigt er, was heute gebucht ist. */
+function faUhrZeigen(u){
+  const orb = $('#faOrb'); if (!orb) return;
+  u = u || faUhr();
+  orb.classList.toggle('laeuft', u.laeuft && !u.pause);
+  orb.classList.toggle('pause', u.pause);
+  orb.style.setProperty('--p', Math.min(u.heute / (FA_SOLL * 3600), 1).toFixed(4));
+  const s = u.laeuft ? u.lauf : u.heute;
+  const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), sek = Math.floor(s % 60);
+  $('#faZeit').innerHTML = h + ':' + pad2(m) + (u.laeuft ? '<small>:' + pad2(sek) + '</small>' : '<small> h</small>');
+  $('#faZustand').textContent = u.pause ? 'Pausiert' : u.laeuft ? 'Läuft' : 'Uhr steht';
+  $('#faSeit').textContent = u.laeuft ? 'seit ' + uhrzeit(u.seit || Date.now()) + ' · Auftrag beim Stoppen' : 'heute gebucht';
+  $('#faOrbKnopf').textContent = u.laeuft ? 'Zur Stempeluhr' : 'Uhr starten';
+  $('#faSoll').innerHTML = 'Heute<b>' + nf1.format(u.heute / 3600) + ' / ' + FA_SOLL + ' h</b>';
+  $('#faOrb').closest('.fa-orb-wrap').hidden = !faDa('stempeluhr');
+}
+
+/* Der Fluss: eine leuchtende Linie durch die Zeichen, ein Lichtpunkt wandert. */
+function faFluss(){
+  const sv = document.getElementById('faFluss'), b = document.getElementById('faBento');
+  if (!sv || !b || innerWidth <= 900 || !b.offsetParent) { if (sv) sv.innerHTML = ''; return; }
+  const g = b.getBoundingClientRect();
+  const pts = [...b.querySelectorAll('.fa-ic')].map(i => { const r = i.getBoundingClientRect(); return [r.left - g.left + r.width / 2, r.top - g.top + r.height / 2]; });
+  if (pts.length < 2) { sv.innerHTML = ''; return; }
+  let d = 'M' + pts[0];
+  for (let i = 1; i < pts.length; i++) { const [x1, y1] = pts[i - 1], [x2, y2] = pts[i], my = (y1 + y2) / 2; d += ' C' + x1 + ',' + my + ' ' + x2 + ',' + my + ' ' + x2 + ',' + y2; }
+  const cs = getComputedStyle(root), f = v => cs.getPropertyValue(v).trim();
+  sv.setAttribute('viewBox', '0 0 ' + g.width + ' ' + g.height); sv.setAttribute('width', g.width); sv.setAttribute('height', g.height);
+  const lauf = '<animateMotion dur="7s" repeatCount="indefinite" path="' + d + '" keyPoints="0;1" keyTimes="0;1" calcMode="spline" keySplines=".45 0 .55 1"/>';
+  sv.innerHTML = '<defs><linearGradient id="faLg" x1="0" x2="1"><stop offset="0" stop-color="' + f('--amber') + '"/><stop offset=".5" stop-color="' + f('--teal') + '"/><stop offset="1" stop-color="' + f('--geld') + '"/></linearGradient>'
+    + '<filter id="faGl" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="5"/></filter></defs>'
+    + '<path d="' + d + '" fill="none" stroke="url(#faLg)" stroke-width="6" opacity=".35" filter="url(#faGl)"/>'
+    + '<path d="' + d + '" fill="none" stroke="url(#faLg)" stroke-width="1.5" stroke-dasharray="2 7" stroke-linecap="round" opacity=".9"/>'
+    + (reduce ? '' : '<circle r="5" fill="#fff">' + lauf + '</circle><circle r="14" fill="' + f('--teal') + '" opacity=".45" filter="url(#faGl)">' + lauf + '</circle>');
+}
+
+(function(){
+  const slide = $('#s-kontor'); if (!slide) return;
+  const knoepfe = [...slide.querySelectorAll('[data-fa]')];
+  const setzen = (art, merken) => {
+    slide.classList.toggle('schaltbild', art === 'schaltbild');
+    knoepfe.forEach(b => { const an = b.dataset.fa === art; b.classList.toggle('an', an); b.setAttribute('aria-pressed', an); });
+    if (merken) { try { localStorage.setItem(FA_LS, art); } catch (e) {} }
+    requestAnimationFrame(() => { if (art === 'schaltbild') { try { busNeu(); } catch (e) {} } else faFluss(); });
+  };
+  knoepfe.forEach(b => b.addEventListener('click', () => setzen(b.dataset.fa, true)));
+  let art = 'ablauf'; try { art = localStorage.getItem(FA_LS) || 'ablauf'; } catch (e) {}
+  setzen(art, false);
+  const orb = $('#faOrb');
+  orb.addEventListener('click', () => faOeffnen('stempeluhr', orb));
+  orb.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); faOeffnen('stempeluhr', orb); } });
+  /* Licht folgt dem Zeiger, die Kachel kippt leicht – nur mit Maus. */
+  if (matchMedia('(pointer:fine)').matches && !reduce) {
+    const b = $('#faBento');
+    b.addEventListener('pointermove', e => { const el = e.target.closest('.fa-k'); if (!el) return;
+      const r = el.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+      el.style.setProperty('--mx', x * 100 + '%'); el.style.setProperty('--my', y * 100 + '%');
+      el.style.setProperty('--ry', ((x - .5) * 5).toFixed(2) + 'deg'); el.style.setProperty('--rx', ((.5 - y) * 5).toFixed(2) + 'deg'); });
+    b.addEventListener('pointerout', e => { const el = e.target.closest('.fa-k'); if (el && !el.contains(e.relatedTarget)) { el.style.setProperty('--rx', '0deg'); el.style.setProperty('--ry', '0deg'); } });
+  }
+  window.FA_BEREIT = true;
+  faBauen();
+  addEventListener('resize', () => requestAnimationFrame(faFluss));
+  addEventListener('storage', e => { if (!e.key || /^(wb-|stempeluhr_)/.test(e.key)) faBauen(); });
+  addEventListener('visibilitychange', () => { if (!document.hidden) faBauen(); });
+  setInterval(() => { if (!document.hidden && !current && !slide.hidden) { const u = faUhr(); if (u.laeuft) faUhrZeigen(u); } }, 1000);
+})();
+
 addEventListener('storage', e => { if (!e.key || /^(wb-|stempeluhr_|ideahub:)/.test(e.key)) kastenFrisch(); });
 WB.horchen(null, kastenFrisch);
 addEventListener('visibilitychange', () => { if (!document.hidden) kastenFrisch(); });
@@ -4184,6 +4683,8 @@ const Dock = (function(){
     alleBtns.forEach(el => el.classList.toggle('is-active', el===btns[i]));
     farbe();
     nameEl.textContent=btns[i].dataset.label;
+    /* Seit 21.11.2026: die Marke nennt den Bereich, in dem man steht. */
+    const markeName=document.querySelector('#home b'); if (markeName) markeName.textContent=btns[i].getAttribute('aria-label');
     bead.setAttribute('aria-valuenow', i+1);
     bead.setAttribute('aria-valuetext', btns[i].dataset.label);
     if (anders) { bead.innerHTML=btns[i].querySelector('svg').outerHTML; if (!still) welle(); }
