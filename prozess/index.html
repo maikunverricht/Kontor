@@ -233,6 +233,74 @@ dialog::backdrop{background:rgba(5,8,13,.55);backdrop-filter:blur(4px)}
 }
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 @media print{.bg,.nav,.fang,.akt{display:none!important}}
+/* Ablauf */
+.ab-breit .wrap{max-width:1880px}
+.ab-leiste{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:8px;border-radius:22px;margin-bottom:12px}
+.ab-t{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-3);margin:0 2px 0 8px}
+.ab-ebene{--c:var(--amber)}
+.ab-ebene i{width:8px;height:8px;border-radius:50%;background:var(--c)}
+.ab-ebene[aria-pressed="true"]{background:color-mix(in srgb,var(--c) 16%,transparent);border-color:var(--c);color:var(--text);font-weight:600}
+.ab-leiste [data-verb][aria-pressed="true"]{background:var(--amber);color:var(--ink);border-color:transparent;font-weight:700}
+.pill.sm.icon{width:30px;padding:0}
+.ab-feld{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:14px;align-items:start}
+.ab-flaeche{position:relative;border-radius:26px;overflow:auto;max-height:calc(100vh - 150px);scrollbar-width:thin}
+.ab-blatt{position:relative;width:1900px;height:900px;transform-origin:0 0;background-image:radial-gradient(circle,var(--line) 1px,transparent 1.2px);background-size:24px 24px}
+.ab-bahn{position:absolute;left:0;right:0;border-top:1px dashed var(--line-strong)}
+.ab-bahn span{position:absolute;left:14px;top:10px;font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-3)}
+.ab-bahn b{position:absolute;left:14px;top:26px;font-size:13px;color:var(--text-2);font-weight:600}
+.ab-schleife{position:absolute;border:2px dashed color-mix(in srgb,var(--amber) 45%,transparent);border-radius:40px;pointer-events:none}
+.ab-schleife span{position:absolute;top:-11px;left:24px;padding:0 8px;background:var(--void);font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber)}
+svg.ab-kanten{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.ab-kante{fill:none;stroke-width:2.2;stroke-linecap:round;transition:opacity .3s}
+.ab-kante.fluss{stroke:var(--amber);stroke-dasharray:7 7;animation:abFluss 1.2s linear infinite}
+.ab-kante.rueck{stroke:var(--lila);stroke-dasharray:3 6}
+.ab-kante.nachweis{stroke:var(--info);stroke-dasharray:1 6;stroke-width:2.6}
+.ab-kante.gewaehlt{stroke-width:3.6;filter:drop-shadow(0 0 6px var(--amber))}
+.ab-kante.gedimmt{opacity:.1}
+.ab-hit{fill:none;stroke:transparent;stroke-width:14;cursor:pointer;pointer-events:stroke}
+.ab-label{font-family:var(--mono);font-size:10.5px;fill:var(--text-3)}
+@keyframes abFluss{to{stroke-dashoffset:-28}}
+.ab-blk{--c:var(--amber);position:absolute;width:184px;padding:10px 12px 10px 14px;border-radius:16px;background:var(--surface);border:1px solid var(--glass-edge);
+  box-shadow:0 16px 34px -20px rgba(0,0,0,.7);cursor:grab;user-select:none;touch-action:none;transition:box-shadow .25s,border-color .25s,opacity .3s,transform .2s}
+.ab-blk::before{content:"";position:absolute;left:0;top:12px;bottom:12px;width:3px;border-radius:0 3px 3px 0;background:var(--c)}
+.ab-blk:hover{border-color:color-mix(in srgb,var(--c) 55%,transparent)}
+.ab-blk.gewaehlt,.ab-blk.quelle{border-color:var(--c);box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 25%,transparent),0 18px 40px -16px color-mix(in srgb,var(--c) 60%,transparent)}
+.ab-blk.zieht{cursor:grabbing;transform:scale(1.03);z-index:5}
+.ab-blk .ab-art{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--c)}
+.ab-blk b{display:block;margin-top:4px;font-size:14px;font-weight:650;line-height:1.25}
+.ab-blk .tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:7px}
+.ab-tag{height:19px;padding:0 7px;border-radius:999px;display:inline-flex;align-items:center;font-family:var(--mono);font-size:10px;font-weight:600;color:var(--info);border:1px solid color-mix(in srgb,var(--info) 40%,transparent);background:color-mix(in srgb,var(--info) 10%,transparent)}
+.ab-wip{position:absolute;right:10px;top:9px;font-family:var(--mono);font-size:10px;font-weight:700;padding:1px 6px;border-radius:999px;background:color-mix(in srgb,var(--teal) 18%,transparent);color:var(--teal);border:1px solid color-mix(in srgb,var(--teal) 45%,transparent)}
+.ab-wip.voll{background:var(--red-ink);color:#fff;border-color:transparent}
+.ab-blk .port{position:absolute;right:-7px;top:50%;width:14px;height:14px;margin-top:-7px;border-radius:50%;background:var(--surface);border:2px solid var(--c);opacity:0;transition:opacity .2s;cursor:crosshair}
+.ab-blk:hover .port,.verbinden .ab-blk .port{opacity:1}
+.ab-blk.ereignis{border-radius:999px;width:168px;text-align:center;padding:10px 16px;background:linear-gradient(140deg,color-mix(in srgb,var(--c) 20%,var(--surface)),var(--surface) 70%)}
+.ab-blk.ereignis::before,.ab-blk.tor::before{display:none}
+.ab-blk.ereignis .tags,.ab-blk.tor .tags{justify-content:center}
+.ab-blk.tor{width:150px;text-align:center;border-radius:14px;border-style:dashed;border-color:color-mix(in srgb,var(--c) 60%,transparent)}
+.ab-blk.gedimmt{opacity:.18}
+.ab-detail{top:76px;max-height:calc(100vh - 96px)}
+.ab-detail h2{font-size:20px}
+.ab-art2{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-3)}
+.ab-wahl{display:flex;flex-wrap:wrap;gap:6px}
+.ab-wahl [aria-pressed="true"]{background:var(--amber);color:var(--ink);border-color:transparent;font-weight:700}
+.ab-verb{display:flex;align-items:center;gap:8px;width:100%;padding:8px 10px;border-radius:12px;background:var(--film);border:1px solid transparent;margin-bottom:6px;font-size:13px;text-align:left}
+.ab-verb:hover{border-color:var(--line-strong)}
+.ab-verb i{width:18px;border-top:2px solid var(--amber)}
+.ab-verb i.rueck{border-top:2px dashed var(--lila)}.ab-verb i.nachweis{border-top:2px dotted var(--info)}
+.ab-hinweis{margin-top:12px;padding:10px 12px;border-radius:14px;background:color-mix(in srgb,var(--red-ink) 12%,transparent);border:1px solid color-mix(in srgb,var(--red-ink) 40%,transparent);font-size:13px;color:var(--text-2)}
+.ab-hinweis b{color:var(--text)}
+.ab-legende{display:grid;gap:7px;font-size:12.5px;color:var(--text-2)}
+.ab-legende div{display:flex;align-items:center;gap:10px}
+.ab-legende svg{width:40px;height:10px}
+.ab-mini{width:40px;height:16px;border-radius:5px;border:1px solid var(--line-strong)}
+.ab-mini.er{border-radius:999px}.ab-mini.tor{border-style:dashed}
+.ab-detail .form textarea{min-height:70px}
+.ab-detail .form input,.ab-detail .form textarea,.ab-detail .form select{width:100%;min-width:0}
+.ab-detail .form .zwei{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+@media (max-width:1060px){.ab-feld{grid-template-columns:1fr}.ab-detail{position:relative;top:0;max-height:none}}
+@media (prefers-reduced-motion:reduce){.ab-kante.fluss{animation:none}}
+
 </style>
 </head>
 <body>
@@ -243,6 +311,7 @@ dialog::backdrop{background:rgba(5,8,13,.55);backdrop-filter:blur(4px)}
     <span class="sp"></span>
     <div class="seg" role="group" aria-label="Ansicht">
       <button type="button" data-ansicht="v" aria-pressed="true">V-Modell</button>
+      <button type="button" data-ansicht="ablauf" aria-pressed="false">Ablauf</button>
       <button type="button" data-ansicht="themen" aria-pressed="false">Themen <span class="n" id="nThemen" hidden>0</span></button>
     </div>
     <button class="pill" type="button" id="bRollen" title="Rollen verwalten"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.3-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18.5 14.8c1.7.7 2.7 2.4 3 5.2"/></svg><span class="txt">Rollen</span></button>
@@ -260,7 +329,7 @@ dialog::backdrop{background:rgba(5,8,13,.55);backdrop-filter:blur(4px)}
     <input type="file" id="datei" accept=".json,application/json" hidden>
   </header>
 
-  <section class="buehne glass">
+  <section class="buehne glass" id="buehne">
     <div style="position:relative;min-width:0">
       <p class="satz" id="satz"></p>
       <form class="fang" id="fang" autocomplete="off">
@@ -394,7 +463,8 @@ function zeichne() {
     : `<b>Alles geklärt.</b> ${REIHE.length} Schritte, ${D.globalRoles.length} Rollen im Prozess.`;
   fangFuellen();
   const m = $('#inhalt'); m.textContent = '';
-  m.append(ansicht === 'themen' ? brett() : vmodell());
+  $('#buehne').hidden = ansicht === 'ablauf'; document.body.classList.toggle('ab-breit', ansicht === 'ablauf');
+  m.append(ansicht === 'themen' ? brett() : ansicht === 'ablauf' ? ablauf() : vmodell());
   if (ansicht === 'v') requestAnimationFrame(bahnZeichnen);
 }
 function kurz(id) { const s = D.steps[id]; return s ? (s.badge && s.badge !== 'Mgmt' && s.badge !== 'Core' && s.badge !== 'Trigger' && s.badge !== 'Validierung' ? s.badge + ' · ' : '') + s.title.replace(/^[\d.]+\s*/, '') : '–'; }
@@ -630,6 +700,7 @@ function markdown() {
     if (th.length) md += `**Themen**\n` + th.map(t => `- [${t.status === 'erledigt' ? 'x' : ' '}] ${ARTEN[t.art][0]}: ${t.titel}${t.ergebnis ? ' → ' + t.ergebnis : ''}`).join('\n') + '\n\n';
     md += '---\n\n';
   }
+  md += abMarkdown();
   laden_datei(md, 'Prozessbuch.md', 'text/markdown;charset=utf-8');
 }
 
@@ -639,6 +710,206 @@ let toastT;
 function toast(text, rueck) {
   const t = $('#toast'); t.innerHTML = esc(text); if (rueck) { const b = el('button'); b.type = 'button'; b.textContent = 'Rückgängig'; b.onclick = () => { rueck(); t.classList.remove('an'); }; t.append(b); }
   t.classList.add('an'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('an'), 5200);
+}
+
+/* ═══ Ablauf (seit 21.11.2026): Blöcke und Verbindungen – Scrum, Flow, ASPICE. Eigenständig, gespeichert in D.ablauf. ═══ */
+const AB_EBENE = { scrum:['Scrum','var(--amber)'], flow:['Flow','var(--teal)'], aspice:['ASPICE','var(--info)'], produkt:['Produkt & Freigabe','var(--lila)'] };
+const AB_TYP = { schritt:'Schritt', ereignis:'Ereignis', tor:'Tor' };
+const AB_KANTE = { fluss:'Fluss der Arbeit', rueck:'Rückkopplung', nachweis:'Nachweis / Verfolgbarkeit' };
+const AB_W = 1900, AB_H = 900;
+const AB_STANDARD = {
+  bahnen:[{ y:20, t:'Produkt · Anforderungen' },{ y:250, t:'Sprint · Flow der Arbeit' },{ y:560, t:'Qualität · Nachweis · Freigabe' }],
+  schleifen:[{ x:470, y:296, w:1190, h:250, t:'Sprint · 2 Wochen' }],
+  bloecke:[
+    { id:'idee', x:40, y:80, e:'produkt', typ:'ereignis', t:'Anfrage / Idee', art:'Auslöser', d:'Kundenwunsch, Fehlerbild oder Change Request kommt herein.', a:['SYS.1','SUP.10'], r:['F-Res'], o:['Issue im ALM'] },
+    { id:'backlog', x:260, y:70, e:'scrum', typ:'schritt', t:'Product Backlog', art:'Artefakt', d:'Geordnete Liste aller Anforderungen, Epics und Features. Der Product Owner priorisiert nach Wert und Risiko.', a:['SWE.1','MAN.3'], r:['Product Owner'], o:['Backlog-Einträge'] },
+    { id:'refine', x:500, y:70, e:'scrum', typ:'ereignis', t:'Refinement', art:'Ereignis', d:'Einträge schneiden, schätzen, Akzeptanzkriterien klären.', a:['SWE.1'], r:['Team','Product Owner'] },
+    { id:'req', x:760, y:60, e:'aspice', typ:'schritt', t:'SW-Requirements', art:'Arbeitsprodukt', d:'Anforderungen mit Verfolgbarkeit zu System-Requirements und Testfällen, im Review freigegeben.', a:['SWE.1','SUP.8'], r:['F-Res'], o:['Anforderungsbuch'] },
+    { id:'dor', x:520, y:186, e:'produkt', typ:'tor', t:'Definition of Ready', art:'Tor', d:'Klar, geschätzt, testbar, Abhängigkeiten bekannt – erst dann in den Sprint.' },
+    { id:'plan', x:500, y:340, e:'scrum', typ:'ereignis', t:'Sprint Planning', art:'Ereignis', d:'Sprint-Ziel festlegen und Einträge aus dem Backlog ziehen – passend zur Kapazität.', a:['MAN.3'], r:['Team','Scrum Master'] },
+    { id:'bereit', x:740, y:330, e:'flow', typ:'schritt', t:'Bereit', art:'Flow-Stufe', d:'Gezogene Einträge warten auf Kapazität. Hier beginnt die Durchlaufzeit.' },
+    { id:'arbeit', x:970, y:330, e:'flow', typ:'schritt', t:'In Arbeit', art:'Flow-Stufe', d:'Architektur, Design und Code. Pull statt Push: nur ziehen, wenn das WIP-Limit Platz hat.', wip:[0,3], a:['SWE.2','SWE.3'], r:['SW Specialist'] },
+    { id:'pruef', x:1200, y:330, e:'flow', typ:'schritt', t:'Review & Test', art:'Flow-Stufe', d:'Code-Review, Unit-Tests, statische Analyse. Engpass zuerst leeren.', wip:[0,2], a:['SWE.4'], r:['SW Specialist'] },
+    { id:'fertig', x:1430, y:340, e:'flow', typ:'tor', t:'Definition of Done', art:'Tor', d:'Reviewt, getestet, integriert, dokumentiert – Nachweise für ASPICE liegen vor.' },
+    { id:'daily', x:970, y:470, e:'scrum', typ:'ereignis', t:'Daily', art:'Ereignis', d:'15 Minuten: Was blockiert den Fluss? Das Board von rechts nach links besprechen.' },
+    { id:'retro', x:1200, y:470, e:'scrum', typ:'ereignis', t:'Retrospektive', art:'Ereignis', d:'Prozess verbessern – Ergebnisse als Themen im Prozessbuch festhalten.', a:['PIM.3'] },
+    { id:'review', x:1430, y:470, e:'scrum', typ:'ereignis', t:'Sprint Review', art:'Ereignis', d:'Inkrement zeigen, Feedback einsammeln, Backlog anpassen.', r:['Team','Stakeholder'] },
+    { id:'arch', x:900, y:650, e:'aspice', typ:'schritt', t:'Architektur & Design', art:'Arbeitsprodukt', d:'Statische und dynamische Architektur, Detail-Design je Komponente.', a:['SWE.2','SWE.3'], o:['Schaltplan','Funktionsentwurf'] },
+    { id:'integ', x:1200, y:650, e:'aspice', typ:'schritt', t:'Integrationstest', art:'Arbeitsprodukt', d:'Komponenten gegen die Architektur integrieren und testen.', a:['SWE.5'], o:['TestcaseManager'] },
+    { id:'quali', x:1450, y:650, e:'aspice', typ:'schritt', t:'Qualifikationstest', art:'Arbeitsprodukt', d:'Software gegen die SW-Requirements prüfen – Verfolgbarkeit geschlossen.', a:['SWE.6'], o:['Testreport'] },
+    { id:'release', x:1680, y:630, e:'produkt', typ:'ereignis', t:'Release', art:'Freigabe', d:'Programmstand freigeben, Konfiguration einfrieren, ausliefern.', a:['SPL.2','SUP.8'], r:['P-Res'] },
+    { id:'cm', x:240, y:660, e:'aspice', typ:'schritt', t:'Konfigurations- & Change-Mgmt', art:'Unterstützend', d:'Baselines, Änderungsanträge, Problemmanagement – begleitet alle Schritte.', a:['SUP.8','SUP.9','SUP.10'] }
+  ],
+  kanten:[
+    ['idee','backlog','fluss'],['backlog','refine','fluss'],['refine','req','nachweis','SWE.1'],['refine','dor','fluss'],['dor','plan','fluss'],
+    ['plan','bereit','fluss'],['bereit','arbeit','fluss'],['arbeit','pruef','fluss'],['pruef','fertig','fluss'],['fertig','review','fluss'],
+    ['review','retro','rueck','Feedback'],['retro','plan','rueck','nächster Sprint'],['review','backlog','rueck','Backlog anpassen'],['daily','arbeit','rueck'],
+    ['arbeit','arch','nachweis','SWE.2/3'],['pruef','integ','nachweis','SWE.4/5'],['req','quali','nachweis','Verfolgbarkeit'],['integ','quali','fluss'],
+    ['quali','release','fluss'],['fertig','integ','nachweis'],['cm','idee','rueck','Change Request'],['retro','cm','nachweis']
+  ]
+};
+const AB = { wahl:'arbeit', wahlK:null, aus:new Set(), verb:false, von:null, z:null };
+function abDaten() {
+  if (!D.ablauf || !Array.isArray(D.ablauf.bloecke)) D.ablauf = kopie(AB_STANDARD);
+  const a = D.ablauf; a.kanten = Array.isArray(a.kanten) ? a.kanten : []; a.bahnen = a.bahnen || kopie(AB_STANDARD.bahnen); a.schleifen = a.schleifen || [];
+  return a;
+}
+function ablauf() {
+  const A = abDaten();
+  const w = el('div', 'ansicht');
+  const leiste = el('div', 'ab-leiste glass');
+  leiste.innerHTML = `<span class="ab-t">Ebenen</span>${Object.entries(AB_EBENE).map(([k, [n, c]]) => `<button class="pill sm ab-ebene" type="button" data-e="${k}" style="--c:${c}" aria-pressed="${!AB.aus.has(k)}"><i></i>${n}</button>`).join('')}
+    <span class="sp"></span><span class="ab-t">Neu</span>${Object.entries(AB_TYP).map(([k, n]) => `<button class="pill sm" type="button" data-neu="${k}">+ ${n}</button>`).join('')}
+    <button class="pill sm" type="button" data-verb aria-pressed="${AB.verb}">⟶ Verbinden</button>
+    <span class="ab-t">Ansicht</span><button class="pill sm icon" type="button" data-z="-" aria-label="Kleiner">−</button><button class="pill sm" type="button" data-z="fit">Einpassen</button><button class="pill sm icon" type="button" data-z="+" aria-label="Größer">+</button>`;
+  const feld = el('div', 'ab-feld');
+  const fl = el('section', 'ab-flaeche glass'); fl.id = 'abFlaeche';
+  fl.innerHTML = `<div id="abHuelle"><div class="ab-blatt${AB.verb ? ' verbinden' : ''}" id="abBlatt">
+    ${A.bahnen.map((b, i) => `<div class="ab-bahn" style="top:${b.y}px"><span>Bahn ${i + 1}</span><b>${esc(b.t)}</b></div>`).join('')}
+    ${A.schleifen.map(s => `<div class="ab-schleife" style="left:${s.x}px;top:${s.y}px;width:${s.w}px;height:${s.h}px"><span>${esc(s.t)}</span></div>`).join('')}
+    <svg class="ab-kanten" aria-hidden="true"><defs>
+      <marker id="abA" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--amber)"/></marker>
+      <marker id="abL" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--lila)"/></marker>
+      <marker id="abI" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--info)"/></marker></defs><g id="abKg"></g></svg></div></div>`;
+  const det = el('aside', 'detail glass ab-detail'); det.id = 'abDetail';
+  feld.append(fl, det); w.append(leiste, feld);
+  leiste.querySelectorAll('.ab-ebene').forEach(b => b.onclick = () => { const e = b.dataset.e; AB.aus.has(e) ? AB.aus.delete(e) : AB.aus.add(e); b.setAttribute('aria-pressed', String(!AB.aus.has(e))); abBloecke(); });
+  leiste.querySelector('[data-verb]').onclick = ev => { AB.verb = !AB.verb; AB.von = null; ev.currentTarget.setAttribute('aria-pressed', String(AB.verb)); $('#abBlatt').classList.toggle('verbinden', AB.verb); if (AB.verb) toast('Erst den Start-, dann den Zielblock antippen'); };
+  leiste.querySelectorAll('[data-neu]').forEach(b => b.onclick = () => {
+    const typ = b.dataset.neu, f = $('#abFlaeche'), z = AB.z || 1, id = uid('b');
+    A.bloecke.push({ id, x:Math.round((f.scrollLeft / z + 80) / 12) * 12, y:Math.round((f.scrollTop / z + 120) / 12) * 12, e:typ === 'ereignis' ? 'scrum' : typ === 'tor' ? 'produkt' : 'flow', typ, t:'Neu: ' + AB_TYP[typ], art:AB_TYP[typ], d:'' });
+    AB.wahl = id; AB.wahlK = null; sichern(); abBloecke();
+  });
+  leiste.querySelectorAll('[data-z]').forEach(b => b.onclick = () => { const v = b.dataset.z; if (v === 'fit') abEinpassen(); else abZoom((AB.z || 1) + (v === '+' ? .1 : -.1)); });
+  fl.addEventListener('pointerdown', e => { if (e.target.id === 'abBlatt' || e.target.closest('.ab-bahn')) { AB.wahl = null; AB.wahlK = null; abBloecke(); } });
+  requestAnimationFrame(() => { AB.z ? abZoom(AB.z) : abEinpassen(); abBloecke(); });
+  return w;
+}
+function abZoom(z) { AB.z = Math.max(.35, Math.min(1.4, z)); const b = $('#abBlatt'), h = $('#abHuelle'); if (!b) return; b.style.transform = `scale(${AB.z})`; h.style.width = AB_W * AB.z + 'px'; h.style.height = AB_H * AB.z + 'px'; }
+function abEinpassen() { const f = $('#abFlaeche'); if (!f) return; abZoom(Math.max(.5, (f.clientWidth - 4) / AB_W)); }
+function abBloecke() {
+  const A = abDaten(), blatt = $('#abBlatt'); if (!blatt) return;
+  blatt.querySelectorAll('.ab-blk').forEach(b => b.remove());
+  for (const n of A.bloecke) {
+    const [, c] = AB_EBENE[n.e] || AB_EBENE.flow;
+    const b = el('div', 'ab-blk ' + n.typ + (n.id === AB.wahl ? ' gewaehlt' : '') + (AB.aus.has(n.e) ? ' gedimmt' : '') + (AB.von === n.id ? ' quelle' : ''));
+    b.style.cssText = `left:${n.x}px;top:${n.y}px;--c:${c}`; b.dataset.id = n.id; b.tabIndex = 0;
+    const wip = n.wip && n.wip[1] ? `<span class="ab-wip${n.wip[0] >= n.wip[1] ? ' voll' : ''}" title="in Arbeit / Limit">${n.wip[0]}/${n.wip[1]}</span>` : '';
+    b.innerHTML = `<span class="ab-art">${esc(n.art || AB_TYP[n.typ])}</span><b>${esc(n.t)}</b>${(n.a || []).length ? `<span class="tags">${n.a.map(x => `<span class="ab-tag">${esc(x)}</span>`).join('')}</span>` : ''}${wip}<span class="port" title="Verbinden"></span>`;
+    abZiehbar(b, n); blatt.append(b);
+  }
+  abKanten(); abDetail();
+}
+function abSeite(n, s) { const b = $(`.ab-blk[data-id="${n.id}"]`); const w = b ? b.offsetWidth : 184, h = b ? b.offsetHeight : 60;
+  return s === 'r' ? [n.x + w, n.y + h / 2] : s === 'l' ? [n.x, n.y + h / 2] : s === 't' ? [n.x + w / 2, n.y] : [n.x + w / 2, n.y + h]; }
+function abKanten() {
+  const A = abDaten(), g = $('#abKg'); if (!g) return; g.innerHTML = '';
+  A.kanten.forEach((k, i) => {
+    const a = A.bloecke.find(n => n.id === k[0]), b = A.bloecke.find(n => n.id === k[1]); if (!a || !b) return;
+    const dx = b.x - a.x, dy = b.y - a.y, senk = Math.abs(dy) > 120 && Math.abs(dx) < 260;
+    const p = senk ? abSeite(a, dy > 0 ? 'b' : 't') : abSeite(a, dx >= 0 ? 'r' : 'l'), q = senk ? abSeite(b, dy > 0 ? 't' : 'b') : abSeite(b, dx >= 0 ? 'l' : 'r');
+    const c = Math.max(50, Math.abs(senk ? q[1] - p[1] : q[0] - p[0]) * .45);
+    const d = senk ? `M${p[0]} ${p[1]} C${p[0]} ${p[1] + (q[1] > p[1] ? c : -c)} ${q[0]} ${q[1] - (q[1] > p[1] ? c : -c)} ${q[0]} ${q[1]}`
+      : `M${p[0]} ${p[1]} C${p[0] + (q[0] > p[0] ? c : -c)} ${p[1]} ${q[0] - (q[0] > p[0] ? c : -c)} ${q[1]} ${q[0]} ${q[1]}`;
+    const dim = AB.aus.has(a.e) || AB.aus.has(b.e), m = { fluss:'abA', rueck:'abL', nachweis:'abI' }[k[2]] || 'abA';
+    g.insertAdjacentHTML('beforeend', `<path class="ab-kante ${k[2]}${AB.wahlK === i ? ' gewaehlt' : ''}${dim ? ' gedimmt' : ''}" d="${d}" marker-end="url(#${m})"/><path class="ab-hit" data-k="${i}" d="${d}"/>` +
+      (k[3] && !dim ? `<text class="ab-label" x="${(p[0] + q[0]) / 2}" y="${(p[1] + q[1]) / 2 - 6}" text-anchor="middle">${esc(k[3])}</text>` : ''));
+  });
+  g.querySelectorAll('.ab-hit').forEach(h => h.onclick = ev => { ev.stopPropagation(); AB.wahlK = +h.dataset.k; AB.wahl = null; abBloecke(); });
+}
+function abZiehbar(b, n) {
+  b.addEventListener('pointerdown', ev => {
+    if (ev.target.classList.contains('port') || AB.verb) { ev.stopPropagation(); abVerbinde(n); return; }
+    ev.stopPropagation();
+    const sx = ev.clientX, sy = ev.clientY, ox = n.x, oy = n.y, z = AB.z || 1; let bew = false;
+    b.setPointerCapture(ev.pointerId); b.classList.add('zieht');
+    b.onpointermove = e => { const dx = e.clientX - sx, dy = e.clientY - sy; if (Math.abs(dx) + Math.abs(dy) > 3) bew = true;
+      n.x = Math.max(0, Math.min(AB_W - 160, Math.round((ox + dx / z) / 12) * 12)); n.y = Math.max(0, Math.min(AB_H - 60, Math.round((oy + dy / z) / 12) * 12));
+      b.style.left = n.x + 'px'; b.style.top = n.y + 'px'; abKanten(); };
+    b.onpointerup = () => { b.onpointermove = null; b.classList.remove('zieht'); if (bew) sichern(); else { AB.wahl = n.id; AB.wahlK = null; abBloecke(); } };
+  });
+  b.addEventListener('keydown', e => { if (e.key === 'Enter') { AB.wahl = n.id; AB.wahlK = null; abBloecke(); } });
+}
+function abVerbinde(n) {
+  if (!AB.von) { AB.von = n.id; AB.wahl = n.id; abBloecke(); return; }
+  const A = abDaten();
+  if (AB.von !== n.id && !A.kanten.some(k => k[0] === AB.von && k[1] === n.id)) { A.kanten.push([AB.von, n.id, 'fluss']); sichern(); toast('Verbunden'); }
+  AB.von = null; AB.wahl = n.id; abBloecke();
+}
+function abDetail() {
+  const A = abDaten(), a = $('#abDetail'); if (!a) return;
+  if (AB.wahlK != null && A.kanten[AB.wahlK]) {
+    const k = A.kanten[AB.wahlK], x = A.bloecke.find(n => n.id === k[0]), y = A.bloecke.find(n => n.id === k[1]);
+    a.innerHTML = `<span class="ab-art2">Verbindung</span><h2>${esc(x.t)} → ${esc(y.t)}</h2>
+      <div class="abschnitt"><h3>Art</h3><div class="ab-wahl">${Object.entries(AB_KANTE).map(([v, t]) => `<button class="pill sm" type="button" data-art="${v}" aria-pressed="${k[2] === v}">${t}</button>`).join('')}</div></div>
+      <div class="abschnitt form"><label>Beschriftung<input data-f="label" value="${esc(k[3] || '')}" placeholder="z. B. nächster Sprint"></label></div>
+      <div class="abschnitt"><button class="pill sm" type="button" data-weg style="color:var(--red-ink)">Verbindung entfernen</button></div>`;
+    a.querySelectorAll('[data-art]').forEach(b => b.onclick = () => { k[2] = b.dataset.art; sichern(); abBloecke(); });
+    a.querySelector('[data-f="label"]').oninput = e => { k[3] = e.target.value; sichern(); abKanten(); };
+    a.querySelector('[data-weg]').onclick = () => { const alt = A.kanten.splice(AB.wahlK, 1)[0], i = AB.wahlK; AB.wahlK = null; sichern(); abBloecke(); toast('Verbindung entfernt', () => { A.kanten.splice(i, 0, alt); sichern(); abBloecke(); }); };
+    return;
+  }
+  const n = A.bloecke.find(x => x.id === AB.wahl);
+  if (!n) { a.innerHTML = `<span class="ab-art2">Ablauf</span><h2>${A.bloecke.length} Blöcke · ${A.kanten.length} Verbindungen</h2><p class="ziel">Block antippen zum Bearbeiten. Ziehen verschiebt ihn, der Punkt am Rand oder „Verbinden“ zieht eine Verbindung.</p>${abLegende()}`; return; }
+  const [en, c] = AB_EBENE[n.e] || AB_EBENE.flow, nm = id => A.bloecke.find(x => x.id === id)?.t || id;
+  const rein = A.kanten.map((k, i) => [k, i]).filter(([k]) => k[1] === n.id), raus = A.kanten.map((k, i) => [k, i]).filter(([k]) => k[0] === n.id);
+  a.innerHTML = `<span class="ab-art2" style="color:${c}">${en} · ${esc(n.art || AB_TYP[n.typ])}</span>
+    <div class="form" style="margin-top:10px">
+      <label>Titel<input data-f="t" value="${esc(n.t)}"></label>
+      <div class="zwei"><label>Ebene<select data-f="e">${Object.entries(AB_EBENE).map(([k, [t]]) => `<option value="${k}"${k === n.e ? ' selected' : ''}>${t}</option>`).join('')}</select></label>
+        <label>Form<select data-f="typ">${Object.entries(AB_TYP).map(([k, t]) => `<option value="${k}"${k === n.typ ? ' selected' : ''}>${t}</option>`).join('')}</select></label></div>
+      <label>Bezeichnung<input data-f="art" value="${esc(n.art || '')}" placeholder="z. B. Flow-Stufe, Artefakt"></label>
+      <label>Beschreibung<textarea data-f="d">${esc(n.d || '')}</textarea></label>
+      <label>ASPICE-Bezug<input data-f="a" value="${esc((n.a || []).join(', '))}" placeholder="SWE.1, SUP.8"></label>
+      <label>Rollen<input data-f="r" value="${esc((n.r || []).join(', '))}" placeholder="Team, Product Owner"></label>
+      <label>Ergebnis · Werkzeug<input data-f="o" value="${esc((n.o || []).join(', '))}" placeholder="Anforderungsbuch"></label>
+      <div class="zwei"><label>WIP aktuell<input data-f="w0" type="number" min="0" value="${n.wip ? n.wip[0] : ''}"></label><label>WIP-Limit<input data-f="w1" type="number" min="0" value="${n.wip ? n.wip[1] : ''}" placeholder="kein"></label></div>
+    </div>
+    ${n.wip && n.wip[1] && n.wip[0] >= n.wip[1] ? `<div class="ab-hinweis"><b>WIP-Limit erreicht</b> – erst rechts fertig machen, dann neu ziehen.</div>` : ''}
+    <div class="abschnitt"><h3>Verbindungen</h3>${rein.concat(raus).length ? rein.map(([k, i]) => `<button class="ab-verb" type="button" data-k="${i}"><i class="${k[2]}"></i>von ${esc(nm(k[0]))}</button>`).join('') + raus.map(([k, i]) => `<button class="ab-verb" type="button" data-k="${i}"><i class="${k[2]}"></i>nach ${esc(nm(k[1]))}</button>`).join('') : '<div class="leer-t">Noch keine Verbindung.</div>'}</div>
+    <div class="abschnitt"><button class="pill sm" type="button" data-weg style="color:var(--red-ink)">Block entfernen</button></div>
+    ${abLegende()}`;
+  const liste = f => f.split(',').map(x => x.trim()).filter(Boolean);
+  a.querySelectorAll('[data-f]').forEach(inp => {
+    const ev = inp.tagName === 'SELECT' ? 'onchange' : 'oninput';
+    inp[ev] = () => {
+      const f = inp.dataset.f, v = inp.value;
+      if (f === 'a' || f === 'r' || f === 'o') n[f] = liste(v);
+      else if (f === 'w0' || f === 'w1') { const w0 = +a.querySelector('[data-f="w0"]').value || 0, w1 = +a.querySelector('[data-f="w1"]').value || 0; n.wip = w1 ? [w0, w1] : null; }
+      else n[f] = v;
+      sichern();
+      if (inp.tagName === 'SELECT') abBloecke(); else abBlockNeu(n);
+    };
+  });
+  a.querySelectorAll('.ab-verb').forEach(b => b.onclick = () => { AB.wahlK = +b.dataset.k; AB.wahl = null; abBloecke(); });
+  a.querySelector('[data-weg]').onclick = () => {
+    const i = A.bloecke.indexOf(n), alteK = A.kanten.slice();
+    A.bloecke.splice(i, 1); A.kanten = A.kanten.filter(k => k[0] !== n.id && k[1] !== n.id); AB.wahl = null; sichern(); abBloecke();
+    toast('Block entfernt', () => { A.bloecke.splice(i, 0, n); A.kanten = alteK; sichern(); abBloecke(); });
+  };
+}
+function abBlockNeu(n) {
+  const b = $(`.ab-blk[data-id="${n.id}"]`); if (!b) return;
+  b.querySelector('b').textContent = n.t; b.querySelector('.ab-art').textContent = n.art || AB_TYP[n.typ];
+  const t = b.querySelector('.tags'); const html = (n.a || []).map(x => `<span class="ab-tag">${esc(x)}</span>`).join('');
+  if (t) { if (html) t.innerHTML = html; else t.remove(); } else if (html) b.querySelector('b').insertAdjacentHTML('afterend', `<span class="tags">${html}</span>`);
+  const w = b.querySelector('.ab-wip'); if (w) w.remove();
+  if (n.wip && n.wip[1]) b.querySelector('.port').insertAdjacentHTML('beforebegin', `<span class="ab-wip${n.wip[0] >= n.wip[1] ? ' voll' : ''}">${n.wip[0]}/${n.wip[1]}</span>`);
+  abKanten();
+}
+function abLegende() {
+  return `<div class="abschnitt"><h3>Legende</h3><div class="ab-legende">
+    <div><svg viewBox="0 0 40 10"><path d="M0 5h40" stroke="var(--amber)" stroke-width="2.2" stroke-dasharray="7 7"/></svg>Fluss der Arbeit</div>
+    <div><svg viewBox="0 0 40 10"><path d="M0 5h40" stroke="var(--lila)" stroke-width="2.2" stroke-dasharray="3 6"/></svg>Rückkopplung · Schleife</div>
+    <div><svg viewBox="0 0 40 10"><path d="M0 5h40" stroke="var(--info)" stroke-width="2.6" stroke-dasharray="1 6" stroke-linecap="round"/></svg>Nachweis · Verfolgbarkeit</div>
+    <div><span class="ab-mini er"></span>Ereignis</div><div><span class="ab-mini tor"></span>Tor (Ready / Done)</div><div><span class="ab-mini"></span>Schritt</div></div></div>`;
+}
+function abMarkdown() {
+  const A = abDaten(), nm = id => A.bloecke.find(x => x.id === id)?.t || id;
+  let md = `## Ablauf (Scrum · Flow · ASPICE)\n\n| Block | Ebene | Form | ASPICE | Rollen | WIP |\n|---|---|---|---|---|---|\n`;
+  md += A.bloecke.map(n => `| ${n.t} | ${(AB_EBENE[n.e] || [''])[0]} | ${AB_TYP[n.typ]} | ${(n.a || []).join(', ') || '–'} | ${(n.r || []).join(', ') || '–'} | ${n.wip && n.wip[1] ? n.wip[0] + '/' + n.wip[1] : '–'} |`).join('\n');
+  md += `\n\n**Verbindungen**\n` + A.kanten.map(k => `- ${nm(k[0])} → ${nm(k[1])} (${AB_KANTE[k[2]] || k[2]}${k[3] ? ': ' + k[3] : ''})`).join('\n') + '\n\n';
+  return md;
 }
 
 /* ── Start ── */
