@@ -4933,14 +4933,18 @@ if (byId[startId]) {
   var css = ''
     + '.wbs-knopf{position:fixed;right:0;top:' + (cfg.hoehe || 62) + '%;z-index:2147483000;width:30px;height:46px;border-radius:12px 0 0 12px;'
     + 'display:grid;place-items:center;cursor:pointer;border:1px solid rgba(255,255,255,.16);border-right:none;background:rgba(16,22,31,.82);color:#F2B33D;'
-    + 'box-shadow:-6px 8px 22px -12px rgba(0,0,0,.7);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);padding:0 0 0 2px;transition:width .15s}'
+    + 'box-shadow:-6px 8px 22px -12px rgba(0,0,0,.7);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);padding:0 0 0 2px;transition:width .15s,right .42s cubic-bezier(.2,.8,.2,1)}'
     + '.wbs-knopf:hover,.wbs-knopf[aria-expanded="true"]{width:38px}'
     + '.wbs-knopf:hover{border-color:#F2B33D}.wbs-knopf:focus-visible{outline:2px solid #F2B33D;outline-offset:2px}'
     + '.wbs-knopf svg{width:18px;height:18px}'
     + '.wbs-knopf b{position:absolute;top:-7px;left:-7px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#F2B33D;color:#12171F;font:700 11px/18px "JetBrains Mono",ui-monospace,monospace}'
-    + '.wbs-feld{position:fixed;right:46px;top:' + (cfg.hoehe || 62) + '%;transform:translateY(-50%);z-index:2147483001;width:min(380px,calc(100vw - 62px));'
-    + 'border-radius:16px;border:1px solid rgba(255,255,255,.14);background:rgba(13,18,26,.96);color:#EDF0F3;padding:14px;'
+    /* Seit 21.11.2026: Das Feld fährt als Schublade aus dem rechten Rand, die Lasche wandert an seiner Kante mit. */
+    + '.wbs-feld{position:fixed;right:0;top:' + (cfg.hoehe || 62) + '%;transform:translate(102%,-50%);z-index:2147483001;width:min(380px,calc(100vw - 62px));'
+    + 'transition:transform .42s cubic-bezier(.2,.8,.2,1);border-right:none!important;'
+    + 'border-radius:16px 0 0 16px;border:1px solid rgba(255,255,255,.14);background:rgba(13,18,26,.96);color:#EDF0F3;padding:14px;'
     + 'box-shadow:0 24px 60px -20px rgba(0,0,0,.8);font:14px/1.45 "Archivo","Helvetica Neue",Arial,sans-serif;-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}'
+    + '.wbs-feld.auf{transform:translate(0,-50%)}'
+    + '@media (prefers-reduced-motion:reduce){.wbs-feld,.wbs-knopf{transition:none}}'
     + '.wbs-feld h2{margin:0 0 8px;font-size:15px;font-weight:800;display:flex;align-items:center;gap:8px}'
     + '.wbs-feld h2 span{flex:1}.wbs-feld h2 small{font:500 11px "JetBrains Mono",ui-monospace,monospace;color:#A7B1BC}'
     + '.wbs-kontext{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;font-size:12px;color:#A7B1BC}'
@@ -4976,7 +4980,9 @@ if (byId[startId]) {
   }
 
   function zu(){
-    if (!feld) return; feld.remove(); feld = null; knopf.setAttribute('aria-expanded', 'false');
+    if (!feld) return; var f = feld; feld = null; knopf.setAttribute('aria-expanded', 'false');
+    f.classList.remove('auf'); knopf.style.right = '';
+    setTimeout(function(){ f.remove(); }, matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 430);
     if (vorher && vorher.focus) try { vorher.focus(); } catch(e){}
   }
 
@@ -5000,8 +5006,9 @@ if (byId[startId]) {
       + '<button type="button" data-zu>Abbrechen</button><button type="button" class="voll" data-sichern title="Strg+Enter">Speichern</button></div>';
     document.body.appendChild(feld);
     knopf.setAttribute('aria-expanded', 'true');
+    void feld.offsetWidth; feld.classList.add('auf'); knopf.style.right = feld.offsetWidth + 'px';
     var ta = feld.querySelector('textarea');
-    ta.focus();
+    ta.focus({ preventScroll:true });
     feld.addEventListener('click', function(e){
       if (e.target.closest('[data-zu]')) zu();
       else if (e.target.closest('[data-sichern]')) sichern();
