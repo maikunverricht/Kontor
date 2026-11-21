@@ -2700,6 +2700,12 @@ const BUERO = [
     zahl:() => { const d = WB.lesen('wb-contribution-stand'); const n = d ? +d.offen || 0 : 0;
       return n ? { n, titel:n + ' offen bei „Was fehlt mir“' } : null; },
     zeichen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h11v8H9l-4 3v-3H4z"/><path d="M15 9h5v8h-1v3l-3-3h-5v-2"/></svg>' },
+  /* Seit 21.11.2026: liegt im Kontor-Repo unter /prozess/ (aus dem V-Modell-Editor). Lesekopie wb-prozessbuch-stand. */
+  { id:'prozessbuch', name:'Prozessbuch', tag:'V-Modell', url:'https://maikunverricht.github.io/Kontor/prozess/',
+    desc:'Prozessschritte im V mit Rollen, Workitems und Outputs – und Themen zum Prozess notieren und klären.', farbe:'var(--lila, #B79CF2)',
+    zahl:() => { const d = WB.lesen('wb-prozessbuch-stand'); const n = d ? (+d.offen || 0) + (+d.klaerung || 0) : 0;
+      return n ? { n, titel:n + (n === 1 ? ' Thema' : ' Themen') + ' zum Prozess offen' } : null; },
+    zeichen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5l9 14 9-14"/><circle cx="3" cy="5" r="1.4"/><circle cx="21" cy="5" r="1.4"/><circle cx="12" cy="19" r="1.6"/><path d="M7.5 9.5h9"/></svg>' },
   { name:'Frei', tag:'folgt' }
 ];
 /* Seit 05.11.2026: die private Seite. Gleiche Kacheln, eigene Ablage dahinter:
@@ -3347,8 +3353,8 @@ const LIZ_PUB = 'MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAESwn5vJH6rMd87uKAXdmC4qXnI47
 /* Seit 19.11.2026: die Zeiterfassung ist aus dem KapazitätenPlaner ausgegliedert und läuft mit dessen Lizenz. */
 /* Seit 19.11.2026: der Contribution Dialog (Büro) liest Kennzahlen aus KapazitätenPlaner und Auswertung – eine der beiden Lizenzen schaltet ihn frei. */
 /* Seit 19.11.2026: Verlauf und Suche kommen mit jedem Produktiv-Werkzeug. */
-const LIZ_KACHEL = { noteos:['notizbuch'], kapazitaetenplaner:['kapazitaetenplaner','zeiterfassung','contribution','verlauf','suche'], auswertung:['auswertung','contribution','verlauf','suche'],
-  anforderungsbuch:['anforderungsbuch','verlauf','suche'], funktionsentwurf:['funktionsentwurf','verlauf','suche'], schaltplan:['schaltplan','verlauf','suche'],
+const LIZ_KACHEL = { noteos:['notizbuch'], kapazitaetenplaner:['kapazitaetenplaner','zeiterfassung','contribution','prozessbuch','verlauf','suche'], auswertung:['auswertung','contribution','verlauf','suche'],
+  anforderungsbuch:['anforderungsbuch','prozessbuch','verlauf','suche'], funktionsentwurf:['funktionsentwurf','verlauf','suche'], schaltplan:['schaltplan','verlauf','suche'],
   codecompare:['codecompare','verlauf','suche'], testcasemanager:['testcasemanager','verlauf','suche'] };
 const KATALOG = [].concat(
   APPS.map(a => Object.assign({}, a, { zeichen:ZEICHEN[a.id], farbe:SYMFARBE[a.id], bereich:'firma' })),
