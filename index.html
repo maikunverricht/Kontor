@@ -2715,7 +2715,10 @@ const PRIVAT = [
     desc:'Steuerbelege sammeln und je Rubrik ablegen – mit offenen Rechnungen und Steuerpaket fürs Jahr.', farbe:'var(--geld)',
     zahl:() => belegZahl('privat'),
     zeichen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3.4h12V21l-2.4-1.5L13.2 21l-2.4-1.5L8.4 21 6 19.5z"/><path d="M9 8h6M9 11.4h6M9 14.8h3.6"/></svg>' },
-  { name:'Frei', tag:'folgt' },
+  /* Seit 21.11.2026: Familienplan unter /familienplan/ – Daten nur auf dem Gerät (familienplan.v1), keine Lizenz nötig. */
+  { id:'familienplan', name:'Familienplan', tag:'Familie', url:'https://maikunverricht.github.io/Kontor/familienplan/',
+    desc:'Tag, Woche, Küche und Kinder auf einen Blick – mit Routinen, Punkten, Einkaufszettel und Kindmodus.', farbe:'var(--amber)',
+    zeichen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><circle cx="10" cy="14" r="1.6"/><circle cx="14.5" cy="15" r="1.2"/><path d="M8 20c0-2 .9-3 2-3s2 1 2 3M13 20c0-1.4.6-2.2 1.5-2.2S16 18.6 16 20"/></svg>' },
   { name:'Frei', tag:'folgt' }
 ];
 function ansichtBauen(LISTE, gridEl){
@@ -3356,6 +3359,8 @@ const LIZ_PUB = 'MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAESwn5vJH6rMd87uKAXdmC4qXnI47
 const LIZ_KACHEL = { noteos:['notizbuch'], kapazitaetenplaner:['kapazitaetenplaner','zeiterfassung','contribution','prozessbuch','verlauf','suche'], auswertung:['auswertung','contribution','verlauf','suche'],
   anforderungsbuch:['anforderungsbuch','prozessbuch','verlauf','suche'], funktionsentwurf:['funktionsentwurf','verlauf','suche'], schaltplan:['schaltplan','verlauf','suche'],
   codecompare:['codecompare','verlauf','suche'], testcasemanager:['testcasemanager','verlauf','suche'] };
+/* Seit 21.11.2026: Werkzeuge, die ohne Lizenz sichtbar sind (privat, keine Firmendaten). */
+const OHNE_LIZENZ = new Set(['familienplan']);
 const KATALOG = [].concat(
   APPS.map(a => Object.assign({}, a, { zeichen:ZEICHEN[a.id], farbe:SYMFARBE[a.id], bereich:'firma' })),
   PRODUKTIV.map(a => Object.assign({}, a, { bereich:'produktiv' })),
@@ -4774,6 +4779,7 @@ function ausgeblendet(){
 }
 function lizenziert(a, frei){
   if (a.fest) return true;
+  if (a.liste.some(w => OHNE_LIZENZ.has(w.id))) return true;
   if (!frei) return false;
   return frei.alle || a.liste.some(w => w.id && frei.ids.has(w.id));
 }
@@ -4784,7 +4790,7 @@ function kachelnSperren(frei){
   Object.keys(byId).forEach(id => {
     const t = byId[id];
     if (id.startsWith('mein-')) return;
-    t.gesperrt = !(frei && (frei.alle || frei.ids.has(id)));
+    t.gesperrt = !OHNE_LIZENZ.has(id) && !(frei && (frei.alle || frei.ids.has(id)));
     t.el.classList.toggle('lz-aus', t.gesperrt);
   });
   ausgang.classList.toggle('lz-aus', !byId.rechnungsbuch || !!byId.rechnungsbuch.gesperrt);
