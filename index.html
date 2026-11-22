@@ -4173,6 +4173,8 @@ function kastenFrisch(){ clearTimeout(kastenT); kastenT = setTimeout(() => meinT
    vendor/ und wird erst beim ersten Klick geladen. */
 const FX_ZEIT_LS = 'stempeluhr_entries_v2';
 const FX_STATUS = ['geplant','aktiv','pausiert','abgeschlossen','abgerechnet'];
+const FX_STATUS_ALIAS = { offen:'geplant', neu:'geplant', inarbeit:'aktiv', laufend:'aktiv', aktiv:'aktiv', pause:'pausiert', wartet:'pausiert',
+  erledigt:'abgeschlossen', fertig:'abgeschlossen', abgeschlossen:'abgeschlossen', abgerechnet:'abgerechnet', bezahlt:'abgerechnet' };
 function fxLib(){
   if (window.XLSX) return Promise.resolve(window.XLSX);
   return new Promise((ok, nein) => { const s = document.createElement('script'); s.src = 'vendor/xlsx.full.min.js';
@@ -4207,7 +4209,7 @@ async function fxExport(){
     const k = (e.agbId && nameVon(e.agbId)) || e.auftraggeber || 'Ohne Auftraggeber';
     if (!r3.has(k)) r3.set(k, []);
     r3.get(k).push({ 'Datum':new Date(s.getFullYear(), s.getMonth(), s.getDate()), 'Beginn':fxHm(s), 'Ende':fxHm(en), 'Dauer h':Math.round((en - s) / 36e3) / 100,
-      'Notiz':e.notiz || '', 'Satz €/h':+e.satz || '', 'Auftrag':e.auftrag || '', 'ID':String(e.id || '') });
+      'Notiz':e.notiz || '', 'Satz €/h':+e.satz || '', 'Auftrag':e.auftrag && e.auftrag !== 'Ohne Auftrag' ? e.auftrag : '', 'ID':String(e.id || '') });
   });
   let nZeiten = 0;
   const blatt = (rows, kopf, breiten) => { const ws = X.utils.json_to_sheet(rows, { header:kopf, cellDates:true, dateNF:'dd.mm.yyyy' });
@@ -4227,7 +4229,7 @@ async function fxExport(){
     ['Einlesen ergänzt und aktualisiert – es wird nichts gelöscht. Leere Zellen ändern keine vorhandenen Werte.'],
     ['Auftraggeber: Name ist Pflicht. Zuordnung über ID, sonst über den Namen.'],
     ['Aufträge: Auftraggeber und Auftrag sind Pflicht. Unbekannte Auftraggeber werden angelegt. Status: ' + FX_STATUS.join(', ') + '.'],
-    ['Stunden_<Auftraggeber>: je Auftraggeber ein Blatt, der Name nach „Stunden_“ ist der Auftraggeber. Auftrag steht in Spalte G.'],
+    ['Stunden_<Auftraggeber>: je Auftraggeber ein Blatt, der Name nach „Stunden_“ ist der Auftraggeber. Auftrag steht in Spalte G, gern mit Zeitraum („Fibu 11/25“) – der landet in der Notiz.'],
     ['Stunden: Datum und Beginn + Ende oder Dauer h sind Pflicht. Uhrzeit als 08:30. Ohne Beginn wird ab 08:00 aneinandergereiht. Doppelte Zeiten werden übersprungen.'],
     ['Neue Zeilen ohne ID bekommen beim Einlesen eine.']]);
   info['!cols'] = [{ wch:110 }, { wch:22 }];
@@ -4256,33 +4258,57 @@ const FX_FELDER = {
   agb:{ id:['id'], name:['name','auftraggeber','kunde','firma'], ansprechpartner:['ansprechpartner','kontakt'], email:['email','mail'], telefon:['telefon','tel','phone'],
         adresse:['adresse','anschrift'], stundensatz:['stundensatz','satz'], zahlungsziel:['zahlungsziel','zahlungszieltage','ziel'], steuersatz:['steuersatz','ust','mwst'],
         aktiv:['aktiv'], notizen:['notizen','notiz','bemerkung'] },
-  auf:{ id:['id'], agb:['auftraggeber','kunde','firma'], name:['projekt','auftrag','name'], projektnummer:['projektnummer','nummer','projektnr','nr'], status:['status'],
+  auf:{ id:['id','auftragsid','auftragsnr'], agb:['auftraggeber','kunde','firma'], name:['projekt','auftrag','titel','bezeichnung','name'], projektnummer:['projektnummer','nummer','projektnr','nr'], status:['status'],
         stundensatz:['stundensatz','satz'], budgetStunden:['budgetstunden','stunden','budgeth'], budgetEuro:['budget','budgeteuro','budgeteur'],
         start:['start','beginn','von'], ende:['ende','bis'], beschreibung:['beschreibung','notiz'] },
-  zeit:{ datum:['datum','tag','date'], beginn:['beginn','start','von'], ende:['ende','bis'], dauer:['dauerh','dauer','stunden','std','h','arbeitszeit','dauerstd'], agb:['auftraggeber','kunde','firma'],
+  zeit:{ datum:['datum','tag','date'], beginn:['beginn','start','von'], ende:['ende','bis'], dauer:['dauerh','dauer','gesamt','stunden','std','h','arbeitszeit','dauerstd'], agb:['auftraggeber','kunde','firma'],
         auf:['projekt','auftrag'], notiz:['notiz','taetigkeit','beschreibung','kommentar'], satz:['satzh','satz','stundensatz'], id:['id'] }
 };
+/* Zellen nach ihrem Zahlenformat lesen: Datum → „2026-03-18“, Uhrzeit/Dauer → „21:30“ bzw. „26:15“.
+   Ohne Date-Objekte, damit keine Zeitzone die Uhrzeit verschiebt. */
+function fxBlatt(X, ws){
+  const roh = X.utils.sheet_to_json(ws, { header:1, defval:'', raw:true, blankrows:false });
+  if (!ws['!ref']) return roh;
+  const r0 = X.utils.decode_range(ws['!ref']);
+  return roh.map((zeile, ri) => zeile.map((v, ci) => {
+    if (typeof v !== 'number') return typeof v === 'string' ? v.trim() : v;
+    const c = ws[X.utils.encode_cell({ r:r0.s.r + ri, c:r0.s.c + ci })], z = String(c && c.z || '').replace(/"[^"]*"|\[[^\]]*\]/g, '').toLowerCase();
+    if (/[dy]/.test(z)) { const p = X.SSF.parse_date_code(v); return p ? p.y + '-' + fxP2(p.m) + '-' + fxP2(p.d) : v; }
+    if (/h|:/.test(z) || /\[h/.test(String(c && c.z || '').toLowerCase())) { const min = Math.round(v * 1440); return Math.floor(min / 60) + ':' + fxP2(min % 60); }
+    return v;
+  }));
+}
+function fxObjekte(roh){ if (roh.length < 2) return [];
+  const kopf = roh[0].map((h, i) => String(h || '').trim() || ('Spalte' + i));
+  return roh.slice(1).map(r => { const o = {}; kopf.forEach((h, i) => { o[h] = r[i] == null ? '' : r[i]; }); return o; }); }
 function fxZeilen(X, wb, namen){
   const n = wb.SheetNames.find(s => namen.includes(fxNorm(s))); if (!n) return null;
-  return X.utils.sheet_to_json(wb.Sheets[n], { defval:'', raw:true });
+  return fxObjekte(fxBlatt(X, wb.Sheets[n]));
 }
-function fxFeld(zeile, art){ const out = {}, map = FX_FELDER[art], keys = Object.keys(zeile).map(k => [fxNorm(k), k]);
+/* Dauer: „01:30“ = 1,5 h, sonst Zahl in Stunden. */
+function fxStunden(v){ const m = String(v == null ? '' : v).trim().match(/^(\d+):(\d{2})$/); return m ? +m[1] + +m[2] / 60 : fxZahl(v); }
+/* Lockerer Vergleich: Umlaute ohne Punkte, nur Buchstaben/Ziffern („Löhne“ ~ „Lohn“). */
+const fxLocker = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/ß/g, 'ss').replace(/[^a-z0-9]/g, '');
+/* „Fibu 11/25“ → Auftrag „Fibu“, Zeitraum „11/25“ */
+function fxAuftragZeitraum(t){ const s = String(t == null ? '' : t).trim(), m = s.match(/^(.*?)[\s\-–]+((?:\d{1,2}[\/.])?\d{2,4}|q[1-4][\/.\s]?\d{2,4})$/i);
+  return m && m[1] ? { name:m[1].trim(), zeitraum:m[2] } : { name:s, zeitraum:'' }; }
+function fxFeld(zeile, art){ const out = {}, map = FX_FELDER[art], keys = Object.keys(zeile).map(k => [fxNorm(k.replace(/\([^)]*\)/g, '')), k]);
   for (const f in map) { const hit = map[f].map(a => keys.find(([n]) => n === a)).find(Boolean); out[f] = hit ? zeile[hit[1]] : ''; }
   return out; }
 
 /* ── Herein: abgleichen ── */
 async function fxImport(datei){
   const X = await fxLib();
-  const wb = X.read(await datei.arrayBuffer(), { type:'array', cellDates:true });
+  const wb = X.read(await datei.arrayBuffer(), { type:'array', cellNF:true });
   const zA = fxZeilen(X, wb, ['auftraggeber','kunden']) || [], zP = fxZeilen(X, wb, ['projekte','auftraege','projekt']) || [],
         zZ = (fxZeilen(X, wb, ['stempelzeiten','zeiten','buchungen','stempeluhr']) || []).map(z => ({ z, blatt:'Stempelzeiten' }));
   /* Blätter „Stunden_<Auftraggeber>“: Auftraggeber aus dem Blattnamen, Auftrag aus Spalte G. */
   wb.SheetNames.forEach(n => { const m = n.match(/^\s*stunden\s*[_\- ]\s*(.+)$/i); if (!m) return;
-    const ws = wb.Sheets[n], roh = X.utils.sheet_to_json(ws, { header:1, defval:'', raw:true, blankrows:false });
+    const roh = fxBlatt(X, wb.Sheets[n]);
     if (roh.length < 2) return;
     const kopf = roh[0].map((h, i) => String(h || '').trim() || ('Spalte' + i));
     roh.slice(1).forEach(r => { const z = {}; kopf.forEach((h, i) => { if (i !== 6) z[h] = r[i]; });
-      zZ.push({ z, blatt:n, agb:m[1].trim(), auf:r[6] }); });
+      zZ.push({ z, blatt:n, agb:m[1].replace(/_/g, ' ').trim(), auf:r[6] }); });
   });
   if (!zA.length && !zP.length && !zZ.length) { fxHinweis('Keine Blätter „Auftraggeber“, „Aufträge“ oder „Stunden_…“ gefunden.'); return; }
   const ab = JSON.parse(JSON.stringify(lsJson(WB_AB_LS) || { app:'werkbank-auftragsbuch', version:1, auftraggeber:[], auftraege:[] }));
@@ -4331,7 +4357,7 @@ async function fxImport(datei){
     if (a.auftraggeberId !== k.id) { a.auftraggeberId = k.id; geaendert = true; }
     [['name'],['projektnummer'],['beschreibung'],['stundensatz','zahl'],['budgetStunden','zahl'],['budgetEuro','zahl'],['start','datum'],['ende','datum']]
       .forEach(([feld, typ]) => { if (setze(a, feld, f[feld], typ)) geaendert = true; });
-    if (!fxLeer(f.status)) { const s = fxNorm(f.status), treffer = FX_STATUS.find(x => fxNorm(x) === s);
+    if (!fxLeer(f.status)) { const s = fxNorm(f.status), treffer = FX_STATUS.find(x => fxNorm(x) === s) || FX_STATUS_ALIAS[s];
       if (treffer && a.status !== treffer) { a.status = treffer; geaendert = true; } else if (!treffer) st.fehler.push('Aufträge Zeile ' + (i + 2) + ': Status „' + f.status + '“ unbekannt'); }
     if (neu) st.aufNeu++; else if (geaendert) st.aufAkt++;
   });
@@ -4339,9 +4365,10 @@ async function fxImport(datei){
   const lauf = {}; /* Zeilen ohne Beginn: je Tag ab 08:00 aneinanderreihen */
   const zeile = {};
   zZ.forEach(({ z, blatt, agb, auf }) => { const f = fxFeld(z, 'zeit'), i = zeile[blatt] = (zeile[blatt] || 0) + 1;
-    if (agb != null) { f.agb = agb; f.auf = auf; }
+    let zeitraum = '', gText = '';
+    if (agb != null) { f.agb = agb; gText = String(auf == null ? '' : auf).trim(); const az = fxAuftragZeitraum(gText); f.auf = /^ohne auftrag$/i.test(az.name) ? '' : az.name; zeitraum = az.zeitraum; }
     if (fxLeer(f.datum) && fxLeer(f.beginn)) return;
-    const tag = fxDatum(f.datum, X), e0 = fxZeit(f.ende), dh = fxZahl(f.dauer);
+    const tag = fxDatum(f.datum, X), e0 = fxZeit(f.ende), dh = fxStunden(f.dauer);
     let b = fxZeit(f.beginn);
     if (!tag || (b == null && !(dh > 0)) || (b != null && e0 == null && !(dh > 0))) { st.fehler.push(blatt + ' Zeile ' + (i + 1) + ': Datum und Beginn + Ende oder Dauer nötig'); return; }
     let e = e0;
@@ -4351,12 +4378,15 @@ async function fxImport(datei){
     if (ende <= start) ende += 864e5;
     const k = !fxLeer(f.agb) ? (agb != null ? agbAusBlatt(f.agb) : agbHolen(f.agb)) : null;
     let a = null;
-    if (k && !fxLeer(f.auf)) { a = ab.auftraege.find(x => x.auftraggeberId === k.id && (fxNorm(x.name) === fxNorm(f.auf) || (x.projektnummer && fxNorm(x.projektnummer) === fxNorm(f.auf))));
+    if (k && !fxLeer(f.auf)) { const eig = ab.auftraege.filter(x => x.auftraggeberId === k.id), l = fxLocker(f.auf);
+      a = eig.find(x => fxNorm(x.name) === fxNorm(f.auf) || (x.projektnummer && fxNorm(x.projektnummer) === fxNorm(f.auf)))
+        || eig.find(x => fxLocker(x.name) === l)
+        || (l.length >= 3 ? eig.filter(x => { const n = fxLocker(x.name); return n.length >= 3 && (n.startsWith(l) || l.startsWith(n)); }).sort((p, q) => p.name.length - q.name.length)[0] : null);
       if (!a) { a = { id:neueId('a'), auftraggeberId:k.id, name:String(f.auf).trim(), projektnummer:'', beschreibung:'', stundensatz:+k.stundensatz || 0, status:'aktiv', budgetStunden:0, budgetEuro:0, start:'', ende:'' };
         ab.auftraege.push(a); st.aufNeu++; } }
     const satz2 = fxZahl(f.satz) != null ? fxZahl(f.satz) : (a && +a.stundensatz) || (k && +k.stundensatz) || 0;
     const wert = { start, end:ende, dur:Math.round((ende - start) / 1000), auftraggeber:k ? k.name : (String(f.agb).trim() || 'Ohne Auftraggeber'),
-      auftrag:a ? a.name : (String(f.auf).trim() || 'Ohne Auftrag'), agbId:k ? k.id : undefined, aufId:a ? a.id : undefined, notiz:String(f.notiz || '').trim(), satz:satz2 };
+      auftrag:a ? a.name : (String(f.auf).trim() || 'Ohne Auftrag'), agbId:k ? k.id : undefined, aufId:a ? a.id : undefined, notiz:String(f.notiz || '').trim() || (zeitraum ? gText : ''), satz:satz2 };
     let alt = !fxLeer(f.id) && ent.find(x => String(x.id) === String(f.id).trim());
     if (alt) { const vorher = JSON.stringify(alt); Object.assign(alt, wert); if (JSON.stringify(alt) !== vorher) st.zAkt++; return; }
     if (ent.some(x => x.start === start && (x.end || x.start + x.dur * 1000) === ende && fxNorm(x.auftrag) === fxNorm(wert.auftrag))) { st.zDoppelt++; return; }
