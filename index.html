@@ -1155,6 +1155,11 @@ html.wb-vorab .slides,html.wb-vorab .dock{visibility:hidden}
 .fa-leiste{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:30px auto 14px}
 .fa-leiste .eyebrow::before{background:var(--text-3)}
 .fa-leiste .pv-wahl{margin:0}
+.fa-leiste .fa-excel{margin-left:auto}
+#fxHinweis{position:fixed;left:50%;bottom:28px;transform:translate(-50%,16px);opacity:0;pointer-events:none;z-index:300;max-width:min(560px,92vw);padding:11px 18px;border-radius:16px;
+  background:var(--glass);border:1px solid var(--line);box-shadow:0 18px 40px -20px rgba(0,0,0,.6);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);font-size:14px;transition:opacity .3s,transform .3s}
+#fxHinweis.an{opacity:1;transform:translate(-50%,0)}
+@media (max-width:640px){.fa-leiste{flex-wrap:wrap}.fa-leiste .fa-excel{margin-left:0}}
 
 /* Bento */
 .fa-bento{position:relative;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));grid-auto-rows:minmax(118px,auto);gap:16px;padding-bottom:8px}
@@ -1342,6 +1347,11 @@ html.wb-vorab .slides,html.wb-vorab .dock{visibility:hidden}
       </section>
       <div class="fa-leiste">
         <span class="eyebrow">Vom Auftrag zum Geld</span>
+        <div class="pv-wahl fa-excel" role="group" aria-label="Excel-Austausch">
+          <button type="button" class="lw-knopf" id="fxAus" title="Auftraggeber, Projekte und Stempelzeiten als Excel-Datei sichern">Excel ↓</button>
+          <button type="button" class="lw-knopf" id="fxEin" title="Auftraggeber, Projekte und Stempelzeiten aus einer Excel-Datei einlesen">Excel ↑</button>
+          <input type="file" id="fxDatei" accept=".xlsx,.xls,.xlsm,.ods,.csv" hidden>
+        </div>
         <div class="pv-wahl" role="group" aria-label="Ansicht">
           <button type="button" class="lw-knopf an" data-fa="ablauf" aria-pressed="true">Ablauf</button>
           <button type="button" class="lw-knopf" data-fa="schaltbild" aria-pressed="false">Schaltbild</button>
@@ -4124,6 +4134,211 @@ function kastenBauen(liste, g){
 /* Nachziehen, sobald ein Werkzeug etwas spiegelt – und die Uhr im Sekundentakt. */
 let kastenT = null;
 function kastenFrisch(){ clearTimeout(kastenT); kastenT = setTimeout(() => meinTiles.forEach(kachelNeu), 120); }
+/* ───────── Meine Firma: Excel-Austausch ─────────
+   Seit 22.11.2026. Auftraggeber, Projekte (Aufträge) und Stempelzeiten als
+   eine .xlsx-Datei hinaus und wieder herein. Gelesen und geschrieben werden
+   die Bestände selbst: wb-auftragsbuch-data (Auftragsbuch) und
+   stempeluhr_entries_v2 (Stempeluhr). Einlesen ergänzt und aktualisiert –
+   gelöscht wird nichts; leere Zellen überschreiben keine vorhandenen Werte.
+   Zuordnung: ID, sonst Name (Auftraggeber), Projektnummer oder Name
+   (Projekt), bei Zeiten Beginn + Ende + Projekt. SheetJS 0.18.5 liegt unter
+   vendor/ und wird erst beim ersten Klick geladen. */
+const FX_ZEIT_LS = 'stempeluhr_entries_v2';
+const FX_STATUS = ['geplant','aktiv','pausiert','abgeschlossen','abgerechnet'];
+function fxLib(){
+  if (window.XLSX) return Promise.resolve(window.XLSX);
+  return new Promise((ok, nein) => { const s = document.createElement('script'); s.src = 'vendor/xlsx.full.min.js';
+    s.onload = () => ok(window.XLSX); s.onerror = () => nein(new Error('Excel-Bibliothek fehlt')); document.head.appendChild(s); });
+}
+let fxT = null;
+function fxHinweis(t){ let el = $('#fxHinweis'); if (!el) { el = document.createElement('div'); el.id = 'fxHinweis'; el.setAttribute('role', 'status'); document.body.appendChild(el); }
+  el.textContent = t; el.classList.add('an'); clearTimeout(fxT); fxT = setTimeout(() => el.classList.remove('an'), 6000); }
+const fxArr = v => Array.isArray(v) ? v.filter(Boolean) : [];
+const fxP2 = n => String(n).padStart(2, '0');
+const fxIso = d => d.getFullYear() + '-' + fxP2(d.getMonth() + 1) + '-' + fxP2(d.getDate());
+const fxHm = d => fxP2(d.getHours()) + ':' + fxP2(d.getMinutes());
+const fxNorm = s => String(s || '').toLowerCase().replace(/ä/g,'ae').replace(/ö/g,'oe').replace(/ü/g,'ue').replace(/ß/g,'ss').replace(/[^a-z0-9]/g, '');
+function fxDatumZelle(iso){ if (!iso) return ''; const [j, m, t] = String(iso).slice(0, 10).split('-').map(Number); return j ? new Date(j, m - 1, t) : ''; }
+
+/* ── Hinaus ── */
+async function fxExport(){
+  const X = await fxLib();
+  const ab = lsJson(WB_AB_LS) || {}, ent = fxArr(lsJson(FX_ZEIT_LS));
+  const agb = fxArr(ab.auftraggeber), auf = fxArr(ab.auftraege);
+  const nameVon = id => (agb.find(k => k.id === id) || {}).name || '';
+  const r1 = agb.map(k => ({ 'ID':k.id, 'Name':k.name || '', 'Ansprechpartner':k.ansprechpartner || '', 'E-Mail':k.email || '', 'Telefon':k.telefon || '',
+    'Adresse':k.adresse || '', 'Stundensatz €':+k.stundensatz || '', 'Zahlungsziel Tage':+k.zahlungsziel || '', 'Steuersatz %':k.steuersatz === 0 ? 0 : (+k.steuersatz || ''),
+    'Aktiv':k.aktiv === false ? 'nein' : 'ja', 'Notizen':k.notizen || '' }));
+  const r2 = auf.map(a => ({ 'ID':a.id, 'Auftraggeber':nameVon(a.auftraggeberId), 'Projekt':a.name || '', 'Projektnummer':a.projektnummer || '', 'Status':a.status || '',
+    'Stundensatz €':+a.stundensatz || '', 'Budget Stunden':+a.budgetStunden || '', 'Budget €':+a.budgetEuro || '', 'Start':fxDatumZelle(a.start), 'Ende':fxDatumZelle(a.ende),
+    'Beschreibung':a.beschreibung || '' }));
+  const r3 = ent.filter(e => e && e.start).sort((a, b) => a.start - b.start).map(e => {
+    const s = new Date(e.start), en = new Date(e.end || (e.start + (+e.dur || 0) * 1000));
+    return { 'Datum':new Date(s.getFullYear(), s.getMonth(), s.getDate()), 'Beginn':fxHm(s), 'Ende':fxHm(en), 'Dauer h':Math.round((en - s) / 36e3) / 100,
+      'Auftraggeber':e.auftraggeber || '', 'Projekt':e.auftrag || '', 'Notiz':e.notiz || '', 'Satz €/h':+e.satz || '', 'ID':String(e.id || '') };
+  });
+  const blatt = (rows, kopf, breiten) => { const ws = X.utils.json_to_sheet(rows, { header:kopf, cellDates:true, dateNF:'dd.mm.yyyy' });
+    ws['!cols'] = breiten.map(w => ({ wch:w })); return ws; };
+  const wb = X.utils.book_new();
+  X.utils.book_append_sheet(wb, blatt(r1, ['ID','Name','Ansprechpartner','E-Mail','Telefon','Adresse','Stundensatz €','Zahlungsziel Tage','Steuersatz %','Aktiv','Notizen'], [10,30,20,26,16,30,13,16,12,7,30]), 'Auftraggeber');
+  X.utils.book_append_sheet(wb, blatt(r2, ['ID','Auftraggeber','Projekt','Projektnummer','Status','Stundensatz €','Budget Stunden','Budget €','Start','Ende','Beschreibung'], [10,28,32,14,13,13,14,11,12,12,36]), 'Projekte');
+  X.utils.book_append_sheet(wb, blatt(r3, ['Datum','Beginn','Ende','Dauer h','Auftraggeber','Projekt','Notiz','Satz €/h','ID'], [12,8,8,9,28,32,40,9,16]), 'Stempelzeiten');
+  const info = X.utils.aoa_to_sheet([
+    ['Meine Firma · Austausch'], ['Exportiert', new Date().toLocaleString('de-DE')], [],
+    ['Einlesen ergänzt und aktualisiert – es wird nichts gelöscht. Leere Zellen ändern keine vorhandenen Werte.'],
+    ['Auftraggeber: Name ist Pflicht. Zuordnung über ID, sonst über den Namen.'],
+    ['Projekte: Auftraggeber und Projekt sind Pflicht. Unbekannte Auftraggeber werden angelegt. Status: ' + FX_STATUS.join(', ') + '.'],
+    ['Stempelzeiten: Datum, Beginn und Ende (oder Dauer h) sind Pflicht. Uhrzeit als 08:30. Doppelte Zeiten werden übersprungen.'],
+    ['Neue Zeilen ohne ID bekommen beim Einlesen eine.']]);
+  info['!cols'] = [{ wch:110 }, { wch:22 }];
+  X.utils.book_append_sheet(wb, info, 'Info');
+  X.writeFile(wb, 'meine-firma-' + fxIso(new Date()) + '.xlsx', { compression:true });
+  fxHinweis('Exportiert: ' + r1.length + ' Auftraggeber · ' + r2.length + ' Projekte · ' + r3.length + ' Stempelzeiten');
+}
+
+/* ── Herein: Zellen lesen ── */
+function fxZahl(v){ if (typeof v === 'number') return v; const s = String(v == null ? '' : v).trim().replace(/[€%\s]/g, ''); if (!s) return null;
+  const n = Number(/,\d{1,2}$/.test(s) || (s.includes(',') && !s.includes('.')) ? s.replace(/\./g, '').replace(',', '.') : s.replace(/,/g, ''));
+  return isFinite(n) ? n : null; }
+function fxDatum(v, X){
+  if (v instanceof Date && !isNaN(v)) return fxIso(new Date(v.getTime() + 12 * 36e5)); /* Excel-Daten kommen um Mitternacht ± Zeitzone */
+  if (typeof v === 'number' && v > 59) { const p = X.SSF.parse_date_code(v); return p ? p.y + '-' + fxP2(p.m) + '-' + fxP2(p.d) : null; }
+  const s = String(v == null ? '' : v).trim(); let m;
+  if ((m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/))) return m[1] + '-' + fxP2(m[2]) + '-' + fxP2(m[3]);
+  if ((m = s.match(/^(\d{1,2})\.(\d{1,2})\.(\d{2,4})$/))) return (m[3].length === 2 ? '20' + m[3] : m[3]) + '-' + fxP2(m[2]) + '-' + fxP2(m[1]);
+  return null; }
+function fxZeit(v){
+  if (v instanceof Date && !isNaN(v)) return v.getHours() * 60 + v.getMinutes() + (v.getSeconds() >= 30 ? 1 : 0);
+  if (typeof v === 'number' && v >= 0 && v < 1) return Math.round(v * 1440);
+  const m = String(v == null ? '' : v).trim().match(/^(\d{1,2})[:.](\d{2})/); return m ? +m[1] * 60 + +m[2] : null; }
+const fxLeer = v => v == null || String(v).trim() === '';
+const FX_FELDER = {
+  agb:{ id:['id'], name:['name','auftraggeber','kunde','firma'], ansprechpartner:['ansprechpartner','kontakt'], email:['email','mail'], telefon:['telefon','tel','phone'],
+        adresse:['adresse','anschrift'], stundensatz:['stundensatz','satz'], zahlungsziel:['zahlungsziel','zahlungszieltage','ziel'], steuersatz:['steuersatz','ust','mwst'],
+        aktiv:['aktiv'], notizen:['notizen','notiz','bemerkung'] },
+  auf:{ id:['id'], agb:['auftraggeber','kunde','firma'], name:['projekt','auftrag','name'], projektnummer:['projektnummer','nummer','projektnr','nr'], status:['status'],
+        stundensatz:['stundensatz','satz'], budgetStunden:['budgetstunden','stunden','budgeth'], budgetEuro:['budget','budgeteuro','budgeteur'],
+        start:['start','beginn','von'], ende:['ende','bis'], beschreibung:['beschreibung','notiz'] },
+  zeit:{ datum:['datum','tag','date'], beginn:['beginn','start','von'], ende:['ende','bis'], dauer:['dauerh','dauer','stunden','h'], agb:['auftraggeber','kunde','firma'],
+        auf:['projekt','auftrag'], notiz:['notiz','taetigkeit','beschreibung','kommentar'], satz:['satzh','satz','stundensatz'], id:['id'] }
+};
+function fxZeilen(X, wb, namen){
+  const n = wb.SheetNames.find(s => namen.includes(fxNorm(s))); if (!n) return null;
+  return X.utils.sheet_to_json(wb.Sheets[n], { defval:'', raw:true });
+}
+function fxFeld(zeile, art){ const out = {}, map = FX_FELDER[art], keys = Object.keys(zeile).map(k => [fxNorm(k), k]);
+  for (const f in map) { const hit = map[f].map(a => keys.find(([n]) => n === a)).find(Boolean); out[f] = hit ? zeile[hit[1]] : ''; }
+  return out; }
+
+/* ── Herein: abgleichen ── */
+async function fxImport(datei){
+  const X = await fxLib();
+  const wb = X.read(await datei.arrayBuffer(), { type:'array', cellDates:true });
+  const zA = fxZeilen(X, wb, ['auftraggeber','kunden']) || [], zP = fxZeilen(X, wb, ['projekte','auftraege','projekt']) || [],
+        zZ = fxZeilen(X, wb, ['stempelzeiten','zeiten','buchungen','stempeluhr']) || [];
+  if (!zA.length && !zP.length && !zZ.length) { fxHinweis('Keine Blätter „Auftraggeber“, „Projekte“ oder „Stempelzeiten“ gefunden.'); return; }
+  const ab = JSON.parse(JSON.stringify(lsJson(WB_AB_LS) || { app:'werkbank-auftragsbuch', version:1, auftraggeber:[], auftraege:[] }));
+  ab.auftraggeber = fxArr(ab.auftraggeber); ab.auftraege = fxArr(ab.auftraege);
+  const ent = JSON.parse(JSON.stringify(fxArr(lsJson(FX_ZEIT_LS))));
+  const st = { agbNeu:0, agbAkt:0, aufNeu:0, aufAkt:0, zNeu:0, zAkt:0, zDoppelt:0, fehler:[] };
+  const neueId = p => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  const setze = (ziel, feld, wert, typ) => {
+    if (fxLeer(wert)) return false;
+    let v = wert;
+    if (typ === 'zahl') { v = fxZahl(wert); if (v == null) return false; }
+    else if (typ === 'datum') { v = fxDatum(wert, X); if (!v) return false; }
+    else if (typ === 'janein') v = !/^(nein|n|0|false|inaktiv)$/i.test(String(wert).trim());
+    else v = String(wert).trim();
+    if (ziel[feld] === v) return false; ziel[feld] = v; return true;
+  };
+  const agbFinden = name => ab.auftraggeber.find(k => fxNorm(k.name) === fxNorm(name));
+  function agbHolen(name){ let k = agbFinden(name);
+    if (!k) { k = { id:neueId('c'), name:String(name).trim(), ansprechpartner:'', email:'', telefon:'', adresse:'', stundensatz:0, zahlungsziel:14, steuersatz:19, notizen:'', aktiv:true };
+      ab.auftraggeber.push(k); st.agbNeu++; }
+    return k; }
+  zA.forEach((z, i) => { const f = fxFeld(z, 'agb');
+    if (fxLeer(f.name) && fxLeer(f.id)) return;
+    let k = (!fxLeer(f.id) && ab.auftraggeber.find(x => String(x.id) === String(f.id).trim())) || (!fxLeer(f.name) && agbFinden(f.name));
+    const neu = !k; if (neu) { if (fxLeer(f.name)) { st.fehler.push('Auftraggeber Zeile ' + (i + 2) + ': Name fehlt'); return; }
+      k = { id:fxLeer(f.id) ? neueId('c') : String(f.id).trim(), name:'', ansprechpartner:'', email:'', telefon:'', adresse:'', stundensatz:0, zahlungsziel:14, steuersatz:19, notizen:'', aktiv:true }; ab.auftraggeber.push(k); }
+    let geaendert = false;
+    [['name'],['ansprechpartner'],['email'],['telefon'],['adresse'],['notizen'],['stundensatz','zahl'],['zahlungsziel','zahl'],['steuersatz','zahl'],['aktiv','janein']]
+      .forEach(([feld, typ]) => { if (setze(k, feld, f[feld], typ)) geaendert = true; });
+    if (neu) st.agbNeu++; else if (geaendert) st.agbAkt++;
+  });
+  zP.forEach((z, i) => { const f = fxFeld(z, 'auf');
+    if (fxLeer(f.name) && fxLeer(f.id)) return;
+    let a = !fxLeer(f.id) && ab.auftraege.find(x => String(x.id) === String(f.id).trim());
+    let k = a ? ab.auftraggeber.find(x => x.id === a.auftraggeberId) : null;
+    if (!fxLeer(f.agb)) k = agbHolen(f.agb);
+    if (!k) { st.fehler.push('Projekte Zeile ' + (i + 2) + ': Auftraggeber fehlt'); return; }
+    if (!a) a = ab.auftraege.find(x => x.auftraggeberId === k.id && ((!fxLeer(f.projektnummer) && x.projektnummer && fxNorm(x.projektnummer) === fxNorm(f.projektnummer)) || (!fxLeer(f.name) && fxNorm(x.name) === fxNorm(f.name))));
+    const neu = !a; if (neu) { if (fxLeer(f.name)) { st.fehler.push('Projekte Zeile ' + (i + 2) + ': Projektname fehlt'); return; }
+      a = { id:fxLeer(f.id) ? neueId('a') : String(f.id).trim(), auftraggeberId:k.id, name:'', projektnummer:'', beschreibung:'', stundensatz:+k.stundensatz || 0, status:'geplant', budgetStunden:0, budgetEuro:0, start:'', ende:'' };
+      ab.auftraege.push(a); }
+    let geaendert = false;
+    if (a.auftraggeberId !== k.id) { a.auftraggeberId = k.id; geaendert = true; }
+    [['name'],['projektnummer'],['beschreibung'],['stundensatz','zahl'],['budgetStunden','zahl'],['budgetEuro','zahl'],['start','datum'],['ende','datum']]
+      .forEach(([feld, typ]) => { if (setze(a, feld, f[feld], typ)) geaendert = true; });
+    if (!fxLeer(f.status)) { const s = fxNorm(f.status), treffer = FX_STATUS.find(x => fxNorm(x) === s);
+      if (treffer && a.status !== treffer) { a.status = treffer; geaendert = true; } else if (!treffer) st.fehler.push('Projekte Zeile ' + (i + 2) + ': Status „' + f.status + '“ unbekannt'); }
+    if (neu) st.aufNeu++; else if (geaendert) st.aufAkt++;
+  });
+  let nId = Date.now();
+  zZ.forEach((z, i) => { const f = fxFeld(z, 'zeit');
+    if (fxLeer(f.datum) && fxLeer(f.beginn)) return;
+    const tag = fxDatum(f.datum, X), b = fxZeit(f.beginn), e = fxZeit(f.ende), dh = fxZahl(f.dauer);
+    if (!tag || b == null || (e == null && !(dh > 0))) { st.fehler.push('Stempelzeiten Zeile ' + (i + 2) + ': Datum, Beginn und Ende oder Dauer nötig'); return; }
+    const [j, m, t] = tag.split('-').map(Number), start = new Date(j, m - 1, t, Math.floor(b / 60), b % 60).getTime();
+    let ende = e != null ? new Date(j, m - 1, t, Math.floor(e / 60), e % 60).getTime() : start + Math.round(dh * 3600) * 1000;
+    if (ende <= start) ende += 864e5;
+    const k = !fxLeer(f.agb) ? agbHolen(f.agb) : null;
+    let a = null;
+    if (k && !fxLeer(f.auf)) { a = ab.auftraege.find(x => x.auftraggeberId === k.id && (fxNorm(x.name) === fxNorm(f.auf) || (x.projektnummer && fxNorm(x.projektnummer) === fxNorm(f.auf))));
+      if (!a) { a = { id:neueId('a'), auftraggeberId:k.id, name:String(f.auf).trim(), projektnummer:'', beschreibung:'', stundensatz:+k.stundensatz || 0, status:'aktiv', budgetStunden:0, budgetEuro:0, start:'', ende:'' };
+        ab.auftraege.push(a); st.aufNeu++; } }
+    const satz2 = fxZahl(f.satz) != null ? fxZahl(f.satz) : (a && +a.stundensatz) || (k && +k.stundensatz) || 0;
+    const wert = { start, end:ende, dur:Math.round((ende - start) / 1000), auftraggeber:k ? k.name : (String(f.agb).trim() || 'Ohne Auftraggeber'),
+      auftrag:a ? a.name : (String(f.auf).trim() || 'Ohne Auftrag'), agbId:k ? k.id : undefined, aufId:a ? a.id : undefined, notiz:String(f.notiz || '').trim(), satz:satz2 };
+    let alt = !fxLeer(f.id) && ent.find(x => String(x.id) === String(f.id).trim());
+    if (alt) { const vorher = JSON.stringify(alt); Object.assign(alt, wert); if (JSON.stringify(alt) !== vorher) st.zAkt++; return; }
+    if (ent.some(x => x.start === start && (x.end || x.start + x.dur * 1000) === ende && fxNorm(x.auftrag) === fxNorm(wert.auftrag))) { st.zDoppelt++; return; }
+    while (ent.some(x => x.id === nId)) nId++;
+    ent.push(Object.assign({ id:nId++ }, wert)); st.zNeu++;
+  });
+  return { ab, ent, st };
+}
+async function fxEinlesen(datei){
+  let r; try { r = await fxImport(datei); } catch (e) { fxHinweis('Datei konnte nicht gelesen werden: ' + (e && e.message || e)); return; }
+  if (!r) return;
+  const { ab, ent, st } = r;
+  const darf = await ladeErlaubnis();
+  const abJa = darf(WB_AB_LS), zJa = darf(FX_ZEIT_LS);
+  const aenderAb = st.agbNeu + st.agbAkt + st.aufNeu + st.aufAkt, aenderZ = st.zNeu + st.zAkt;
+  if (!aenderAb && !aenderZ) { fxHinweis('Nichts Neues in der Datei' + (st.zDoppelt ? ' (' + st.zDoppelt + ' Zeiten schon vorhanden)' : '') + (st.fehler.length ? ' · ' + st.fehler.length + ' Zeilen übersprungen' : '') + '.'); return; }
+  const txt = 'Excel einlesen?\n\n'
+    + 'Auftraggeber: ' + st.agbNeu + ' neu, ' + st.agbAkt + ' aktualisiert\n'
+    + 'Projekte: ' + st.aufNeu + ' neu, ' + st.aufAkt + ' aktualisiert\n'
+    + 'Stempelzeiten: ' + st.zNeu + ' neu, ' + st.zAkt + ' aktualisiert' + (st.zDoppelt ? ', ' + st.zDoppelt + ' schon vorhanden' : '') + '\n'
+    + (st.fehler.length ? '\n' + st.fehler.length + ' Zeilen übersprungen:\n' + st.fehler.slice(0, 6).join('\n') + (st.fehler.length > 6 ? '\n…' : '') + '\n' : '')
+    + (!abJa && aenderAb ? '\nOhne Lizenz fürs Auftragsbuch werden Auftraggeber und Projekte nicht übernommen.' : '')
+    + (!zJa && aenderZ ? '\nOhne Lizenz für die Stempeluhr werden Zeiten nicht übernommen.' : '')
+    + '\nEs wird nichts gelöscht.';
+  if (!confirm(txt)) return;
+  let n = 0;
+  if (abJa && aenderAb) { ab.updated = new Date().toISOString(); localStorage.setItem(WB_AB_LS, JSON.stringify(ab)); n++; }
+  if (zJa && aenderZ) { localStorage.setItem(FX_ZEIT_LS, JSON.stringify(ent)); n++; }
+  if (!n) { fxHinweis('Nichts übernommen – Lizenz fehlt.'); return; }
+  fxHinweis('Eingelesen. Stempeluhr und Auftragsbuch rechnen beim nächsten Öffnen neu.');
+  setTimeout(() => location.reload(), 1400);
+}
+(function(){
+  const aus = $('#fxAus'), ein = $('#fxEin'), dat = $('#fxDatei'); if (!aus) return;
+  aus.addEventListener('click', () => fxExport().catch(e => fxHinweis('Export nicht möglich: ' + e.message)));
+  ein.addEventListener('click', () => dat.click());
+  dat.addEventListener('change', () => { const f = dat.files && dat.files[0]; dat.value = ''; if (f) fxEinlesen(f); });
+})();
+
 /* ───────── Meine Firma: Ablauf ─────────
    Seit 21.11.2026. Die Bühne „Heute“ zählt, was ansteht (dieselben Posten
    wie „Was offen ist“, dazu Budget und der nächste Termin), und zeigt die
