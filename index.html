@@ -1312,7 +1312,7 @@ html.wb-vorab .slides,html.wb-vorab .dock{visibility:hidden}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="M10.8 12.2 20 3M16 7l3 3M14 9l2 2"/></svg>
         <span class="hide-sm">Lizenz</span></button>
       <button class="pill" id="alleSichern" type="button" title="Bestände aller Werkzeuge als eine JSON-Datei sichern">Sichern ↓</button>
-      <button class="pill" id="alleLaden" type="button" title="Sicherung (JSON) oder Excel-Datei (Auftraggeber, Projekte, Stempelzeiten) einspielen">Laden ↑</button>
+      <button class="pill" id="alleLaden" type="button" title="Sicherung (JSON) oder Excel-Datei (Auftraggeber, Aufträge, Stunden_…) einspielen">Laden ↑</button>
       <input type="file" id="ladeDatei" accept=".json,application/json,.xlsx,.xls,.xlsm,.ods,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" hidden>
       <div class="ans-menue">
         <button class="pill" id="ansBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="ansPanel" title="Ansichten ein- und ausblenden">
@@ -1359,8 +1359,8 @@ html.wb-vorab .slides,html.wb-vorab .dock{visibility:hidden}
       <div class="fa-leiste">
         <span class="eyebrow">Vom Auftrag zum Geld</span>
         <div class="pv-wahl fa-excel" role="group" aria-label="Excel-Austausch">
-          <button type="button" class="lw-knopf" id="fxAus" title="Auftraggeber, Projekte und Stempelzeiten als Excel-Datei sichern">Excel ↓</button>
-          <button type="button" class="lw-knopf" id="fxEin" title="Auftraggeber, Projekte und Stempelzeiten aus einer Excel-Datei einlesen">Excel ↑</button>
+          <button type="button" class="lw-knopf" id="fxAus" title="Auftraggeber, Aufträge und Stunden als Excel-Datei sichern">Excel ↓</button>
+          <button type="button" class="lw-knopf" id="fxEin" title="Auftraggeber, Aufträge und Stunden aus einer Excel-Datei einlesen">Excel ↑</button>
           <input type="file" id="fxDatei" accept=".xlsx,.xls,.xlsm,.ods,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" hidden>
         </div>
         <div class="pv-wahl" role="group" aria-label="Ansicht">
@@ -2429,7 +2429,7 @@ $('#alleSichern').addEventListener('click', ev => {
   if (m) { m.remove(); return; }
   m = document.createElement('div'); m.id = 'sichernWahl'; m.setAttribute('role', 'menu');
   m.innerHTML = '<button type="button" role="menuitem" data-w="json"><b>Alles als JSON</b><small>Bestände aller Werkzeuge – zum Wiederherstellen</small></button>'
-    + '<button type="button" role="menuitem" data-w="xlsx"><b>Meine Firma als Excel</b><small>Auftraggeber, Projekte, Stempelzeiten</small></button>';
+    + '<button type="button" role="menuitem" data-w="xlsx"><b>Meine Firma als Excel</b><small>Auftraggeber, Aufträge, Stunden je Auftraggeber</small></button>';
   const r = ev.currentTarget.getBoundingClientRect();
   m.style.top = (r.bottom + 8) + 'px'; m.style.left = Math.max(8, Math.min(innerWidth - 300, r.left)) + 'px';
   document.body.appendChild(m);
@@ -4197,31 +4197,43 @@ async function fxExport(){
   const r1 = agb.map(k => ({ 'ID':k.id, 'Name':k.name || '', 'Ansprechpartner':k.ansprechpartner || '', 'E-Mail':k.email || '', 'Telefon':k.telefon || '',
     'Adresse':k.adresse || '', 'Stundensatz €':+k.stundensatz || '', 'Zahlungsziel Tage':+k.zahlungsziel || '', 'Steuersatz %':k.steuersatz === 0 ? 0 : (+k.steuersatz || ''),
     'Aktiv':k.aktiv === false ? 'nein' : 'ja', 'Notizen':k.notizen || '' }));
-  const r2 = auf.map(a => ({ 'ID':a.id, 'Auftraggeber':nameVon(a.auftraggeberId), 'Projekt':a.name || '', 'Projektnummer':a.projektnummer || '', 'Status':a.status || '',
+  const r2 = auf.map(a => ({ 'ID':a.id, 'Auftraggeber':nameVon(a.auftraggeberId), 'Auftrag':a.name || '', 'Projektnummer':a.projektnummer || '', 'Status':a.status || '',
     'Stundensatz €':+a.stundensatz || '', 'Budget Stunden':+a.budgetStunden || '', 'Budget €':+a.budgetEuro || '', 'Start':fxDatumZelle(a.start), 'Ende':fxDatumZelle(a.ende),
     'Beschreibung':a.beschreibung || '' }));
-  const r3 = ent.filter(e => e && e.start).sort((a, b) => a.start - b.start).map(e => {
+  /* Stunden je Auftraggeber auf eigenem Blatt „Stunden_<Name>“, Auftrag in Spalte G. */
+  const r3 = new Map();
+  ent.filter(e => e && e.start).sort((a, b) => a.start - b.start).forEach(e => {
     const s = new Date(e.start), en = new Date(e.end || (e.start + (+e.dur || 0) * 1000));
-    return { 'Datum':new Date(s.getFullYear(), s.getMonth(), s.getDate()), 'Beginn':fxHm(s), 'Ende':fxHm(en), 'Dauer h':Math.round((en - s) / 36e3) / 100,
-      'Auftraggeber':e.auftraggeber || '', 'Projekt':e.auftrag || '', 'Notiz':e.notiz || '', 'Satz €/h':+e.satz || '', 'ID':String(e.id || '') };
+    const k = (e.agbId && nameVon(e.agbId)) || e.auftraggeber || 'Ohne Auftraggeber';
+    if (!r3.has(k)) r3.set(k, []);
+    r3.get(k).push({ 'Datum':new Date(s.getFullYear(), s.getMonth(), s.getDate()), 'Beginn':fxHm(s), 'Ende':fxHm(en), 'Dauer h':Math.round((en - s) / 36e3) / 100,
+      'Notiz':e.notiz || '', 'Satz €/h':+e.satz || '', 'Auftrag':e.auftrag || '', 'ID':String(e.id || '') });
   });
+  let nZeiten = 0;
   const blatt = (rows, kopf, breiten) => { const ws = X.utils.json_to_sheet(rows, { header:kopf, cellDates:true, dateNF:'dd.mm.yyyy' });
     ws['!cols'] = breiten.map(w => ({ wch:w })); return ws; };
   const wb = X.utils.book_new();
   X.utils.book_append_sheet(wb, blatt(r1, ['ID','Name','Ansprechpartner','E-Mail','Telefon','Adresse','Stundensatz €','Zahlungsziel Tage','Steuersatz %','Aktiv','Notizen'], [10,30,20,26,16,30,13,16,12,7,30]), 'Auftraggeber');
-  X.utils.book_append_sheet(wb, blatt(r2, ['ID','Auftraggeber','Projekt','Projektnummer','Status','Stundensatz €','Budget Stunden','Budget €','Start','Ende','Beschreibung'], [10,28,32,14,13,13,14,11,12,12,36]), 'Projekte');
-  X.utils.book_append_sheet(wb, blatt(r3, ['Datum','Beginn','Ende','Dauer h','Auftraggeber','Projekt','Notiz','Satz €/h','ID'], [12,8,8,9,28,32,40,9,16]), 'Stempelzeiten');
+  X.utils.book_append_sheet(wb, blatt(r2, ['ID','Auftraggeber','Auftrag','Projektnummer','Status','Stundensatz €','Budget Stunden','Budget €','Start','Ende','Beschreibung'], [10,28,32,14,13,13,14,11,12,12,36]), 'Aufträge');
+  const vergeben = new Set(wb.SheetNames.map(fxNorm));
+  r3.forEach((rows, k) => {
+    let n = ('Stunden_' + k.replace(/[\[\]:*?\/\\]/g, ' ').trim()).slice(0, 31), i = 2;
+    while (vergeben.has(fxNorm(n))) n = n.slice(0, 28) + '_' + i++;
+    vergeben.add(fxNorm(n)); nZeiten += rows.length;
+    X.utils.book_append_sheet(wb, blatt(rows, ['Datum','Beginn','Ende','Dauer h','Notiz','Satz €/h','Auftrag','ID'], [12,8,8,9,40,9,32,16]), n);
+  });
   const info = X.utils.aoa_to_sheet([
     ['Meine Firma · Austausch'], ['Exportiert', new Date().toLocaleString('de-DE')], [],
     ['Einlesen ergänzt und aktualisiert – es wird nichts gelöscht. Leere Zellen ändern keine vorhandenen Werte.'],
     ['Auftraggeber: Name ist Pflicht. Zuordnung über ID, sonst über den Namen.'],
-    ['Projekte: Auftraggeber und Projekt sind Pflicht. Unbekannte Auftraggeber werden angelegt. Status: ' + FX_STATUS.join(', ') + '.'],
-    ['Stempelzeiten: Datum, Beginn und Ende (oder Dauer h) sind Pflicht. Uhrzeit als 08:30. Doppelte Zeiten werden übersprungen.'],
+    ['Aufträge: Auftraggeber und Auftrag sind Pflicht. Unbekannte Auftraggeber werden angelegt. Status: ' + FX_STATUS.join(', ') + '.'],
+    ['Stunden_<Auftraggeber>: je Auftraggeber ein Blatt, der Name nach „Stunden_“ ist der Auftraggeber. Auftrag steht in Spalte G.'],
+    ['Stunden: Datum und Beginn + Ende oder Dauer h sind Pflicht. Uhrzeit als 08:30. Ohne Beginn wird ab 08:00 aneinandergereiht. Doppelte Zeiten werden übersprungen.'],
     ['Neue Zeilen ohne ID bekommen beim Einlesen eine.']]);
   info['!cols'] = [{ wch:110 }, { wch:22 }];
   X.utils.book_append_sheet(wb, info, 'Info');
   X.writeFile(wb, 'meine-firma-' + fxIso(new Date()) + '.xlsx', { compression:true });
-  fxHinweis('Exportiert: ' + r1.length + ' Auftraggeber · ' + r2.length + ' Projekte · ' + r3.length + ' Stempelzeiten');
+  fxHinweis('Exportiert: ' + r1.length + ' Auftraggeber · ' + r2.length + ' Aufträge · ' + nZeiten + ' Stunden');
 }
 
 /* ── Herein: Zellen lesen ── */
@@ -4247,7 +4259,7 @@ const FX_FELDER = {
   auf:{ id:['id'], agb:['auftraggeber','kunde','firma'], name:['projekt','auftrag','name'], projektnummer:['projektnummer','nummer','projektnr','nr'], status:['status'],
         stundensatz:['stundensatz','satz'], budgetStunden:['budgetstunden','stunden','budgeth'], budgetEuro:['budget','budgeteuro','budgeteur'],
         start:['start','beginn','von'], ende:['ende','bis'], beschreibung:['beschreibung','notiz'] },
-  zeit:{ datum:['datum','tag','date'], beginn:['beginn','start','von'], ende:['ende','bis'], dauer:['dauerh','dauer','stunden','h'], agb:['auftraggeber','kunde','firma'],
+  zeit:{ datum:['datum','tag','date'], beginn:['beginn','start','von'], ende:['ende','bis'], dauer:['dauerh','dauer','stunden','std','h','arbeitszeit','dauerstd'], agb:['auftraggeber','kunde','firma'],
         auf:['projekt','auftrag'], notiz:['notiz','taetigkeit','beschreibung','kommentar'], satz:['satzh','satz','stundensatz'], id:['id'] }
 };
 function fxZeilen(X, wb, namen){
@@ -4263,8 +4275,16 @@ async function fxImport(datei){
   const X = await fxLib();
   const wb = X.read(await datei.arrayBuffer(), { type:'array', cellDates:true });
   const zA = fxZeilen(X, wb, ['auftraggeber','kunden']) || [], zP = fxZeilen(X, wb, ['projekte','auftraege','projekt']) || [],
-        zZ = fxZeilen(X, wb, ['stempelzeiten','zeiten','buchungen','stempeluhr']) || [];
-  if (!zA.length && !zP.length && !zZ.length) { fxHinweis('Keine Blätter „Auftraggeber“, „Projekte“ oder „Stempelzeiten“ gefunden.'); return; }
+        zZ = (fxZeilen(X, wb, ['stempelzeiten','zeiten','buchungen','stempeluhr']) || []).map(z => ({ z, blatt:'Stempelzeiten' }));
+  /* Blätter „Stunden_<Auftraggeber>“: Auftraggeber aus dem Blattnamen, Auftrag aus Spalte G. */
+  wb.SheetNames.forEach(n => { const m = n.match(/^\s*stunden\s*[_\- ]\s*(.+)$/i); if (!m) return;
+    const ws = wb.Sheets[n], roh = X.utils.sheet_to_json(ws, { header:1, defval:'', raw:true, blankrows:false });
+    if (roh.length < 2) return;
+    const kopf = roh[0].map((h, i) => String(h || '').trim() || ('Spalte' + i));
+    roh.slice(1).forEach(r => { const z = {}; kopf.forEach((h, i) => { if (i !== 6) z[h] = r[i]; });
+      zZ.push({ z, blatt:n, agb:m[1].trim(), auf:r[6] }); });
+  });
+  if (!zA.length && !zP.length && !zZ.length) { fxHinweis('Keine Blätter „Auftraggeber“, „Aufträge“ oder „Stunden_…“ gefunden.'); return; }
   const ab = JSON.parse(JSON.stringify(lsJson(WB_AB_LS) || { app:'werkbank-auftragsbuch', version:1, auftraggeber:[], auftraege:[] }));
   ab.auftraggeber = fxArr(ab.auftraggeber); ab.auftraege = fxArr(ab.auftraege);
   const ent = JSON.parse(JSON.stringify(fxArr(lsJson(FX_ZEIT_LS))));
@@ -4280,6 +4300,9 @@ async function fxImport(datei){
     if (ziel[feld] === v) return false; ziel[feld] = v; return true;
   };
   const agbFinden = name => ab.auftraggeber.find(k => fxNorm(k.name) === fxNorm(name));
+  /* Blattnamen sind auf 31 Zeichen gekürzt – eindeutiger Anfang reicht. */
+  const agbAusBlatt = name => { const n = fxNorm(name); const k = agbFinden(name); if (k) return k;
+    const t = ab.auftraggeber.filter(x => n.length >= 6 && fxNorm(x.name).startsWith(n)); return t.length === 1 ? t[0] : agbHolen(name); };
   function agbHolen(name){ let k = agbFinden(name);
     if (!k) { k = { id:neueId('c'), name:String(name).trim(), ansprechpartner:'', email:'', telefon:'', adresse:'', stundensatz:0, zahlungsziel:14, steuersatz:19, notizen:'', aktiv:true };
       ab.auftraggeber.push(k); st.agbNeu++; }
@@ -4299,9 +4322,9 @@ async function fxImport(datei){
     let a = !fxLeer(f.id) && ab.auftraege.find(x => String(x.id) === String(f.id).trim());
     let k = a ? ab.auftraggeber.find(x => x.id === a.auftraggeberId) : null;
     if (!fxLeer(f.agb)) k = agbHolen(f.agb);
-    if (!k) { st.fehler.push('Projekte Zeile ' + (i + 2) + ': Auftraggeber fehlt'); return; }
+    if (!k) { st.fehler.push('Aufträge Zeile ' + (i + 2) + ': Auftraggeber fehlt'); return; }
     if (!a) a = ab.auftraege.find(x => x.auftraggeberId === k.id && ((!fxLeer(f.projektnummer) && x.projektnummer && fxNorm(x.projektnummer) === fxNorm(f.projektnummer)) || (!fxLeer(f.name) && fxNorm(x.name) === fxNorm(f.name))));
-    const neu = !a; if (neu) { if (fxLeer(f.name)) { st.fehler.push('Projekte Zeile ' + (i + 2) + ': Projektname fehlt'); return; }
+    const neu = !a; if (neu) { if (fxLeer(f.name)) { st.fehler.push('Aufträge Zeile ' + (i + 2) + ': Auftrag fehlt'); return; }
       a = { id:fxLeer(f.id) ? neueId('a') : String(f.id).trim(), auftraggeberId:k.id, name:'', projektnummer:'', beschreibung:'', stundensatz:+k.stundensatz || 0, status:'geplant', budgetStunden:0, budgetEuro:0, start:'', ende:'' };
       ab.auftraege.push(a); }
     let geaendert = false;
@@ -4309,18 +4332,24 @@ async function fxImport(datei){
     [['name'],['projektnummer'],['beschreibung'],['stundensatz','zahl'],['budgetStunden','zahl'],['budgetEuro','zahl'],['start','datum'],['ende','datum']]
       .forEach(([feld, typ]) => { if (setze(a, feld, f[feld], typ)) geaendert = true; });
     if (!fxLeer(f.status)) { const s = fxNorm(f.status), treffer = FX_STATUS.find(x => fxNorm(x) === s);
-      if (treffer && a.status !== treffer) { a.status = treffer; geaendert = true; } else if (!treffer) st.fehler.push('Projekte Zeile ' + (i + 2) + ': Status „' + f.status + '“ unbekannt'); }
+      if (treffer && a.status !== treffer) { a.status = treffer; geaendert = true; } else if (!treffer) st.fehler.push('Aufträge Zeile ' + (i + 2) + ': Status „' + f.status + '“ unbekannt'); }
     if (neu) st.aufNeu++; else if (geaendert) st.aufAkt++;
   });
   let nId = Date.now();
-  zZ.forEach((z, i) => { const f = fxFeld(z, 'zeit');
+  const lauf = {}; /* Zeilen ohne Beginn: je Tag ab 08:00 aneinanderreihen */
+  const zeile = {};
+  zZ.forEach(({ z, blatt, agb, auf }) => { const f = fxFeld(z, 'zeit'), i = zeile[blatt] = (zeile[blatt] || 0) + 1;
+    if (agb != null) { f.agb = agb; f.auf = auf; }
     if (fxLeer(f.datum) && fxLeer(f.beginn)) return;
-    const tag = fxDatum(f.datum, X), b = fxZeit(f.beginn), e = fxZeit(f.ende), dh = fxZahl(f.dauer);
-    if (!tag || b == null || (e == null && !(dh > 0))) { st.fehler.push('Stempelzeiten Zeile ' + (i + 2) + ': Datum, Beginn und Ende oder Dauer nötig'); return; }
+    const tag = fxDatum(f.datum, X), e0 = fxZeit(f.ende), dh = fxZahl(f.dauer);
+    let b = fxZeit(f.beginn);
+    if (!tag || (b == null && !(dh > 0)) || (b != null && e0 == null && !(dh > 0))) { st.fehler.push(blatt + ' Zeile ' + (i + 1) + ': Datum und Beginn + Ende oder Dauer nötig'); return; }
+    let e = e0;
+    if (b == null) { b = lauf[tag] != null ? lauf[tag] : 480; e = null; lauf[tag] = b + Math.round(dh * 60); }
     const [j, m, t] = tag.split('-').map(Number), start = new Date(j, m - 1, t, Math.floor(b / 60), b % 60).getTime();
     let ende = e != null ? new Date(j, m - 1, t, Math.floor(e / 60), e % 60).getTime() : start + Math.round(dh * 3600) * 1000;
     if (ende <= start) ende += 864e5;
-    const k = !fxLeer(f.agb) ? agbHolen(f.agb) : null;
+    const k = !fxLeer(f.agb) ? (agb != null ? agbAusBlatt(f.agb) : agbHolen(f.agb)) : null;
     let a = null;
     if (k && !fxLeer(f.auf)) { a = ab.auftraege.find(x => x.auftraggeberId === k.id && (fxNorm(x.name) === fxNorm(f.auf) || (x.projektnummer && fxNorm(x.projektnummer) === fxNorm(f.auf))));
       if (!a) { a = { id:neueId('a'), auftraggeberId:k.id, name:String(f.auf).trim(), projektnummer:'', beschreibung:'', stundensatz:+k.stundensatz || 0, status:'aktiv', budgetStunden:0, budgetEuro:0, start:'', ende:'' };
@@ -4340,8 +4369,8 @@ function fxFrage(st, abJa, zJa, aenderAb, aenderZ){
   return new Promise(ok => {
     const d = document.createElement('div'); d.id = 'fxBlatt'; d.setAttribute('role', 'dialog'); d.setAttribute('aria-modal', 'true');
     const z = (t, n, a, x) => '<div class="z"><span>' + t + '</span><b>' + n + ' neu · ' + a + ' aktualisiert' + (x ? ' · ' + x : '') + '</b></div>';
-    d.innerHTML = '<div class="in"><h3>Excel einlesen?</h3>' + z('Auftraggeber', st.agbNeu, st.agbAkt) + z('Projekte', st.aufNeu, st.aufAkt)
-      + z('Stempelzeiten', st.zNeu, st.zAkt, st.zDoppelt ? st.zDoppelt + ' schon da' : '')
+    d.innerHTML = '<div class="in"><h3>Excel einlesen?</h3>' + z('Auftraggeber', st.agbNeu, st.agbAkt) + z('Aufträge', st.aufNeu, st.aufAkt)
+      + z('Stunden', st.zNeu, st.zAkt, st.zDoppelt ? st.zDoppelt + ' schon da' : '')
       + (st.fehler.length ? '<div class="f">' + st.fehler.length + ' Zeilen übersprungen:\n' + st.fehler.slice(0, 6).map(x => x.replace(/[<>&]/g, '')).join('\n') + (st.fehler.length > 6 ? '\n…' : '') + '</div>' : '')
       + (!abJa && aenderAb ? '<div class="f">Ohne Lizenz fürs Auftragsbuch werden Auftraggeber und Projekte nicht übernommen.</div>' : '')
       + (!zJa && aenderZ ? '<div class="f">Ohne Lizenz für die Stempeluhr werden Zeiten nicht übernommen.</div>' : '')
