@@ -1159,6 +1159,17 @@ html.wb-vorab .slides,html.wb-vorab .dock{visibility:hidden}
 #fxHinweis{position:fixed;left:50%;bottom:28px;transform:translate(-50%,16px);opacity:0;pointer-events:none;z-index:300;max-width:min(560px,92vw);padding:11px 18px;border-radius:16px;
   background:var(--glass);border:1px solid var(--line);box-shadow:0 18px 40px -20px rgba(0,0,0,.6);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);font-size:14px;transition:opacity .3s,transform .3s}
 #fxHinweis.an{opacity:1;transform:translate(-50%,0)}
+#sichernWahl{position:fixed;z-index:400;width:290px;padding:6px;border-radius:18px;background:var(--glass);border:1px solid var(--line);box-shadow:0 24px 50px -22px rgba(0,0,0,.6);-webkit-backdrop-filter:blur(22px);backdrop-filter:blur(22px)}
+#sichernWahl button{display:block;width:100%;text-align:left;padding:10px 12px;border:0;border-radius:12px;background:none;color:inherit;font:inherit;cursor:pointer}
+#sichernWahl button:hover{background:color-mix(in srgb,var(--amber,#F2B33D) 14%,transparent)}
+#sichernWahl b{display:block;font-size:14px}#sichernWahl small{display:block;font-size:12px;opacity:.7}
+#fxBlatt{position:fixed;inset:0;z-index:500;display:grid;place-items:center;background:rgba(5,8,13,.5);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+#fxBlatt .in{width:min(460px,92vw);max-height:86vh;overflow:auto;padding:20px;border-radius:24px;background:var(--glass);border:1px solid var(--line);box-shadow:0 30px 70px -30px #000;-webkit-backdrop-filter:blur(26px);backdrop-filter:blur(26px)}
+#fxBlatt h3{margin:0 0 12px;font-size:19px}
+#fxBlatt .z{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+#fxBlatt .z b{font-variant-numeric:tabular-nums}
+#fxBlatt .f{margin-top:10px;font-size:12.5px;opacity:.75;white-space:pre-line}
+#fxBlatt .k{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
 @media (max-width:640px){.fa-leiste{flex-wrap:wrap}.fa-leiste .fa-excel{margin-left:0}}
 
 /* Bento */
@@ -1301,8 +1312,8 @@ html.wb-vorab .slides,html.wb-vorab .dock{visibility:hidden}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="M10.8 12.2 20 3M16 7l3 3M14 9l2 2"/></svg>
         <span class="hide-sm">Lizenz</span></button>
       <button class="pill" id="alleSichern" type="button" title="Bestände aller Werkzeuge als eine JSON-Datei sichern">Sichern ↓</button>
-      <button class="pill" id="alleLaden" type="button" title="Sicherung (JSON) einspielen">Laden ↑</button>
-      <input type="file" id="ladeDatei" accept=".json,application/json" hidden>
+      <button class="pill" id="alleLaden" type="button" title="Sicherung (JSON) oder Excel-Datei (Auftraggeber, Projekte, Stempelzeiten) einspielen">Laden ↑</button>
+      <input type="file" id="ladeDatei" accept=".json,application/json,.xlsx,.xls,.xlsm,.ods,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" hidden>
       <div class="ans-menue">
         <button class="pill" id="ansBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="ansPanel" title="Ansichten ein- und ausblenden">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg>
@@ -1350,7 +1361,7 @@ html.wb-vorab .slides,html.wb-vorab .dock{visibility:hidden}
         <div class="pv-wahl fa-excel" role="group" aria-label="Excel-Austausch">
           <button type="button" class="lw-knopf" id="fxAus" title="Auftraggeber, Projekte und Stempelzeiten als Excel-Datei sichern">Excel ↓</button>
           <button type="button" class="lw-knopf" id="fxEin" title="Auftraggeber, Projekte und Stempelzeiten aus einer Excel-Datei einlesen">Excel ↑</button>
-          <input type="file" id="fxDatei" accept=".xlsx,.xls,.xlsm,.ods,.csv" hidden>
+          <input type="file" id="fxDatei" accept=".xlsx,.xls,.xlsm,.ods,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" hidden>
         </div>
         <div class="pv-wahl" role="group" aria-label="Ansicht">
           <button type="button" class="lw-knopf an" data-fa="ablauf" aria-pressed="true">Ablauf</button>
@@ -2411,7 +2422,22 @@ async function ladeErlaubnis(){
 }
 /* Alles sichern: sammelt die Lesekopien und Bestände aller Werkzeuge dieser
    Herkunft aus dem localStorage in eine einzige JSON-Datei. Nur lesend. */
-$('#alleSichern').addEventListener('click', () => {
+/* Seit 22.11.2026: „Sichern“ fragt nach dem Format – alles als JSON oder Meine Firma als Excel. */
+$('#alleSichern').addEventListener('click', ev => {
+  ev.stopPropagation();
+  let m = $('#sichernWahl');
+  if (m) { m.remove(); return; }
+  m = document.createElement('div'); m.id = 'sichernWahl'; m.setAttribute('role', 'menu');
+  m.innerHTML = '<button type="button" role="menuitem" data-w="json"><b>Alles als JSON</b><small>Bestände aller Werkzeuge – zum Wiederherstellen</small></button>'
+    + '<button type="button" role="menuitem" data-w="xlsx"><b>Meine Firma als Excel</b><small>Auftraggeber, Projekte, Stempelzeiten</small></button>';
+  const r = ev.currentTarget.getBoundingClientRect();
+  m.style.top = (r.bottom + 8) + 'px'; m.style.left = Math.max(8, Math.min(innerWidth - 300, r.left)) + 'px';
+  document.body.appendChild(m);
+  m.addEventListener('click', e => { const b = e.target.closest('[data-w]'); if (!b) return; m.remove();
+    if (b.dataset.w === 'xlsx') fxExport().catch(x => fxHinweis('Export nicht möglich: ' + (x && x.message || x))); else alleSichernJson(); });
+  setTimeout(() => document.addEventListener('click', function weg(e){ if (!m.contains(e.target)) { m.remove(); document.removeEventListener('click', weg); } }), 0);
+});
+function alleSichernJson(){
   const btn = $('#alleSichern'), alt = 'Sichern ↓';
   try {
     const daten = {};
@@ -2437,7 +2463,7 @@ $('#alleSichern').addEventListener('click', () => {
     try { kastenFrisch(); } catch (e) {}
   } catch (e) { btn.textContent = 'Sichern nicht möglich'; }
   setTimeout(() => btn.textContent = alt, 3000);
-});
+}
 /* Laden: spielt eine Sicherung aus „Sichern“ wieder in den localStorage ein.
    Vorhandene Schlüssel gleichen Namens werden überschrieben, andere bleiben. */
 $('#alleLaden').addEventListener('click', () => $('#ladeDatei').click());
@@ -2446,6 +2472,8 @@ $('#ladeDatei').addEventListener('change', async ev => {
   const f = inp.files && inp.files[0]; inp.value = '';
   if (!f) return;
   const kurz = t => { btn.textContent = t; setTimeout(() => btn.textContent = alt, 3000); };
+  /* Seit 22.11.2026: Excel-Dateien gehen an den Excel-Austausch von Meine Firma. */
+  if (!/\.json$/i.test(f.name) && /\.(xlsx|xlsm|xls|ods|csv)$/i.test(f.name)) { fxEinlesen(f); return; }
   try {
     const o = JSON.parse(await f.text());
     if (!o || o.app !== 'werkbank-kontor-sicherung' || !o.daten || typeof o.daten !== 'object') {
@@ -4308,7 +4336,25 @@ async function fxImport(datei){
   });
   return { ab, ent, st };
 }
+function fxFrage(st, abJa, zJa, aenderAb, aenderZ){
+  return new Promise(ok => {
+    const d = document.createElement('div'); d.id = 'fxBlatt'; d.setAttribute('role', 'dialog'); d.setAttribute('aria-modal', 'true');
+    const z = (t, n, a, x) => '<div class="z"><span>' + t + '</span><b>' + n + ' neu · ' + a + ' aktualisiert' + (x ? ' · ' + x : '') + '</b></div>';
+    d.innerHTML = '<div class="in"><h3>Excel einlesen?</h3>' + z('Auftraggeber', st.agbNeu, st.agbAkt) + z('Projekte', st.aufNeu, st.aufAkt)
+      + z('Stempelzeiten', st.zNeu, st.zAkt, st.zDoppelt ? st.zDoppelt + ' schon da' : '')
+      + (st.fehler.length ? '<div class="f">' + st.fehler.length + ' Zeilen übersprungen:\n' + st.fehler.slice(0, 6).map(x => x.replace(/[<>&]/g, '')).join('\n') + (st.fehler.length > 6 ? '\n…' : '') + '</div>' : '')
+      + (!abJa && aenderAb ? '<div class="f">Ohne Lizenz fürs Auftragsbuch werden Auftraggeber und Projekte nicht übernommen.</div>' : '')
+      + (!zJa && aenderZ ? '<div class="f">Ohne Lizenz für die Stempeluhr werden Zeiten nicht übernommen.</div>' : '')
+      + '<div class="f">Es wird nichts gelöscht.</div><div class="k"><button type="button" class="pill" data-n>Abbrechen</button><button type="button" class="pill" data-j style="background:var(--amber,#F2B33D);color:#12171F;border-color:transparent;font-weight:700">Übernehmen</button></div></div>';
+    document.body.appendChild(d);
+    const zu = v => { d.remove(); ok(v); };
+    d.querySelector('[data-n]').onclick = () => zu(false); d.querySelector('[data-j]').onclick = () => zu(true);
+    d.addEventListener('click', e => { if (e.target === d) zu(false); });
+    d.querySelector('[data-j]').focus();
+  });
+}
 async function fxEinlesen(datei){
+  fxHinweis('Lese „' + datei.name + '“ …');
   let r; try { r = await fxImport(datei); } catch (e) { fxHinweis('Datei konnte nicht gelesen werden: ' + (e && e.message || e)); return; }
   if (!r) return;
   const { ab, ent, st } = r;
@@ -4316,15 +4362,7 @@ async function fxEinlesen(datei){
   const abJa = darf(WB_AB_LS), zJa = darf(FX_ZEIT_LS);
   const aenderAb = st.agbNeu + st.agbAkt + st.aufNeu + st.aufAkt, aenderZ = st.zNeu + st.zAkt;
   if (!aenderAb && !aenderZ) { fxHinweis('Nichts Neues in der Datei' + (st.zDoppelt ? ' (' + st.zDoppelt + ' Zeiten schon vorhanden)' : '') + (st.fehler.length ? ' · ' + st.fehler.length + ' Zeilen übersprungen' : '') + '.'); return; }
-  const txt = 'Excel einlesen?\n\n'
-    + 'Auftraggeber: ' + st.agbNeu + ' neu, ' + st.agbAkt + ' aktualisiert\n'
-    + 'Projekte: ' + st.aufNeu + ' neu, ' + st.aufAkt + ' aktualisiert\n'
-    + 'Stempelzeiten: ' + st.zNeu + ' neu, ' + st.zAkt + ' aktualisiert' + (st.zDoppelt ? ', ' + st.zDoppelt + ' schon vorhanden' : '') + '\n'
-    + (st.fehler.length ? '\n' + st.fehler.length + ' Zeilen übersprungen:\n' + st.fehler.slice(0, 6).join('\n') + (st.fehler.length > 6 ? '\n…' : '') + '\n' : '')
-    + (!abJa && aenderAb ? '\nOhne Lizenz fürs Auftragsbuch werden Auftraggeber und Projekte nicht übernommen.' : '')
-    + (!zJa && aenderZ ? '\nOhne Lizenz für die Stempeluhr werden Zeiten nicht übernommen.' : '')
-    + '\nEs wird nichts gelöscht.';
-  if (!confirm(txt)) return;
+  if (!(await fxFrage(st, abJa, zJa, aenderAb, aenderZ))) return;
   let n = 0;
   if (abJa && aenderAb) { ab.updated = new Date().toISOString(); localStorage.setItem(WB_AB_LS, JSON.stringify(ab)); n++; }
   if (zJa && aenderZ) { localStorage.setItem(FX_ZEIT_LS, JSON.stringify(ent)); n++; }
@@ -4335,7 +4373,7 @@ async function fxEinlesen(datei){
 (function(){
   const aus = $('#fxAus'), ein = $('#fxEin'), dat = $('#fxDatei'); if (!aus) return;
   aus.addEventListener('click', () => fxExport().catch(e => fxHinweis('Export nicht möglich: ' + e.message)));
-  ein.addEventListener('click', () => dat.click());
+  ein.addEventListener('click', () => { fxLib().catch(() => {}); dat.click(); });
   dat.addEventListener('change', () => { const f = dat.files && dat.files[0]; dat.value = ''; if (f) fxEinlesen(f); });
 })();
 
